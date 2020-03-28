@@ -1,0 +1,4 @@
+--patch-module
+com.justifiedsolutions.openpdf=_
+--add-reads
+com.justifiedsolutions.openpdf=ALL-UNNAMED
