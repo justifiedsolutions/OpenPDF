@@ -115,17 +115,6 @@ public class SimplePatternParser implements SimpleXMLDocHandler,
         return il.toString();
     }
 
-    public static void main(String[] args) {
-        try {
-            if (args.length > 0) {
-                SimplePatternParser pp = new SimplePatternParser();
-                pp.parse(new FileInputStream(args[0]), pp);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void parse(InputStream stream, PatternConsumer consumer) {
         this.consumer = consumer;
         try {

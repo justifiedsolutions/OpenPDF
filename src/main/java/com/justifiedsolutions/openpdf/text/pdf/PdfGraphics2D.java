@@ -1881,9 +1881,6 @@ public class PdfGraphics2D extends Graphics2D {
             Method method;
             try {
                 method = clazz.getDeclaredMethod(methodName, parameterTypes);
-                if (!method.isAccessible()) {
-                    method.setAccessible(true);
-                }
             } catch (Exception e) {
                 method = null;
             }

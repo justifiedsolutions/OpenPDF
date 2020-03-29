@@ -199,8 +199,8 @@ public class Paragraph extends Phrase {
             setIndentationLeft(p.getIndentationLeft());
             setIndentationRight(p.getIndentationRight());
             setFirstLineIndent(p.getFirstLineIndent());
-            setSpacingAfter(p.spacingAfter());
-            setSpacingBefore(p.spacingBefore());
+            setSpacingAfter(p.getSpacingAfter());
+            setSpacingBefore(p.getSpacingBefore());
             setExtraParagraphSpace(p.getExtraParagraphSpace());
         }
     }
@@ -474,29 +474,4 @@ public class Paragraph extends Phrase {
     public void setExtraParagraphSpace(float extraParagraphSpace) {
         this.extraParagraphSpace = extraParagraphSpace;
     }
-    
-    // scheduled for removal
-    
-    /**
-     * Gets the spacing before this paragraph.
-     *
-     * @return    the spacing
-     * @deprecated As of iText 2.1.5, replaced by {@link #getSpacingBefore()},
-     * scheduled for removal at 2.3.0
-     */
-    public float spacingBefore() {
-        return getSpacingBefore();
-    }
-
-    /**
-     * Gets the spacing after this paragraph.
-     *
-     * @return    the spacing
-     * @deprecated As of iText 2.1.5, replaced by {@link #getSpacingAfter()},
-     * scheduled for removal at 2.3.0
-     */
-    public float spacingAfter() {
-        return spacingAfter;
-    }
-
 }

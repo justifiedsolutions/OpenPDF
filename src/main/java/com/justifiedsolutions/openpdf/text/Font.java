@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import com.justifiedsolutions.openpdf.text.html.Markup;
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
 import java.awt.Color;
 
@@ -318,36 +317,6 @@ public class Font implements Comparable {
     // FAMILY
 
     /**
-     * Translates a <CODE>String</CODE> -value of a certain style into the index value is used for
-     * this style in this class.
-     *
-     * @param style A <CODE>String</CODE>
-     * @return the corresponding value
-     */
-    public static int getStyleValue(String style) {
-        int s = 0;
-        if (style.contains(Markup.CSS_VALUE_NORMAL)) {
-            s |= NORMAL;
-        }
-        if (style.contains(Markup.CSS_VALUE_BOLD)) {
-            s |= BOLD;
-        }
-        if (style.contains(Markup.CSS_VALUE_ITALIC)) {
-            s |= ITALIC;
-        }
-        if (style.contains(Markup.CSS_VALUE_OBLIQUE)) {
-            s |= ITALIC;
-        }
-        if (style.contains(Markup.CSS_VALUE_UNDERLINE)) {
-            s |= UNDERLINE;
-        }
-        if (style.contains(Markup.CSS_VALUE_LINETHROUGH)) {
-            s |= STRIKETHRU;
-        }
-        return s;
-    }
-
-    /**
      * Compares this <CODE>Font</CODE> with another
      *
      * @param object the other <CODE>Font</CODE>
@@ -509,19 +478,6 @@ public class Font implements Comparable {
      */
     public void setStyle(int style) {
         this.style = style;
-    }
-
-    /**
-     * Sets the style using a <CODE>String</CODE> containing one of more of the following values:
-     * normal, bold, italic, underline, strike.
-     *
-     * @param style A <CODE>String</CODE> representing a certain style.
-     */
-    public void setStyle(String style) {
-        if (this.style == UNDEFINED) {
-            this.style = NORMAL;
-        }
-        this.style |= getStyleValue(style);
     }
 
     /**

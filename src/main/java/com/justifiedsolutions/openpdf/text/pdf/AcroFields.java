@@ -1901,44 +1901,37 @@ public class AcroFields {
 
     /**
      * An array of <CODE>PdfDictionary</CODE> where the value tag /V is present.
-     *
-     * @deprecated (will remove ' public ' in the future)
-     */
-    public ArrayList<PdfDictionary> values = new ArrayList<>();
+     **/
+    private ArrayList<PdfDictionary> values = new ArrayList<>();
 
     /**
      * An array of <CODE>PdfDictionary</CODE> with the widgets.
-     *
-     * @deprecated (will remove ' public ' in the future)
      */
-    public ArrayList<PdfDictionary> widgets = new ArrayList<>();
+    private ArrayList<PdfDictionary> widgets = new ArrayList<>();
 
     /**
      * An array of <CODE>PdfDictionary</CODE> with the widget references.
      *
-     * @deprecated (will remove ' public ' in the future)
      */
-    public ArrayList<PdfIndirectReference> widgetRefs = new ArrayList<>();
+    private ArrayList<PdfIndirectReference> widgetRefs = new ArrayList<>();
 
     /**
      * An array of <CODE>PdfDictionary</CODE> with all the field and widget tags merged.
      *
-     * @deprecated (will remove ' public ' in the future)
      */
-    public ArrayList<PdfDictionary> merged = new ArrayList<>();
+    private ArrayList<PdfDictionary> merged = new ArrayList<>();
 
     /**
      * An array of <CODE>Integer</CODE> with the page numbers where the widgets are displayed.
      *
-     * @deprecated (will remove ' public ' in the future)
      */
-    public ArrayList<Integer> page = new ArrayList<>();
+    private ArrayList<Integer> page = new ArrayList<>();
+
     /**
      * An array of <CODE>Integer</CODE> with the tab order of the field in the page.
      *
-     * @deprecated (will remove ' public ' in the future)
      */
-    public ArrayList<Integer> tabOrder = new ArrayList<>();
+    private ArrayList<Integer> tabOrder = new ArrayList<>();
 
     /**
      * Preferred method of determining the number of instances of a given field.
