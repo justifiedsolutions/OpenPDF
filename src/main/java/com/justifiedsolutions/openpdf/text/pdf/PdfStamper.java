@@ -484,16 +484,7 @@ public class PdfStamper
         addAnnotation(signature, page);
         return signature;
     }
-    
-    /**
-     * Adds the comments present in an FDF file.
-     * @param fdf the FDF file
-     * @throws IOException on error
-     */    
-    public void addComments(FdfReader fdf) throws IOException {
-        stamper.addComments(fdf);
-    }
-    
+
     /**
      * Sets the bookmarks. The list structure is defined in
      * {@link SimpleBookmark}.

@@ -2025,20 +2025,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   }
 
   /**
-   * Decodes a stream that has the LZWDecode filter.
-   * 
-   * @param in
-   *          the input data
-   * @return the decoded data
-   */
-  public static byte[] LZWDecode(byte[] in) {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    LZWDecoder lzw = new LZWDecoder();
-    lzw.decode(in, out);
-    return out.toByteArray();
-  }
-
-  /**
    * Checks if the document had errors and was rebuilt.
    * 
    * @return true if rebuilt.
@@ -2275,15 +2261,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
             case "/A85":
                 b = ASCII85Decode(b);
                 break;
-            case "/LZWDecode": {
-                b = LZWDecode(b);
-                PdfObject dicParam;
-                if (j < dp.size()) {
-                    dicParam = dp.get(j);
-                    b = decodePredictor(b, dicParam);
-                }
-                break;
-            }
             case "/Crypt":
                 break;
             default:

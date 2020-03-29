@@ -1285,33 +1285,6 @@ public class AcroFields {
     }
   }
 
-  /**
-   * Sets the fields by FDF merging.
-   *
-   * @param fdf the FDF form
-   * @throws IOException on error
-   * @throws DocumentException on error
-   */
-  public void setFields(FdfReader fdf) throws IOException, DocumentException {
-    Map<String, PdfDictionary> fd = fdf.getAllFields();
-    for (String f : fd.keySet()) {
-      String v = fdf.getFieldValue(f);
-      if (v != null) {
-        setField(f, v);
-      }
-    }
-  }
-  
-  /**
-   * Allows merging the fields by a field reader. One use would be to set the fields by XFDF merging.
-   *
-   * @param fieldReader The fields to merge.
-   * @throws IOException on error
-   * @throws DocumentException on error
-   */
-  public void setFields(XfdfReader fieldReader) throws IOException, DocumentException {
-    setFields((FieldReader) fieldReader);
-  }
 
   /**
    * Allows merging the fields by a field reader. One use would be to set the fields by XFDF merging.
@@ -2457,64 +2430,6 @@ public class AcroFields {
     return fieldCache;
   }
 
-  /**
-   * Sets a cache for field appearances. Parsing the existing PDF to create a new TextField is time expensive. For those tasks that
-   * repeatedly fill the same PDF with different field values the use of the cache has dramatic speed advantages. An example usage:
-   * <p>
-   * <pre>
-   * String pdfFile = ...;// the pdf file used as template
-   * ArrayList xfdfFiles = ...;// the xfdf file names
-   * ArrayList pdfOutFiles = ...;// the output file names, one for each element in xpdfFiles
-   * HashMap cache = new HashMap();// the appearances cache
-   * PdfReader originalReader = new PdfReader(pdfFile);
-   * for (int k = 0; k &lt; xfdfFiles.size(); ++k) {
-   *    PdfReader reader = new PdfReader(originalReader);
-   *    XfdfReader xfdf = new XfdfReader((String)xfdfFiles.get(k));
-   *    PdfStamper stp = new PdfStamper(reader, new FileOutputStream((String)pdfOutFiles.get(k)));
-   *    AcroFields af = stp.getAcroFields();
-   *    af.setFieldCache(cache);
-   *    af.setFields(xfdf);
-   *    stp.close();
-   * }
-   * </pre>
-   *
-   * @deprecated use {@link AcroFields#setFieldCacheMap(Map)}
-   *
-   * @param fieldCache a Map that will carry the cached appearances
-   * @since 2.1.5  this method used to take a HashMap as parameter
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  public void setFieldCache(Map fieldCache) {
-    this.fieldCache = fieldCache;
-  }
-
-  /**
-   * Sets a cache for field appearances. Parsing the existing PDF to create a new TextField is time expensive. For those tasks that
-   * repeatedly fill the same PDF with different field values the use of the cache has dramatic speed advantages. An example usage:
-   * <p>
-   * <pre>
-   * String pdfFile = ...;// the pdf file used as template
-   * ArrayList xfdfFiles = ...;// the xfdf file names
-   * ArrayList pdfOutFiles = ...;// the output file names, one for each element in xpdfFiles
-   * HashMap cache = new HashMap();// the appearances cache
-   * PdfReader originalReader = new PdfReader(pdfFile);
-   * for (int k = 0; k &lt; xfdfFiles.size(); ++k) {
-   *    PdfReader reader = new PdfReader(originalReader);
-   *    XfdfReader xfdf = new XfdfReader((String)xfdfFiles.get(k));
-   *    PdfStamper stp = new PdfStamper(reader, new FileOutputStream((String)pdfOutFiles.get(k)));
-   *    AcroFields af = stp.getAcroFields();
-   *    af.setFieldCache(cache);
-   *    af.setFields(xfdf);
-   *    stp.close();
-   * }
-   * </pre>
-   *
-   * @param fieldCache a Map that will carry the cached appearances
-   */
-  public void setFieldCacheMap(Map<String, BaseField> fieldCache) {
-    this.fieldCache = fieldCache;
-  }
 
   /**
    * Sets extra margins in text fields to better mimic the Acrobat layout.

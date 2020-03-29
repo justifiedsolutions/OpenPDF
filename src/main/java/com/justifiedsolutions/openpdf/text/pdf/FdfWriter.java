@@ -248,25 +248,6 @@ public class FdfWriter {
         return setField(field, action);
     }
     
-    /** Sets all the fields from this <CODE>FdfReader</CODE>
-     * @param fdf the <CODE>FdfReader</CODE>
-     */    
-    public void setFields(FdfReader fdf) {
-        Map<String, PdfDictionary> map = fdf.getAllFields();
-        for (Map.Entry<String, PdfDictionary> entry : map.entrySet()) {
-            String key = entry.getKey();
-            PdfDictionary dic = entry.getValue();
-            PdfObject v = dic.get(PdfName.V);
-            if (v != null) {
-                setField(key, v);
-            }
-            v = dic.get(PdfName.A); // (plaflamme)
-            if (v != null) {
-                setField(key, v);
-            }
-        }
-    }
-    
     /** Sets all the fields from this <CODE>PdfReader</CODE>
      * @param pdf the <CODE>PdfReader</CODE>
      */    
