@@ -2,11 +2,11 @@
 
 OpenPDF is a Java library for creating PDF files with a LGPL and MPL open source license. OpenPDF is the LGPL/MPL open source successor of iText, and is based on a fork of LibrePDF/OpenPDF. We welcome contributions from other developers. Please feel free to submit pull-requests and bugreports to this GitHub repository.
 
- [![Build Status](https://travis-ci.org/justifiedsolutions/OpenPDF.svg?branch=master)](https://travis-ci.org/justifiedsolutions/OpenPDF) 
- [![Maven Central](https://img.shields.io/maven-central/v/com.justifiedsolutions/openpdf?color=green)](https://maven-badges.herokuapp.com/maven-central/com.justifiedsolutions/openpdf)
- [![javadoc](https://javadoc.io/badge2/com.justifiedsolutions/openpdf/javadoc.svg)](https://javadoc.io/doc/com.justifiedsolutions/openpdf)
- [![License (LGPL version 3.0)](https://img.shields.io/badge/license-GNU%20LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) 
- [![License (MPL)](https://img.shields.io/badge/license-Mozilla%20Public%20License%20v2-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
+[![Build Status](https://travis-ci.org/justifiedsolutions/OpenPDF.svg?branch=master)](https://travis-ci.org/justifiedsolutions/OpenPDF)
+[![Maven Central](https://img.shields.io/maven-central/v/com.justifiedsolutions/openpdf?color=green)](https://maven-badges.herokuapp.com/maven-central/com.justifiedsolutions/openpdf)
+[![javadoc](https://javadoc.io/badge2/com.justifiedsolutions/openpdf/javadoc.svg)](https://javadoc.io/doc/com.justifiedsolutions/openpdf)
+[![License (LGPL version 3.0)](https://img.shields.io/badge/license-GNU%20LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) 
+[![License (MPL)](https://img.shields.io/badge/license-Mozilla%20Public%20License%20v2-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
 
 ## OpenPDF version 1.0.0 released 2020-03-28 ##
 Initial release of the "slimmed down" version of OpenPDF. 
