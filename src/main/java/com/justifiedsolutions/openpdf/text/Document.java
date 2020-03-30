@@ -84,8 +84,6 @@ import java.util.Properties;
  * <PRE>// creation of the document with a certain size and certain margins
  * <STRONG>Document document = new Document(PageSize.A4, 50, 50, 50, 50);
  * </STRONG> try { 
- *   // creation of the different writers 
- *   HtmlWriter.getInstance(<STRONG>document </STRONG>, System.out);
  *   PdfWriter.getInstance(<STRONG>document </STRONG>, new FileOutputStream("text.pdf"));
  *   // we add some meta information to the document
  *   <STRONG>document.addAuthor("Bruno Lowagie"); </STRONG>
@@ -145,7 +143,7 @@ public class Document implements AutoCloseable, DocListener {
     public static float wmfFontCorrection = 0.86f;
     
     /** The DocListener. */
-    private List<DocListener> listeners = new ArrayList<>();
+    private final List<DocListener> listeners = new ArrayList<>();
     
     /** Is the document open or not? */
     protected boolean open;
@@ -159,16 +157,16 @@ public class Document implements AutoCloseable, DocListener {
     protected Rectangle pageSize;
     
     /** margin in x direction starting from the left */
-    protected float marginLeft = 0;
+    protected float marginLeft;
     
     /** margin in x direction starting from the right */
-    protected float marginRight = 0;
+    protected float marginRight;
     
     /** margin in y direction starting from the top */
-    protected float marginTop = 0;
+    protected float marginTop;
     
     /** margin in y direction starting from the bottom */
-    protected float marginBottom = 0;
+    protected float marginBottom;
     
     /** mirroring of the left/right margins */
     protected boolean marginMirroring = false;
@@ -178,15 +176,6 @@ public class Document implements AutoCloseable, DocListener {
      * @since    2.1.6
      */
     protected boolean marginMirroringTopBottom = false;
-    
-    /** Content of JavaScript onLoad function */
-    protected String javaScript_onLoad = null;
-
-    /** Content of JavaScript onUnLoad function */
-    protected String javaScript_onUnLoad = null;
-
-    /** Style class in HTML body tag */
-    protected String htmlStyleClass = null;
 
     // headers, footers
     
@@ -757,16 +746,6 @@ public class Document implements AutoCloseable, DocListener {
     }
 
     /**
-     * Gets the product name.
-     *
-     * @return the product name
-     * @since 2.1.6
-     */
-    public static String getProduct() {
-        return OPENPDF;
-    }
-
-    /**
      * Gets the release number.
      *
      * @return the product name
@@ -785,69 +764,6 @@ public class Document implements AutoCloseable, DocListener {
         return OPENPDF_VERSION;
     }
 
-    /**
- * Adds a JavaScript onLoad function to the HTML body tag
- *
-     * @param code
-     *            the JavaScript code to be executed on load of the HTML page
- */
-    
-    public void setJavaScript_onLoad(String code) {
-        this.javaScript_onLoad = code;
-    }
-
-    /**
- * Gets the JavaScript onLoad command.
-     * 
- * @return the JavaScript onLoad command
- */
-
-    public String getJavaScript_onLoad() {
-        return this.javaScript_onLoad;
-    }
-
-    /**
- * Adds a JavaScript onUnLoad function to the HTML body tag
- *
-     * @param code
-     *            the JavaScript code to be executed on unload of the HTML page
- */
-    
-    public void setJavaScript_onUnLoad(String code) {
-        this.javaScript_onUnLoad = code;
-    }
-
-    /**
- * Gets the JavaScript onUnLoad command.
-     * 
- * @return the JavaScript onUnLoad command
- */
-
-    public String getJavaScript_onUnLoad() {
-        return this.javaScript_onUnLoad;
-    }
-
-    /**
- * Adds a style class to the HTML body tag
- *
-     * @param htmlStyleClass
-     *            the style class for the HTML body tag
- */
-    
-    public void setHtmlStyleClass(String htmlStyleClass) {
-        this.htmlStyleClass = htmlStyleClass;
-    }
-
-    /**
- * Gets the style class of the HTML body tag
- *
- * @return        the style class of the HTML body tag
- */
-    
-    public String getHtmlStyleClass() {
-        return this.htmlStyleClass;
-    }
-    
     /**
      * Set the margin mirroring. It will mirror right/left margins for odd/even pages.
      * <p>

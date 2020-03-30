@@ -19,17 +19,31 @@ Add this to your pom.xml file to use the latest version of OpenPDF:
             <artifactId>openpdf</artifactId>
             <version>1.0.0</version>
         </dependency>
+        
+## Project Goals ##
+### Goals ###
+ - Minimize functionality
+ - Easy to understand and use API
+ 
+### Non-Goals ###
+ - Compatibility with iText or LibrePDF/OpenPDF
+ - Supporting Forms
+ - Supporting Encryption
+ - Supporting Signing
+ - Supporting Parsing
 
 ## License ##
 
-All contributions to OpenPDF must be dual licensed as [LGPL v3](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) and [MPL v2](https://www.mozilla.org/en-US/MPL/2.0/).
+`SPDX-License-Identifier: LGPL-3.0-only OR MPL-2.0`
+
+All contributions to OpenPDF must be dual licensed as [LGPL v3](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) and [MPL v2](https://www.mozilla.org/en-US/MPL/2.0/). When using this library you can use either license.
 
 
 ## Background ##
 
 Justified Solutions OpenPDF is open source software with a LGPL and MPL license. It is a fork of LibrePDF which is a fork of iText version 4, more specifically iText svn tag 4.2.0, which was hosted publicly on sourceforge with LGPL and MPL license headers in the source code, and LGPL and MPL license documents in the SVN repository. Beginning with version 5.0 of iText, the developers have moved to the AGPL to improve their ability to sell commercial licenses. Justified Solutions OpenPDF was forked off of the LibrePDF version in March 2020. The goal of this version to provide a slimmed down version that focuses on the minimum requirements for creating a PDF document.
 
-### Coding Style ###
+## Coding Style ##
 - Code indentation style is 4 spaces.
 - A coding style configuraton for [IntelliJ](https://www.jetbrains.com/idea/) is included in the repository.
 - Generally try to preserve the coding style in the file you are modifying.

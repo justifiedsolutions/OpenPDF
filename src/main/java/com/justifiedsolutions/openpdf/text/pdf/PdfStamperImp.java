@@ -223,16 +223,7 @@ class PdfStamperImp extends PdfWriter {
         if (oldInfo != null && oldInfo.get(PdfName.PRODUCER) != null) {
           producer = oldInfo.getAsString(PdfName.PRODUCER).toUnicodeString();
         }
-        if (producer == null) {
-          producer = Document.getVersion();
-        }
-        else if (!producer.contains(Document.getProduct())) {
-          StringBuilder buf = new StringBuilder(producer);
-          buf.append("; modified using ");
-          buf.append(Document.getVersion());
-          producer = buf.toString();
-        }
-        
+
         // if we explicitly set Producer key
         if (moreInfo != null && moreInfo.containsKey("Producer")) {
           producer = moreInfo.get("Producer");

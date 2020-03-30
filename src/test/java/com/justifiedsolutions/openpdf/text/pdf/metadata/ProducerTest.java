@@ -43,18 +43,4 @@ public class ProducerTest {
 
         reader.close();
     }
-
-    @Test
-    public void testMetadataProducerStamperIssue254 () throws IOException {
-        File origin = new File("src/test/resources/pdf_form_metadata_issue_254.pdf");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfReader reader = new PdfReader(origin.getAbsolutePath());
-        PdfStamper stamp = new PdfStamper(reader, baos);
-        stamp.close();
-        byte[] data = baos.toByteArray();
-        String sData = new String(data);
-        Assertions.assertTrue(sData.contains("(LibreOffice 6.0; modified using OpenPDF"));        
-        
-        
-    }
 }

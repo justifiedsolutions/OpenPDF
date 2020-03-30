@@ -152,7 +152,7 @@ public class PdfWriter extends DocWriter implements
             private int type;
 
             /**    Byte offset in the PDF file. */
-            private long offset;
+            private final long offset;
 
             private int refnum;
             /**    generation of the object. */
