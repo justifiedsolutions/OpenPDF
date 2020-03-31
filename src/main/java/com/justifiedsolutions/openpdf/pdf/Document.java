@@ -3,6 +3,8 @@ package com.justifiedsolutions.openpdf.pdf;
 import com.justifiedsolutions.openpdf.pdf.content.Chapter;
 import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Represents a PDF document. A document can contain both {@link Metadata} and {@link Content}. It
@@ -87,4 +89,11 @@ public interface Document {
      */
     void addContent(Content content) throws DocumentException;
 
+    /**
+     * Writes the contents of the Document to the specified {@link OutputStream}.
+     *
+     * @param out the OutputStream to write the PDF to
+     * @throws IOException if there is an issue writing the stream
+     */
+    void write(OutputStream out) throws IOException;
 }
