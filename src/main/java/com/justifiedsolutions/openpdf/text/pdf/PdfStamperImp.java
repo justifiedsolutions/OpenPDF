@@ -249,11 +249,6 @@ class PdfStamperImp extends PdfWriter {
             }
             xmp.put(PdfName.TYPE, PdfName.METADATA);
             xmp.put(PdfName.SUBTYPE, PdfName.XML);
-            if (crypto != null && !crypto.isMetadataEncrypted()) {
-                PdfArray ar = new PdfArray();
-                ar.add(PdfName.CRYPT);
-                xmp.put(PdfName.FILTER, ar);
-            }
             if (append && xmpo != null) {
               body.add(xmp, xmpo.getIndRef());
             }
@@ -300,17 +295,7 @@ class PdfStamperImp extends PdfWriter {
         }
         PdfIndirectReference encryption = null;
         PdfObject fileID = null;
-        if (crypto != null) {
-            if (append) {
-                encryption = reader.getCryptoRef();
-            }
-            else {
-                PdfIndirectObject encryptionObject = addToBody(crypto.getEncryptionDictionary(), false);
-                encryption = encryptionObject.getIndirectReference();
-            }
-            if (includeFileID) fileID = crypto.getFileID();
-        }
-        else if (includeFileID) {
+        if (includeFileID) {
             if (overrideFileId != null) {
                 fileID = overrideFileId;
             } else {

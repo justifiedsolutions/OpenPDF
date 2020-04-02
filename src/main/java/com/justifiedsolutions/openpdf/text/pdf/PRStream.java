@@ -220,20 +220,13 @@ public class PRStream extends PdfStream {
     
     public void toPdf(PdfWriter writer, OutputStream os) throws IOException {
         byte[] b = PdfReader.getStreamBytesRaw(this);
-        PdfEncryption crypto = null;
-        if (writer != null)
-            crypto = writer.getEncryption();
         PdfObject objLen = get(PdfName.LENGTH);
         int nn = b.length;
-        if (crypto != null)
-            nn = crypto.calculateStreamSize(nn);
         put(PdfName.LENGTH, new PdfNumber(nn));
         superToPdf(writer, os);
         put(PdfName.LENGTH, objLen);
         os.write(STARTSTREAM);
         if (length > 0) {
-            if (crypto != null && !crypto.isEmbeddedFilesOnly())
-                b = crypto.encryptByteArray(b);
             os.write(b);
         }
         os.write(ENDSTREAM);

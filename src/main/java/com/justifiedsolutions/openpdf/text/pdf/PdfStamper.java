@@ -46,24 +46,13 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.DocWriter;
 import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfEncryptionSettings;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfViewerPreferences;
 import com.justifiedsolutions.openpdf.text.xml.xmp.XmpWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.cert.Certificate;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /** Applies extra content to the pages of a PDF document.
@@ -76,7 +65,7 @@ import java.util.Map;
  * @author Paulo Soares (psoares@consiste.pt)
  */
 public class PdfStamper
-    implements PdfViewerPreferences, PdfEncryptionSettings {
+    implements PdfViewerPreferences {
     /**
      * The writer
      */    
@@ -194,103 +183,6 @@ public class PdfStamper
     public PdfContentByte getOverContent(int pageNum) {
         return stamper.getOverContent(pageNum);
     }
-
-    /** Sets the encryption options for this document. The userPassword and the
-     *  ownerPassword can be null or have zero length. In this case the ownerPassword
-     *  is replaced by a random string. The open permissions for the document can be
-     *  AllowPrinting, AllowModifyContents, AllowCopy, AllowModifyAnnotations,
-     *  AllowFillIn, AllowScreenReaders, AllowAssembly and AllowDegradedPrinting.
-     *  The permissions can be combined by ORing them.
-     * @param userPassword the user password. Can be null or empty
-     * @param ownerPassword the owner password. Can be null or empty
-     * @param permissions the user permissions
-     * @param strength128Bits <code>true</code> for 128 bit key length, <code>false</code> for 40 bit key length
-     * @throws DocumentException if anything was already written to the output
-     */
-    public void setEncryption(byte[] userPassword, byte[] ownerPassword, int permissions, boolean strength128Bits) throws DocumentException {
-        if (stamper.isAppend())
-            throw new DocumentException(MessageLocalization.getComposedMessage("append.mode.does.not.support.changing.the.encryption.status"));
-        if (stamper.isContentWritten())
-            throw new DocumentException(MessageLocalization.getComposedMessage("content.was.already.written.to.the.output"));
-        stamper.setEncryption(userPassword, ownerPassword, permissions, strength128Bits ? PdfWriter.STANDARD_ENCRYPTION_128 : PdfWriter.STANDARD_ENCRYPTION_40);
-    }
-
-    /** Sets the encryption options for this document. The userPassword and the
-     *  ownerPassword can be null or have zero length. In this case the ownerPassword
-     *  is replaced by a random string. The open permissions for the document can be
-     *  AllowPrinting, AllowModifyContents, AllowCopy, AllowModifyAnnotations,
-     *  AllowFillIn, AllowScreenReaders, AllowAssembly and AllowDegradedPrinting.
-     *  The permissions can be combined by ORing them.
-     * @param userPassword the user password. Can be null or empty
-     * @param ownerPassword the owner password. Can be null or empty
-     * @param permissions the user permissions
-     * @param encryptionType the type of encryption. It can be one of STANDARD_ENCRYPTION_40, STANDARD_ENCRYPTION_128 or ENCRYPTION_AES128.
-     * Optionally DO_NOT_ENCRYPT_METADATA can be ored to output the metadata in cleartext
-     * @throws DocumentException if the document is already open
-     */
-    public void setEncryption(byte[] userPassword, byte[] ownerPassword, int permissions, int encryptionType) throws DocumentException {
-        if (stamper.isAppend())
-            throw new DocumentException(MessageLocalization.getComposedMessage("append.mode.does.not.support.changing.the.encryption.status"));
-        if (stamper.isContentWritten())
-            throw new DocumentException(MessageLocalization.getComposedMessage("content.was.already.written.to.the.output"));
-        stamper.setEncryption(userPassword, ownerPassword, permissions, encryptionType);
-    }
-
-    /**
-     * Sets the encryption options for this document. The userPassword and the
-     *  ownerPassword can be null or have zero length. In this case the ownerPassword
-     *  is replaced by a random string. The open permissions for the document can be
-     *  AllowPrinting, AllowModifyContents, AllowCopy, AllowModifyAnnotations,
-     *  AllowFillIn, AllowScreenReaders, AllowAssembly and AllowDegradedPrinting.
-     *  The permissions can be combined by ORing them.
-     * @param strength <code>true</code> for 128 bit key length, <code>false</code> for 40 bit key length
-     * @param userPassword the user password. Can be null or empty
-     * @param ownerPassword the owner password. Can be null or empty
-     * @param permissions the user permissions
-     * @throws DocumentException if anything was already written to the output
-     */
-    public void setEncryption(boolean strength, String userPassword, String ownerPassword, int permissions) throws DocumentException {
-        setEncryption(DocWriter.getISOBytes(userPassword), DocWriter.getISOBytes(ownerPassword), permissions, strength);
-    }
-
-    /**
-     * Sets the encryption options for this document. The userPassword and the
-     *  ownerPassword can be null or have zero length. In this case the ownerPassword
-     *  is replaced by a random string. The open permissions for the document can be
-     *  AllowPrinting, AllowModifyContents, AllowCopy, AllowModifyAnnotations,
-     *  AllowFillIn, AllowScreenReaders, AllowAssembly and AllowDegradedPrinting.
-     *  The permissions can be combined by ORing them.
-     * @param encryptionType the type of encryption. It can be one of STANDARD_ENCRYPTION_40, STANDARD_ENCRYPTION_128 or ENCRYPTION_AES128.
-     * Optionally DO_NOT_ENCRYPT_METADATA can be ored to output the metadata in cleartext
-     * @param userPassword the user password. Can be null or empty
-     * @param ownerPassword the owner password. Can be null or empty
-     * @param permissions the user permissions
-     * @throws DocumentException if anything was already written to the output
-     */
-    public void setEncryption(int encryptionType, String userPassword, String ownerPassword, int permissions) throws DocumentException {
-        setEncryption(DocWriter.getISOBytes(userPassword), DocWriter.getISOBytes(ownerPassword), permissions, encryptionType);
-    }
-
-    /**
-     * Sets the certificate encryption options for this document. An array of one or more public certificates
-     * must be provided together with an array of the same size for the permissions for each certificate.
-     *  The open permissions for the document can be
-     *  AllowPrinting, AllowModifyContents, AllowCopy, AllowModifyAnnotations,
-     *  AllowFillIn, AllowScreenReaders, AllowAssembly and AllowDegradedPrinting.
-     *  The permissions can be combined by ORing them.
-     * Optionally DO_NOT_ENCRYPT_METADATA can be ored to output the metadata in cleartext
-     * @param certs the public certificates to be used for the encryption
-     * @param permissions the user permissions for each of the certificates
-     * @param encryptionType the type of encryption. It can be one of STANDARD_ENCRYPTION_40, STANDARD_ENCRYPTION_128 or ENCRYPTION_AES128.
-     * @throws DocumentException if the encryption was set too late
-     */
-     public void setEncryption(Certificate[] certs, int[] permissions, int encryptionType) throws DocumentException {
-        if (stamper.isAppend())
-            throw new DocumentException(MessageLocalization.getComposedMessage("append.mode.does.not.support.changing.the.encryption.status"));
-        if (stamper.isContentWritten())
-            throw new DocumentException(MessageLocalization.getComposedMessage("content.was.already.written.to.the.output"));
-        stamper.setEncryption(certs, permissions, encryptionType);
-     }
 
     /** Gets the underlying PdfWriter.
      * @return the underlying PdfWriter

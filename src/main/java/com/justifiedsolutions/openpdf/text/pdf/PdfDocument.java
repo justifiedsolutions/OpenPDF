@@ -59,8 +59,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Font;
 import com.justifiedsolutions.openpdf.text.HeaderFooter;
 import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.MarkedObject;
-import com.justifiedsolutions.openpdf.text.MarkedSection;
 import com.justifiedsolutions.openpdf.text.Meta;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
@@ -643,18 +641,6 @@ public class PdfDocument extends Document {
                     DrawInterface zh = (DrawInterface)element;
                     zh.draw(graphics, indentLeft(), indentBottom(), indentRight(), indentTop(), indentTop() - currentHeight - (leadingCount > 0 ? leading : 0));
                     pageEmpty = false;
-                    break;
-                }
-                case Element.MARKED: {
-                    MarkedObject mo;
-                    if (element instanceof MarkedSection) {
-                        mo = ((MarkedSection)element).getTitle();
-                        if (mo != null) {
-                            mo.process(this);
-                        }
-                    }
-                    mo = (MarkedObject)element;
-                    mo.process(this);
                     break;
                 }
                 default:

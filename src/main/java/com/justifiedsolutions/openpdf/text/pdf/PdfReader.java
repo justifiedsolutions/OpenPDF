@@ -113,7 +113,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   protected int lastXref;
   protected int eofPos;
   protected char pdfVersion;
-  protected PdfEncryption decrypt;
   protected byte[] password = null; // added by ujihara for decryption
   protected Key certificateKey = null; // added by Aiken Sam for certificate
                                        // decryption
@@ -329,8 +328,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     this.freeXref = reader.freeXref;
     this.lastXref = reader.lastXref;
     this.tokens = new PRTokeniser(reader.tokens.getSafeFile());
-    if (reader.decrypt != null)
-      this.decrypt = new PdfEncryption(reader.decrypt);
     this.pValue = reader.pValue;
     this.rValue = reader.rValue;
     this.xrefObj = new ArrayList<>(reader.xrefObj);
@@ -798,28 +795,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       }
     }
 
-    decrypt = new PdfEncryption();
-    decrypt.setCryptoMode(cryptoMode, lengthValue);
-
-    if (filter.equals(PdfName.STANDARD)) {
-      // check by owner password
-      decrypt
-          .setupByOwnerPassword(documentID, password, uValue, oValue, pValue);
-      if (!equalsArray(uValue, decrypt.userKey,
-          (rValue == 3 || rValue == 4) ? 16 : 32)) {
-        // check by user password
-        decrypt.setupByUserPassword(documentID, password, oValue, pValue);
-        if (!equalsArray(uValue, decrypt.userKey,
-            (rValue == 3 || rValue == 4) ? 16 : 32)) {
-          throw new BadPasswordException(
-              MessageLocalization.getComposedMessage("bad.user.password"));
-        }
-      } else
-        ownerPasswordUsed = true;
-    } else if (filter.equals(PdfName.PUBSEC)) {
-      decrypt.setupByEncryptionKey(encryptionKey, lengthValue);
-      ownerPasswordUsed = true;
-    }
 
     for (Object string : strings) {
       PdfString str = (PdfString) string;
@@ -2152,7 +2127,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
    */
   public static byte[] getStreamBytesRaw(PRStream stream,
       RandomAccessFileOrArray file) throws IOException {
-    PdfReader reader = stream.getReader();
     byte[] b;
     if (stream.getOffset() < 0)
       b = stream.getBytes();
@@ -2160,24 +2134,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       b = new byte[stream.getLength()];
       file.seek(stream.getOffset());
       file.readFully(b);
-      PdfEncryption decrypt = reader.getDecrypt();
-      if (decrypt != null) {
-        PdfObject filter = getPdfObjectRelease(stream.get(PdfName.FILTER));
-        List<PdfObject> filters = new ArrayList<>();
-        filters = addFilters(filters, filter);
-        boolean skip = false;
-        for (PdfObject filter1 : filters) {
-          PdfObject obj = getPdfObjectRelease(filter1);
-          if (obj != null && obj.toString().equals("/Crypt")) {
-            skip = true;
-            break;
-          }
-        }
-        if (!skip) {
-          decrypt.setHashKey(stream.getObjNum(), stream.getObjGen());
-          b = decrypt.decryptByteArray(b);
-        }
-      }
     }
     return b;
   }
@@ -2355,10 +2311,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
    */
   public PdfDictionary getTrailer() {
     return trailer;
-  }
-
-  PdfEncryption getDecrypt() {
-    return decrypt;
   }
 
   private static boolean equalsn(byte[] a1, byte[] a2) {

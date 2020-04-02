@@ -132,10 +132,6 @@ public class PdfAnnotation extends PdfDictionary {
     }
   }
 
-  public void setBorder(PdfBorderArray border) {
-    put(PdfName.BORDER, border);
-  }
-
   public void setColor(Color color) {
     put(PdfName.C, new PdfColor(color));
   }

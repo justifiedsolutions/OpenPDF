@@ -181,9 +181,6 @@ public class CleanMetaDataTest {
 		int n = reader.getNumberOfPages();
 		PdfStamper stamp = new PdfStamper(reader, baos);
 		stamp.setInfoDictionary(moreInfo);
-		if (encrypt) {
-			stamp.setEncryption(null, null, 0, PdfWriter.ENCRYPTION_AES_128);
-		}
 		int i = 0;
 		PdfContentByte over;
 		BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);

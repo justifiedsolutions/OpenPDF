@@ -303,12 +303,6 @@ public class Section extends ArrayList<Element> implements TextElementArray, Lar
                 section.setNumbers(++subsections, numbers);
                 return super.add(section);
             }
-            else if (o instanceof MarkedSection && ((MarkedObject)o).element.type() == Element.SECTION) {
-                MarkedSection mo = (MarkedSection)o;
-                Section section = (Section)mo.element;
-                section.setNumbers(++subsections, numbers);
-                return super.add(mo);
-            }
             else if (element.isNestable()) {
                 return super.add(o);
             }
@@ -376,15 +370,6 @@ public class Section extends ArrayList<Element> implements TextElementArray, Lar
      */
     public Section addSection(Paragraph title, int numberDepth) {
         return addSection(0, title, numberDepth);
-    }
-    
-    /**
-     * Adds a marked section. For use in class MarkedSection only!
-     */
-    public MarkedSection addMarkedSection() {
-        MarkedSection section = new MarkedSection(new Section(null, numberDepth + 1));
-        add(section);
-        return section;
     }
     
     /**

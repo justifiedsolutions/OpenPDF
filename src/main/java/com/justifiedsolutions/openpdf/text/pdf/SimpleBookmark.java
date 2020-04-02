@@ -101,7 +101,7 @@ import java.util.StringTokenizer;
 public final class SimpleBookmark implements SimpleXMLDocHandler {
     
     private List<Map<String, Object>> topList;
-    private Stack<Map<String, Object>> attr = new Stack<>();
+    private final Stack<Map<String, Object>> attr = new Stack<>();
     
     /** Creates a new instance of SimpleBookmark */
     private SimpleBookmark() {
