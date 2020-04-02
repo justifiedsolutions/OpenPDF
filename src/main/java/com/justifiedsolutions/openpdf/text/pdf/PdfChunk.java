@@ -182,12 +182,11 @@ public class PdfChunk {
     
 /**
  * Constructs a <CODE>PdfChunk</CODE>-object.
+ *  @param chunk the original <CODE>Chunk</CODE>-object
  *
- * @param chunk the original <CODE>Chunk</CODE>-object
- * @param action the <CODE>PdfAction</CODE> if the <CODE>Chunk</CODE> comes from an <CODE>Anchor</CODE>
  */
     
-    PdfChunk(Chunk chunk, PdfAction action) {
+    PdfChunk(Chunk chunk) {
         thisChunk[0] = this;
         value = chunk.getContent();
         
@@ -238,8 +237,6 @@ public class PdfChunk {
             Object[][] unders = Utilities.addToArray((Object[][]) attributes.get(Chunk.UNDERLINE), obj);
             attributes.put(Chunk.UNDERLINE, unders);
         }
-        if (action != null)
-            attributes.put(Chunk.ACTION, action);
         // the color can't be stored in a PdfFont
         noStroke.put(Chunk.COLOR, f.getColor());
         noStroke.put(Chunk.ENCODING, font.getFont().getEncoding());

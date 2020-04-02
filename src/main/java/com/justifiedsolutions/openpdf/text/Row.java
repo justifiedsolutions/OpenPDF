@@ -54,6 +54,7 @@ import com.justifiedsolutions.openpdf.text.alignment.HorizontalAlignment;
 import com.justifiedsolutions.openpdf.text.alignment.WithHorizontalAlignment;
 import java.util.ArrayList;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.util.List;
 
 /**
  * A <CODE>Row</CODE> is part of a <CODE>Table</CODE>
@@ -146,7 +147,7 @@ public class Row implements Element, WithHorizontalAlignment {
      *
      * @return  an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
+    public List<Chunk> getChunks() {
         return new ArrayList<>();
     }
     

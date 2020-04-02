@@ -111,6 +111,8 @@
             </goals>
             <configuration>
               <quiet>true</quiet>
+              <!-- TODO Remove doclint option -->
+              <additionalJOptions>-Xdoclint:none</additionalJOptions>
             </configuration>
           </execution>
         </executions>

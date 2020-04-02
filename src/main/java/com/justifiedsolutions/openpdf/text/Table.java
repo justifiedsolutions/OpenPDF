@@ -62,6 +62,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -86,7 +87,6 @@ import java.util.Optional;
  * <STRONG>Table table = new Table(3);</STRONG>
  * <STRONG>table.setBorderWidth(1);</STRONG>
  * <STRONG>table.setBorderColor(new Color(0, 0, 255));</STRONG>
- * <STRONG>table.setPadding(5);</STRONG>
  * <STRONG>table.setSpacing(5);</STRONG>
  * Cell cell = new Cell("header");
  * cell.setHeader(true);
@@ -328,7 +328,7 @@ public class Table extends TableRectangle implements LargeElement, WithHorizonta
      * @return  an <CODE>ArrayList</CODE>
      */
     
-    public ArrayList<Element> getChunks() {
+    public List<Chunk> getChunks() {
         return new ArrayList<>();
     }
 

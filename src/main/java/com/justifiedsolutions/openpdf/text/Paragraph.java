@@ -49,6 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text;
 
+import java.util.List;
+
 /**
  * A <CODE>Paragraph</CODE> is a series of <CODE>Chunk</CODE>s and/or <CODE>Phrases</CODE>.
  * <P>
@@ -67,7 +69,6 @@ package com.justifiedsolutions.openpdf.text;
  *
  * @see        Element
  * @see        Phrase
- * @see        ListItem
  */
 
 public class Paragraph extends Phrase {
@@ -225,19 +226,9 @@ public class Paragraph extends Phrase {
      * @return true is adding the object succeeded
      */
     public boolean add(Element o) {
-        if (o instanceof List) {
-            List list = (List) o;
-            list.setIndentationLeft(list.getIndentationLeft() + indentationLeft);
-            list.setIndentationRight(indentationRight);
-            return super.add(list);
-        }
-        else if (o instanceof Image) {
-            super.addSpecial(o);
-            return true;
-        }
-        else if (o instanceof Paragraph) {
+        if (o instanceof Paragraph) {
             super.add(o);
-            java.util.List chunks = getChunks();
+            List<Chunk> chunks = getChunks();
             if (!chunks.isEmpty()) {
                 Chunk tmp = ((Chunk) chunks.get(chunks.size() - 1));
                 super.add(new Chunk("\n", tmp.getFont()));

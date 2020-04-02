@@ -93,18 +93,6 @@ public class CleanMetaDataTest {
 	}
 	
 	@Test
-	public void testStamperEncryptMetadata() throws Exception {
-		byte[] data = addWatermark(new File("src/test/resources/HelloWorldMeta.pdf"), true, createCleanerMoreInfo());
-		PdfReader r = new PdfReader(data);
-		Assertions.assertNull(r.getInfo().get("Producer"));
-		Assertions.assertNull(r.getInfo().get("Author"));
-		Assertions.assertNull(r.getInfo().get("Title"));
-		Assertions.assertNull(r.getInfo().get("Subject"));		
-		r.close();
-	}
-	
-	
-	@Test
 	public void testStamperExtraMetadata() throws Exception {
 		HashMap<String, String> moreInfo = createCleanerMoreInfo();
 		moreInfo.put("Producer", Document.getVersion());

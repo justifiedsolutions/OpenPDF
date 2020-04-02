@@ -55,9 +55,7 @@ package com.justifiedsolutions.openpdf.text;
  * @see        Phrase
  * @see        Paragraph
  * @see        Section
- * @see        ListItem
  * @see        Chapter
- * @see        Anchor
  * @see        Cell
  */
 

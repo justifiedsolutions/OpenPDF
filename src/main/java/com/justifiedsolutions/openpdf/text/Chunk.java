@@ -51,14 +51,12 @@ package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
-import com.justifiedsolutions.openpdf.text.pdf.PdfAction;
-import com.justifiedsolutions.openpdf.text.pdf.PdfAnnotation;
 import com.justifiedsolutions.openpdf.text.pdf.PdfContentByte;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 import java.awt.Color;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -402,8 +400,8 @@ public class Chunk implements Element {
      *
      * @return an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
-        ArrayList<Element> tmp = new ArrayList<>();
+    public List<Chunk> getChunks() {
+        List<Chunk> tmp = new ArrayList<>();
         tmp.add(this);
         return tmp;
     }
@@ -796,39 +794,6 @@ public class Chunk implements Element {
     }
 
     /**
-     * Sets an action for this <CODE>Chunk</CODE>.
-     *
-     * @param action the action
-     * @return this <CODE>Chunk</CODE>
-     */
-
-    public Chunk setAction(PdfAction action) {
-        return setAttribute(ACTION, action);
-    }
-
-    /**
-     * Sets an anchor for this <CODE>Chunk</CODE>.
-     *
-     * @param url the <CODE>URL</CODE> to link to
-     * @return this <CODE>Chunk</CODE>
-     */
-
-    public Chunk setAnchor(URL url) {
-        return setAttribute(ACTION, new PdfAction(url.toExternalForm()));
-    }
-
-    /**
-     * Sets an anchor for this <CODE>Chunk</CODE>.
-     *
-     * @param url the url to link to
-     * @return this <CODE>Chunk</CODE>
-     */
-
-    public Chunk setAnchor(String url) {
-        return setAttribute(ACTION, new PdfAction(url));
-    }
-
-    /**
      * Sets a new page tag..
      *
      * @return this <CODE>Chunk</CODE>
@@ -836,16 +801,6 @@ public class Chunk implements Element {
 
     public Chunk setNewPage() {
         return setAttribute(NEWPAGE, null);
-    }
-
-    /**
-     * Sets a generic annotation to this <CODE>Chunk</CODE>.
-     *
-     * @param annotation the annotation
-     * @return this <CODE>Chunk</CODE>
-     */
-    public Chunk setAnnotation(PdfAnnotation annotation) {
-        return setAttribute(PDFANNOTATION, annotation);
     }
 
     /**

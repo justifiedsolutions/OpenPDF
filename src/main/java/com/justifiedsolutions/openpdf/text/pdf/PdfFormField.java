@@ -99,17 +99,6 @@ public class PdfFormField extends PdfAnnotation {
     protected PdfFormField parent;
     
     protected List<PdfFormField> kids;
-    
-/**
- * Constructs a new <CODE>PdfAnnotation</CODE> of subtype link (Action).
- */
-    
-    public PdfFormField(PdfWriter writer, float llx, float lly, float urx, float ury, PdfAction action) {
-        super(writer, llx, lly, urx, ury, action);
-        put(PdfName.TYPE, PdfName.ANNOT);
-        put(PdfName.SUBTYPE, PdfName.WIDGET);
-        annotation = true;
-    }
 
     /** Creates new PdfFormField */
     protected PdfFormField(PdfWriter writer) {
@@ -117,21 +106,7 @@ public class PdfFormField extends PdfAnnotation {
         form = true;
         annotation = false;
     }
-    
-    public void setWidget(Rectangle rect, PdfName highlight) {
-        put(PdfName.TYPE, PdfName.ANNOT);
-        put(PdfName.SUBTYPE, PdfName.WIDGET);
-        put(PdfName.RECT, new PdfRectangle(rect));
-        annotation = true;
-        if (highlight != null && !highlight.equals(HIGHLIGHT_INVERT))
-            put(PdfName.H, highlight);
-    }
-    
-    public static PdfFormField createEmpty(PdfWriter writer) {
-        PdfFormField field = new PdfFormField(writer);
-        return field;
-    }
-    
+
     public void setButton(int flags) {
         put(PdfName.FT, PdfName.BTN);
         if (flags != 0)
@@ -335,21 +310,4 @@ public class PdfFormField extends PdfAnnotation {
         put(PdfName.DR, dic);
     }
 
-    public static PdfAnnotation shallowDuplicate(PdfAnnotation annot) {
-        PdfAnnotation dup;
-        if (annot.isForm()) {
-            dup = new PdfFormField(annot.writer);
-            PdfFormField dupField = (PdfFormField)dup;
-            PdfFormField srcField = (PdfFormField)annot;
-            dupField.parent = srcField.parent;
-            dupField.kids = srcField.kids;
-        }
-        else
-            dup = new PdfAnnotation(annot.writer, null);
-        dup.merge(annot);
-        dup.form = annot.form;
-        dup.annotation = annot.annotation;
-        dup.templates = annot.templates;
-        return dup;
-    }
 }

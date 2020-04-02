@@ -59,7 +59,6 @@ import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.exceptions.BadPasswordException;
 import com.justifiedsolutions.openpdf.text.pdf.AcroFields.Item;
 
 /**
@@ -99,89 +98,6 @@ class PdfCopyFieldsImp extends PdfWriter {
             super.setPdfVersion(pdfVersion);
         nd = new Document();
         nd.addDocListener(pdf);
-    }
-    
-    void addDocument(PdfReader reader, List<Integer> pagesToKeep) throws DocumentException, IOException {
-        if (!readers2intrefs.containsKey(reader) && reader.isTampered())
-            throw new DocumentException(MessageLocalization.getComposedMessage("the.document.was.reused"));
-        reader = new PdfReader(reader);        
-        reader.selectPages(pagesToKeep);
-        if (reader.getNumberOfPages() == 0)
-            return;
-        reader.setTampered(false);
-        addDocument(reader);
-    }
-    
-    void addDocument(PdfReader reader) throws DocumentException, IOException {
-        if (!reader.isOpenedWithFullPermissions())
-            throw new BadPasswordException(MessageLocalization.getComposedMessage("pdfreader.not.opened.with.owner.password"));
-        openDoc();
-        if (readers2intrefs.containsKey(reader)) {
-            reader = new PdfReader(reader);
-        }
-        else {
-            if (reader.isTampered())
-                throw new DocumentException(MessageLocalization.getComposedMessage("the.document.was.reused"));
-            reader.consolidateNamedDestinations();
-            reader.setTampered(true);
-        }
-        reader.shuffleSubsetNames();
-        readers2intrefs.put(reader, new IntHashtable());
-        readers.add(reader);
-        int len = reader.getNumberOfPages();
-        IntHashtable refs = new IntHashtable();
-        for (int p = 1; p <= len; ++p) {
-            refs.put(reader.getPageOrigRef(p).getNumber(), 1);
-            reader.releasePage(p);
-        }
-        pages2intrefs.put(reader, refs);
-        visited.put(reader, new IntHashtable());
-        fields.add(reader.getAcroFields());
-        updateCalculationOrder(reader);
-    }
-    
-    private static String getCOName(PdfReader reader, PRIndirectReference ref) {
-        String name = "";
-        while (ref != null) {
-            PdfObject obj = PdfReader.getPdfObject(ref);
-            if (obj == null || obj.type() != PdfObject.DICTIONARY)
-                break;
-            PdfDictionary dic = (PdfDictionary)obj;
-            PdfString t = dic.getAsString(PdfName.T);
-            if (t != null) {
-                name = t.toUnicodeString()+ "." + name;
-            }
-            ref = (PRIndirectReference)dic.get(PdfName.PARENT);
-        }
-        if (name.endsWith("."))
-            name = name.substring(0, name.length() - 1);
-        return name;
-    }
-    
-    /**
-     * @since    2.1.5; before 2.1.5 the method was private
-     */
-    protected void updateCalculationOrder(PdfReader reader) {
-        PdfDictionary catalog = reader.getCatalog();
-        PdfDictionary acro = catalog.getAsDict(PdfName.ACROFORM);
-        if (acro == null)
-            return;
-        PdfArray co = acro.getAsArray(PdfName.CO);
-        if (co == null || co.size() == 0)
-            return;
-        AcroFields af = reader.getAcroFields();
-        for (int k = 0; k < co.size(); ++k) {
-            PdfObject obj = co.getPdfObject(k);
-            if (obj == null || !obj.isIndirect())
-                continue;
-            String name = getCOName(reader, (PRIndirectReference)obj);
-            if (af.getFieldItem(name) == null)
-                continue;
-            name = "." + name;
-            if (calculationOrder.contains(name))
-                continue;
-            calculationOrder.add(name);
-        }
     }
 
     private void propagate(PdfObject obj, PdfIndirectReference refo, boolean restricted) {

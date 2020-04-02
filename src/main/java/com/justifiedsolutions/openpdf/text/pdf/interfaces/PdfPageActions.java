@@ -49,9 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf.interfaces;
 
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.pdf.PdfAction;
-import com.justifiedsolutions.openpdf.text.pdf.PdfName;
 import com.justifiedsolutions.openpdf.text.pdf.PdfTransition;
 
 /**
@@ -59,15 +56,6 @@ import com.justifiedsolutions.openpdf.text.pdf.PdfTransition;
  */
 
 public interface PdfPageActions {
-    
-    /**
-     * Sets the open and close page additional action.
-     * @param actionType the action type. It can be <CODE>PdfWriter.PAGE_OPEN</CODE>
-     * or <CODE>PdfWriter.PAGE_CLOSE</CODE>
-     * @param action the action to perform
-     * @throws DocumentException if the action type is invalid
-     */
-    void setPageAction(PdfName actionType, PdfAction action) throws DocumentException;
 
     /**
      * Sets the display duration for the page (for presentations)

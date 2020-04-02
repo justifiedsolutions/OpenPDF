@@ -50,8 +50,6 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.DocListener;
-import com.justifiedsolutions.openpdf.text.Anchor;
-import com.justifiedsolutions.openpdf.text.Annotation;
 import com.justifiedsolutions.openpdf.text.BadElementException;
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Document;
@@ -61,8 +59,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Font;
 import com.justifiedsolutions.openpdf.text.HeaderFooter;
 import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.List;
-import com.justifiedsolutions.openpdf.text.ListItem;
 import com.justifiedsolutions.openpdf.text.MarkedObject;
 import com.justifiedsolutions.openpdf.text.MarkedSection;
 import com.justifiedsolutions.openpdf.text.Meta;
@@ -76,11 +72,9 @@ import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfViewerPreferences;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfAnnotationsImp;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfViewerPreferencesImp;
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -301,26 +295,7 @@ public class PdfDocument extends Document {
             }
         }
 
-        /**
-         * Adds an open action to the catalog.
-         * @param    action    the action that will be triggered upon opening the document
-         */
-        void setOpenAction(PdfAction action) {
-            put(PdfName.OPENACTION, action);
-        }
 
-
-        /**
-         * Sets the document level additional actions.
-         * @param actions   dictionary of actions
-         */
-        void setAdditionalActions(PdfDictionary actions) {
-            try {
-                put(PdfName.AA, writer.addToBody(actions).getIndirectReference());
-            } catch (Exception e) {
-                throw new ExceptionConverter(e);
-            }
-        }
     }
 
 // CONSTRUCTING A PdfDocument/PdfWriter INSTANCE
@@ -345,7 +320,6 @@ public class PdfDocument extends Document {
     public void addWriter(PdfWriter writer) throws DocumentException {
         if (this.writer == null) {
             this.writer = writer;
-            annotationsImp = new PdfAnnotationsImp(writer);
             return;
         }
         throw new DocumentException(MessageLocalization.getComposedMessage("you.can.only.add.a.writer.to.a.pdfdocument.once"));
@@ -400,9 +374,6 @@ public class PdfDocument extends Document {
      */
     protected int leadingCount = 0;
 
-    /** The current active <CODE>PdfAction</CODE> when processing an <CODE>Anchor</CODE>. */
-    protected PdfAction anchorAction = null;
-
     /**
      * Signals that an <CODE>Element</CODE> was added to the <CODE>Document</CODE>.
      *
@@ -451,7 +422,7 @@ public class PdfDocument extends Document {
                     }
 
                     // we cast the element to a chunk
-                    PdfChunk chunk = new PdfChunk((Chunk) element, anchorAction);
+                    PdfChunk chunk = new PdfChunk((Chunk) element);
                     // we try to add the chunk to the line, until we succeed
                     {
                         PdfChunk overflow;
@@ -465,33 +436,6 @@ public class PdfDocument extends Document {
                     if (chunk.isAttribute(Chunk.NEWPAGE)) {
                         newPage();
                     }
-                    break;
-                }
-                case Element.ANCHOR: {
-                    leadingCount++;
-                    Anchor anchor = (Anchor) element;
-                    String url = anchor.getReference();
-                    leading = anchor.getLeading();
-                    if (url != null) {
-                        anchorAction = new PdfAction(url);
-                    }
-                    // we process the element
-                    element.process(this);
-                    anchorAction = null;
-                    leadingCount--;
-                    break;
-                }
-                case Element.ANNOTATION: {
-                    if (line == null) {
-                        carriageReturn();
-                    }
-                    Annotation annot = (Annotation) element;
-                    Rectangle rect = new Rectangle(0, 0);
-                    if (line != null)
-                        rect = new Rectangle(annot.llx(indentRight() - line.widthLeft()), annot.ury(indentTop() - currentHeight - 20), annot.urx(indentRight() - line.widthLeft() + 20), annot.lly(indentTop() - currentHeight));
-                    PdfAnnotation an = PdfAnnotationsImp.convertAnnotation(writer, annot, rect);
-                    annotationsImp.addPlainAnnotation(an);
-                    pageEmpty = false;
                     break;
                 }
                 case Element.PHRASE: {
@@ -614,55 +558,6 @@ public class PdfDocument extends Document {
                         else
                             pageEvent.onSectionEnd(writer, this, indentTop() - currentHeight);
 
-                    break;
-                }
-                case Element.LIST: {
-                    // we cast the element to a List
-                    List list = (List) element;
-                    if (list.isAlignindent()) {
-                        list.normalizeIndentation();
-                    }
-                    // we adjust the document
-                    indentation.listIndentLeft += list.getIndentationLeft();
-                    indentation.indentRight += list.getIndentationRight();
-                    // we process the items in the list
-                    element.process(this);
-                    // some parameters are set back to normal again
-                    indentation.listIndentLeft -= list.getIndentationLeft();
-                    indentation.indentRight -= list.getIndentationRight();
-                    carriageReturn();
-                    break;
-                }
-                case Element.LISTITEM: {
-                    leadingCount++;
-                    // we cast the element to a ListItem
-                    ListItem listItem = (ListItem) element;
-
-                    addSpacing(listItem.getSpacingBefore(), leading, listItem.getFont());
-
-                    // we adjust the document
-                    alignment = listItem.getAlignment();
-                    indentation.listIndentLeft += listItem.getIndentationLeft();
-                    indentation.indentRight += listItem.getIndentationRight();
-                    leading = listItem.getTotalLeading();
-                    carriageReturn();
-
-                    // we prepare the current line to be able to show us the listsymbol
-                    line.setListItem(listItem);
-                    // we process the item
-                    element.process(this);
-
-                    addSpacing(listItem.getSpacingAfter(), listItem.getTotalLeading(), listItem.getFont());
-
-                    // if the last line is justified, it should be aligned to the left
-                    if (line.hasToBeJustified()) {
-                        line.resetAlignment();
-                    }
-                    // some parameters are set back to normal again
-                    carriageReturn();
-                    indentation.listIndentLeft -= listItem.getIndentationLeft();
-                    indentation.indentRight -= listItem.getIndentationRight();
-                    leadingCount--;
                     break;
                 }
                 case Element.RECTANGLE: {
@@ -826,8 +721,6 @@ public class PdfDocument extends Document {
             boolean wasImage = (imageWait != null);
             newPage();
             if (imageWait != null || wasImage) newPage();
-            if (annotationsImp.hasUnusedAnnotations())
-                throw new RuntimeException(MessageLocalization.getComposedMessage("not.all.annotations.could.be.added.to.the.document.the.document.doesn.t.have.enough.pages"));
             PdfPageEvent pageEvent = writer.getPageEvent();
             if (pageEvent != null)
                 pageEvent.onCloseDocument(writer, this);
@@ -925,12 +818,6 @@ public class PdfDocument extends Document {
                 PdfStream xmp = new PdfStream(xmpMetadata);
                 xmp.put(PdfName.TYPE, PdfName.METADATA);
                 xmp.put(PdfName.SUBTYPE, PdfName.XML);
-                PdfEncryption crypto = writer.getEncryption();
-                if (crypto != null && !crypto.isMetadataEncrypted()) {
-                    PdfArray ar = new PdfArray();
-                    ar.add(PdfName.CRYPT);
-                    xmp.put(PdfName.FILTER, ar);
-                }
                 page.put(PdfName.METADATA, writer.addToBody(xmp).getIndirectReference());
             }
 
@@ -960,11 +847,6 @@ public class PdfDocument extends Document {
             }
 
             // [C5] and [C8] we add the annotations
-            if (annotationsImp.hasUnusedAnnotations()) {
-                PdfArray array = annotationsImp.rotateAnnotations(writer, pageSize);
-                if (array.size() != 0)
-                    page.put(PdfName.ANNOTS, array);
-            }
 
             // [F12] we add tag info
             if (writer.isTagged())
@@ -1152,7 +1034,6 @@ public class PdfDocument extends Document {
         pageN++;
 
         // initialization of some page objects
-        annotationsImp.resetAnnotations();
         pageResources = new PageResources();
 
         writer.resetContent();
@@ -1528,35 +1409,6 @@ public class PdfDocument extends Document {
                         }
                         graphics.setLineWidth(1);
                     }
-                    if (chunk.isAttribute(Chunk.ACTION)) {
-                        float subtract = lastBaseFactor;
-                        if (nextChunk != null && nextChunk.isAttribute(Chunk.ACTION))
-                            subtract = 0;
-                        if (nextChunk == null)
-                            subtract += hangingCorrection;
-                        text.addAnnotation(new PdfAnnotation(writer, xMarker, yMarker, xMarker + width - subtract, yMarker + chunk.font().size(), (PdfAction)chunk.getAttribute(Chunk.ACTION)));
-                    }
-                    if (chunk.isAttribute(Chunk.REMOTEGOTO)) {
-                        float subtract = lastBaseFactor;
-                        if (nextChunk != null && nextChunk.isAttribute(Chunk.REMOTEGOTO))
-                            subtract = 0;
-                        if (nextChunk == null)
-                            subtract += hangingCorrection;
-                        Object[] obj = (Object[]) chunk.getAttribute(Chunk.REMOTEGOTO);
-                        String filename = (String)obj[0];
-                        if (obj[1] instanceof String)
-                            remoteGoto(filename, (String)obj[1], xMarker, yMarker, xMarker + width - subtract, yMarker + chunk.font().size());
-                        else
-                            remoteGoto(filename, (Integer) obj[1], xMarker, yMarker, xMarker + width - subtract, yMarker + chunk.font().size());
-                    }
-                    if (chunk.isAttribute(Chunk.LOCALGOTO)) {
-                        float subtract = lastBaseFactor;
-                        if (nextChunk != null && nextChunk.isAttribute(Chunk.LOCALGOTO))
-                            subtract = 0;
-                        if (nextChunk == null)
-                            subtract += hangingCorrection;
-                        localGoto((String)chunk.getAttribute(Chunk.LOCALGOTO), xMarker, yMarker, xMarker + width - subtract, yMarker + chunk.font().size());
-                    }
                     if (chunk.isAttribute(Chunk.LOCALDESTINATION)) {
                         float subtract = lastBaseFactor;
                         if (nextChunk != null && nextChunk.isAttribute(Chunk.LOCALDESTINATION))
@@ -1575,19 +1427,6 @@ public class PdfDocument extends Document {
                         PdfPageEvent pev = writer.getPageEvent();
                         if (pev != null)
                             pev.onGenericTag(writer, this, rect, (String)chunk.getAttribute(Chunk.GENERICTAG));
-                    }
-                    if (chunk.isAttribute(Chunk.PDFANNOTATION)) {
-                        float subtract = lastBaseFactor;
-                        if (nextChunk != null && nextChunk.isAttribute(Chunk.PDFANNOTATION))
-                            subtract = 0;
-                        if (nextChunk == null)
-                            subtract += hangingCorrection;
-                        float fontSize = chunk.font().size();
-                        float ascender = chunk.font().getFont().getFontDescriptor(BaseFont.ASCENT, fontSize);
-                        float descender = chunk.font().getFont().getFontDescriptor(BaseFont.DESCENT, fontSize);
-                        PdfAnnotation annot = PdfFormField.shallowDuplicate((PdfAnnotation)chunk.getAttribute(Chunk.PDFANNOTATION));
-                        annot.put(PdfName.RECT, new PdfRectangle(xMarker, yMarker + descender, xMarker + width - subtract, yMarker + ascender));
-                        text.addAnnotation(annot);
                     }
                     float[] params = (float[]) chunk.getAttribute(Chunk.SKEW);
                     Float hs = (Float)chunk.getAttribute(Chunk.HSCALE);
@@ -1870,30 +1709,9 @@ public class PdfDocument extends Document {
         // [C5] named objects
         catalog.addNames(localDestinations, getDocumentLevelJS(), documentFileAttachment, writer);
 
-        // [C6] actions
-        if (openActionName != null) {
-            PdfAction action = getLocalGotoAction(openActionName);
-            catalog.setOpenAction(action);
-        }
-        else if (openActionAction != null)
-            catalog.setOpenAction(openActionAction);
-        if (additionalActions != null)   {
-            catalog.setAdditionalActions(additionalActions);
-        }
-
         // [C7] portable collections
         if (collection != null) {
             catalog.put(PdfName.COLLECTION, collection);
-        }
-
-        // [C8] AcroForm
-        if (annotationsImp.hasValidAcroForm()) {
-            try {
-                catalog.put(PdfName.ACROFORM, writer.addToBody(annotationsImp.getAcroForm()).getIndirectReference());
-            }
-            catch (IOException e) {
-                throw new ExceptionConverter(e);
-            }
         }
 
         return catalog;
@@ -1906,15 +1724,6 @@ public class PdfDocument extends Document {
 
     /** This is the current <CODE>PdfOutline</CODE> in the hierarchy of outlines. */
     protected PdfOutline currentOutline;
-
-    /**
-     * Adds a named outline to the document .
-     * @param outline the outline to be added
-     * @param name the name of this local destination
-     */
-    void addOutline(PdfOutline outline, String name) {
-        localDestination(name, outline.getPdfDestination());
-    }
 
     /**
      * Gets the root outline. All the outlines must be created with a parent.
@@ -2025,80 +1834,10 @@ public class PdfDocument extends Document {
 //    [C5] named objects: local destinations, javascript, embedded files
 
     /**
-     * Implements a link to other part of the document. The jump will
-     * be made to a local destination with the same name, that must exist.
-     * @param name the name for this link
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    void localGoto(String name, float llx, float lly, float urx, float ury) {
-        PdfAction action = getLocalGotoAction(name);
-        annotationsImp.addPlainAnnotation(new PdfAnnotation(writer, llx, lly, urx, ury, action));
-    }
-
-    /**
-     * Implements a link to another document.
-     * @param filename the filename for the remote document
-     * @param name the name to jump to
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    void remoteGoto(String filename, String name, float llx, float lly, float urx, float ury) {
-        annotationsImp.addPlainAnnotation(new PdfAnnotation(writer, llx, lly, urx, ury, new PdfAction(filename, name)));
-    }
-
-    /**
-     * Implements a link to another document.
-     * @param filename the filename for the remote document
-     * @param page the page to jump to
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    void remoteGoto(String filename, int page, float llx, float lly, float urx, float ury) {
-        addAnnotation(new PdfAnnotation(writer, llx, lly, urx, ury, new PdfAction(filename, page)));
-    }
-
-    /** Implements an action in an area.
-     * @param action the <CODE>PdfAction</CODE>
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    void setAction(PdfAction action, float llx, float lly, float urx, float ury) {
-        addAnnotation(new PdfAnnotation(writer, llx, lly, urx, ury, action));
-    }
-
-    /**
      * Stores the destinations keyed by name. Value is
      * <CODE>Object[]{PdfAction,PdfIndirectReference,PdfDestintion}</CODE>.
      */
     protected TreeMap<String, Object[]> localDestinations = new TreeMap<>();
-
-    PdfAction getLocalGotoAction(String name) {
-        PdfAction action;
-        Object[] obj = localDestinations.get(name);
-        if (obj == null)
-            obj = new Object[3];
-        if (obj[0] == null) {
-            if (obj[1] == null) {
-                obj[1] = writer.getPdfIndirectReference();
-            }
-            action = new PdfAction((PdfIndirectReference)obj[1]);
-            obj[0] = action;
-            localDestinations.put(name, obj);
-        }
-        else {
-            action = (PdfAction)obj[0];
-        }
-        return action;
-    }
 
     /**
      * The local destination to where a local goto with the same
@@ -2122,60 +1861,13 @@ public class PdfDocument extends Document {
         return true;
     }
 
-    /**
-     * Stores a list of document level JavaScript actions.
-     */
-    int jsCounter;
     protected HashMap<String, PdfIndirectReference> documentLevelJS = new HashMap<>();
-    protected static final DecimalFormat SIXTEEN_DIGITS = new DecimalFormat("0000000000000000");
-    void addJavaScript(PdfAction js) {
-        if (js.get(PdfName.JS) == null)
-            throw new RuntimeException(MessageLocalization.getComposedMessage("only.javascript.actions.are.allowed"));
-        try {
-            documentLevelJS.put(SIXTEEN_DIGITS.format(jsCounter++), writer.addToBody(js).getIndirectReference());
-        }
-        catch (IOException e) {
-            throw new ExceptionConverter(e);
-        }
-    }
-    void addJavaScript(String name, PdfAction js) {
-        if (js.get(PdfName.JS) == null)
-            throw new RuntimeException(MessageLocalization.getComposedMessage("only.javascript.actions.are.allowed"));
-        try {
-            documentLevelJS.put(name, writer.addToBody(js).getIndirectReference());
-        }
-        catch (IOException e) {
-            throw new ExceptionConverter(e);
-        }
-    }
 
     HashMap<String, PdfIndirectReference> getDocumentLevelJS() {
         return documentLevelJS;
     }
 
     protected HashMap<String, PdfIndirectReference> documentFileAttachment = new HashMap<>();
-
-    void addFileAttachment(String description, PdfFileSpecification fs) throws IOException {
-        if (description == null) {
-            PdfString desc = (PdfString)fs.get(PdfName.DESC);
-            if (desc == null) {
-                description = "";
-            }
-            else {
-                description = PdfEncodings.convertToString(desc.getBytes(), null);
-            }
-        }
-        fs.addDescription(description, true);
-        if (description.length() == 0)
-            description = "Unnamed";
-        String fn = PdfEncodings.convertToString(new PdfString(description, PdfObject.TEXT_UNICODE).getBytes(), null);
-        int k = 0;
-        while (documentFileAttachment.containsKey(fn)) {
-            ++k;
-            fn = PdfEncodings.convertToString(new PdfString(description + " " + k, PdfObject.TEXT_UNICODE).getBytes(), null);
-        }
-        documentFileAttachment.put(fn, fs.getReference());
-    }
 
     HashMap<String, PdfIndirectReference> getDocumentFileAttachment() {
         return documentFileAttachment;
@@ -2187,29 +1879,9 @@ public class PdfDocument extends Document {
 
     void setOpenAction(String name) {
         openActionName = name;
-        openActionAction = null;
     }
 
-    protected PdfAction openActionAction;
-    void setOpenAction(PdfAction action) {
-        openActionAction = action;
-        openActionName = null;
-    }
-
-    protected PdfDictionary additionalActions;
-    void addAdditionalAction(PdfName actionType, PdfAction action)  {
-        if (additionalActions == null)  {
-            additionalActions = new PdfDictionary();
-        }
-        if (action == null)
-            additionalActions.remove(actionType);
-        else
-            additionalActions.put(actionType, action);
-        if (additionalActions.size() == 0)
-            additionalActions = null;
-    }
-
-//    [C7] portable collections
+    //    [C7] portable collections
 
     protected PdfCollection collection;
 
@@ -2221,30 +1893,9 @@ public class PdfDocument extends Document {
         this.collection = collection;
     }
 
-//    [C8] AcroForm
 
-    PdfAnnotationsImp annotationsImp;
 
-    /**
-     * Gets the AcroForm object.
-     * @return the PdfAcroform object of the PdfDocument
-     */
-    PdfAcroForm getAcroForm() {
-        return annotationsImp.getAcroForm();
-    }
 
-    void setSigFlags(int f) {
-        annotationsImp.setSigFlags(f);
-    }
-
-    void addCalculationOrder(PdfFormField formField) {
-        annotationsImp.addCalculationOrder(formField);
-    }
-
-    void addAnnotation(PdfAnnotation annot) {
-        pageEmpty = false;
-        annotationsImp.addAnnotation(annot);
-    }
 
 //    [F12] tagged PDF
 
@@ -2352,12 +2003,6 @@ public class PdfDocument extends Document {
     }
 
     protected PdfDictionary pageAA = null;
-    void setPageAction(PdfName actionType, PdfAction action) {
-        if (pageAA == null) {
-            pageAA = new PdfDictionary();
-        }
-        pageAA.put(actionType, action);
-    }
 
 //    [U8] thumbnail images
 

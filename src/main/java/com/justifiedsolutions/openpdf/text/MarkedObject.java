@@ -50,6 +50,7 @@
 package com.justifiedsolutions.openpdf.text;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -87,7 +88,7 @@ public class MarkedObject implements Element {
      *
      * @return  an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
+    public List<Chunk> getChunks() {
         return element.getChunks();
     }
 

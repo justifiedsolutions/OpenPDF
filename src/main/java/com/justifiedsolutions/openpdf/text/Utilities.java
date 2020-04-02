@@ -48,16 +48,11 @@
  */
 package com.justifiedsolutions.openpdf.text;
 
-import com.justifiedsolutions.openpdf.text.pdf.PRTokeniser;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -100,147 +95,6 @@ public class Utilities {
         }
     }
 
-    /**
-     * Checks for a true/false value of a key in a Properties object.
-     * @param attributes
-     * @param key
-     * @return a true/false value of a key in a Properties object
-     */
-    public static boolean checkTrueOrFalse(Properties attributes, String key) {
-        return "true".equalsIgnoreCase(attributes.getProperty(key));
-    }
-
-    /**
-     * Unescapes an URL. All the "%xx" are replaced by the 'xx' hex char value.
-     * @param src the url to unescape
-     * @return the unescaped value
-     */    
-    public static String unEscapeURL(String src) {
-        StringBuilder bf = new StringBuilder();
-        char[] s = src.toCharArray();
-        for (int k = 0; k < s.length; ++k) {
-            char c = s[k];
-            if (c == '%') {
-                if (k + 2 >= s.length) {
-                    bf.append(c);
-                    continue;
-                }
-                int a0 = PRTokeniser.getHex(s[k + 1]);
-                int a1 = PRTokeniser.getHex(s[k + 2]);
-                if (a0 < 0 || a1 < 0) {
-                    bf.append(c);
-                    continue;
-                }
-                bf.append((char)(a0 * 16 + a1));
-                k += 2;
-            }
-            else
-                bf.append(c);
-        }
-        return bf.toString();
-    }
-
-    /**
-     * This method makes a valid URL from a given filename.
-     * <P>
-     * This method makes the conversion of this library from the JAVA 2 platform
-     * to a JDK1.1.x-version easier.
-     * 
-     * @param filename
-     *            a given filename
-     * @return a valid URL
-     * @throws MalformedURLException
-     */
-    public static URL toURL(String filename) throws MalformedURLException {
-        try {
-            return new URL(filename);
-        }
-        catch (Exception e) {
-            return new File(filename).toURI().toURL();
-        }
-    }
-
-    /**
-     * This method is an alternative for the <CODE>InputStream.skip()</CODE>
-     * -method that doesn't seem to work properly for big values of <CODE>size
-     * </CODE>.
-     * 
-     * @param is
-     *            the <CODE>InputStream</CODE>
-     * @param size
-     *            the number of bytes to skip
-     * @throws IOException
-     */
-    static public void skip(InputStream is, int size) throws IOException {
-        long n;
-        while (size > 0) {
-            n = is.skip(size);
-            if (n <= 0)
-                break;
-            size -= n;
-        }
-    }
-    
-    /**
-     * Measurement conversion from millimeters to points.
-     * @param    value    a value in millimeters
-     * @return    a value in points
-     * @since    2.1.2
-     */
-    public static float millimetersToPoints(float value) {
-        return inchesToPoints(millimetersToInches(value));
-    }
-
-    /**
-     * Measurement conversion from millimeters to inches.
-     * @param    value    a value in millimeters
-     * @return    a value in inches
-     * @since    2.1.2
-     */
-    public static float millimetersToInches(float value) {
-        return value / 25.4f;
-    }
-
-    /**
-     * Measurement conversion from points to millimeters.
-     * @param    value    a value in points
-     * @return    a value in millimeters
-     * @since    2.1.2
-     */
-    public static float pointsToMillimeters(float value) {
-        return inchesToMillimeters(pointsToInches(value));
-    }
-
-    /**
-     * Measurement conversion from points to inches.
-     * @param    value    a value in points
-     * @return    a value in inches
-     * @since    2.1.2
-     */
-    public static float pointsToInches(float value) {
-        return value / 72f;
-    }
-
-    /**
-     * Measurement conversion from inches to millimeters.
-     * @param    value    a value in inches
-     * @return    a value in millimeters
-     * @since    2.1.2
-     */
-    public static float inchesToMillimeters(float value) {
-        return value * 25.4f;
-    }
-
-    /**
-     * Measurement conversion from inches to points.
-     * @param    value    a value in inches
-     * @return    a value in points
-     * @since    2.1.2
-     */
-    public static float inchesToPoints(float value) {
-        return value * 72f;
-    }
-    
     /**
      * Check if the value of a character belongs to a certain interval
      * that indicates it's the higher part of a surrogate pair.
@@ -325,19 +179,6 @@ public class Utilities {
      */
     public static int convertToUtf32(String text, int idx) {
          return (((text.charAt(idx) - 0xd800) * 0x400) + (text.charAt(idx + 1) - 0xdc00)) + 0x10000;
-    }
-
-    /**
-     * Converts a UTF32 code point value to a String with the corresponding character(s).
-     * @param codePoint    a Unicode value
-     * @return    the corresponding characters in a String
-     * @since    2.1.2
-     */
-    public static String convertFromUtf32(int codePoint) {
-        if (codePoint < 0x10000)
-            return Character.toString((char)codePoint);
-        codePoint -= 0x10000;
-        return new String(new char[]{(char)((codePoint / 0x400) + 0xd800), (char)((codePoint % 0x400) + 0xdc00)});
     }
 
     /**

@@ -55,14 +55,11 @@ import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.ImgJBIG2;
-import com.justifiedsolutions.openpdf.text.ImgWMF;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.Table;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPageEventForwarder;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfAnnotations;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfDocumentActions;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfEncryptionSettings;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfPageActions;
@@ -108,8 +105,7 @@ public class PdfWriter extends DocWriter implements
     PdfDocumentActions,
     PdfPageActions,
     PdfXConformance,
-    PdfRunDirection,
-    PdfAnnotations {
+    PdfRunDirection {
 
     /**
      * The highest generation number possible.
@@ -1303,15 +1299,6 @@ public class PdfWriter extends DocWriter implements
 
      protected List newBookmarks;
 
-    /**
-     * Sets the bookmarks. The list structure is defined in
-     * {@link SimpleBookmark}.
-     * @param outlines the bookmarks or <CODE>null</CODE> to remove any
-     */
-    public void setOutlines(List outlines) {
-        newBookmarks = outlines;
-    }
-
     protected void writeOutlines(PdfDictionary catalog, boolean namedAsNames) throws IOException {
         if (newBookmarks == null || newBookmarks.isEmpty())
             return;
@@ -1507,101 +1494,8 @@ public class PdfWriter extends DocWriter implements
         dest.addPage(getPageReference(page));
         pdf.localDestination(name, dest);
     }
-    
-     /**
-      * Use this method to add a JavaScript action at the document level.
-      * When the document opens, all this JavaScript runs.
-      * @param js The JavaScript action
-      */
-     public void addJavaScript(PdfAction js) {
-         pdf.addJavaScript(js);
-     }
 
-     /**
-      * Use this method to add a JavaScript action at the document level.
-      * When the document opens, all this JavaScript runs.
-      * @param code the JavaScript code
-      * @param unicode select JavaScript unicode. Note that the internal
-      * Acrobat JavaScript engine does not support unicode,
-      * so this may or may not work for you
-      */
-     public void addJavaScript(String code, boolean unicode) {
-         addJavaScript(PdfAction.javaScript(code, this, unicode));
-     }
-
-     /**
-      * Use this method to adds a JavaScript action at the document level.
-      * When the document opens, all this JavaScript runs.
-      * @param code the JavaScript code
-      */
-     public void addJavaScript(String code) {
-         addJavaScript(code, false);
-     }
-     /**
-      * Use this method to add a JavaScript action at the document level.
-      * When the document opens, all this JavaScript runs.
-      * @param name    The name of the JS Action in the name tree
-      * @param js The JavaScript action
-      */
-     public void addJavaScript(String name, PdfAction js) {
-         pdf.addJavaScript(name, js);
-     }
-
-     /**
-      * Use this method to add a JavaScript action at the document level.
-      * When the document opens, all this JavaScript runs.
-      * @param name    The name of the JS Action in the name tree
-      * @param code the JavaScript code
-      * @param unicode select JavaScript unicode. Note that the internal
-      * Acrobat JavaScript engine does not support unicode,
-      * so this may or may not work for you
-      */
-     public void addJavaScript(String name, String code, boolean unicode) {
-         addJavaScript(name, PdfAction.javaScript(code, this, unicode));
-     }
-
-     /**
-      * Use this method to adds a JavaScript action at the document level.
-      * When the document opens, all this JavaScript runs.
-      * @param name    The name of the JS Action in the name tree
-      * @param code the JavaScript code
-      */
-     public void addJavaScript(String name, String code) {
-         addJavaScript(name, code, false);
-     }
-
-     /**
-      * Use this method to add a file attachment at the document level.
-      * @param description the file description
-      * @param fileStore an array with the file. If it's <CODE>null</CODE>
-      * the file will be read from the disk
-      * @param file the path to the file. It will only be used if
-      * <CODE>fileStore</CODE> is not <CODE>null</CODE>
-      * @param fileDisplay the actual file name stored in the pdf
-      * @throws IOException on error
-      */
-     public void addFileAttachment(String description, byte[] fileStore, String file, String fileDisplay) throws IOException {
-         addFileAttachment(description, PdfFileSpecification.fileEmbedded(this, file, fileDisplay, fileStore));
-     }
-
-     /**
-      * Use this method to add a file attachment at the document level.
-      * @param description the file description
-      * @param fs the file specification
-      */
-     public void addFileAttachment(String description, PdfFileSpecification fs) throws IOException {
-         pdf.addFileAttachment(description, fs);
-     }
-
-     /**
-      * Use this method to add a file attachment at the document level.
-      * @param fs the file specification
-      */
-     public void addFileAttachment(PdfFileSpecification fs) throws IOException {
-         addFileAttachment(null, fs);
-     }
-
-// [C6] Actions (open and additional)
+    // [C6] Actions (open and additional)
 
      /** action value */
      public static final PdfName DOCUMENT_CLOSE = PdfName.WC;
@@ -1617,23 +1511,6 @@ public class PdfWriter extends DocWriter implements
     /** @see PdfDocumentActions#setOpenAction(java.lang.String) */
     public void setOpenAction(String name) {
          pdf.setOpenAction(name);
-     }
-
-    /** @see PdfDocumentActions#setOpenAction(PdfAction) */
-    public void setOpenAction(PdfAction action) {
-         pdf.setOpenAction(action);
-     }
-
-    /** @see PdfDocumentActions#setAdditionalAction(PdfName, PdfAction) */
-    public void setAdditionalAction(PdfName actionType, PdfAction action) throws DocumentException {
-         if (!(actionType.equals(DOCUMENT_CLOSE) ||
-         actionType.equals(WILL_SAVE) ||
-         actionType.equals(DID_SAVE) ||
-         actionType.equals(WILL_PRINT) ||
-         actionType.equals(DID_PRINT))) {
-             throw new DocumentException(MessageLocalization.getComposedMessage("invalid.additional.action.type.1", actionType.toString()));
-         }
-         pdf.addAdditionalAction(actionType, action);
      }
 
 //  [C7] portable collections
@@ -1654,29 +1531,7 @@ public class PdfWriter extends DocWriter implements
     /** signature value */
     public static final int SIGNATURE_APPEND_ONLY = 2;
 
-    /** @see PdfAnnotations#getAcroForm() */
-    public PdfAcroForm getAcroForm() {
-        return pdf.getAcroForm();
-    }
 
-    /** @see PdfAnnotations#addAnnotation(PdfAnnotation) */
-    public void addAnnotation(PdfAnnotation annot) {
-        pdf.addAnnotation(annot);
-    }
-
-    void addAnnotation(PdfAnnotation annot, int page) {
-        addAnnotation(annot);
-    }
-
-    /** @see PdfAnnotations#addCalculationOrder(PdfFormField) */
-    public void addCalculationOrder(PdfFormField annot) {
-        pdf.addCalculationOrder(annot);
-    }
-
-    /** @see PdfAnnotations#setSigFlags(int) */
-    public void setSigFlags(int f) {
-        pdf.setSigFlags(f);
-    }
 
 //  [C9] Metadata
 
@@ -2567,13 +2422,6 @@ public class PdfWriter extends DocWriter implements
     /** action value */
     public static final PdfName PAGE_CLOSE = PdfName.C;
 
-    /** @see PdfPageActions#setPageAction(PdfName, PdfAction) */
-    public void setPageAction(PdfName actionType, PdfAction action) throws DocumentException {
-          if (!actionType.equals(PAGE_OPEN) && !actionType.equals(PAGE_CLOSE))
-              throw new DocumentException(MessageLocalization.getComposedMessage("invalid.page.additional.action.type.1", actionType.toString()));
-          pdf.setPageAction(actionType, action);
-      }
-
     /** @see PdfPageActions#setDuration(int) */
     public void setDuration(int seconds) {
          pdf.setDuration(seconds);
@@ -2881,15 +2729,6 @@ public class PdfWriter extends DocWriter implements
         else {
             if (image.isImgTemplate()) {
                 name = new PdfName("img" + images.size());
-                if(image instanceof ImgWMF){
-                    try {
-                        ImgWMF wmf = (ImgWMF)image;
-                        wmf.readWMF(PdfTemplate.createTemplate(this, 0, 0));
-                    }
-                    catch (Exception e) {
-                        throw new DocumentException(e);
-                    }
-                }
             }
             else {
                 PdfIndirectReference dref = image.getDirectReference();
@@ -2906,14 +2745,6 @@ public class PdfWriter extends DocWriter implements
                     maskRef = getImageReference(mname);
                 }
                 PdfImage i = new PdfImage(image, "img" + images.size(), maskRef);
-                if (image instanceof ImgJBIG2) {
-                    byte[] globals = ((ImgJBIG2) image).getGlobalBytes();
-                    if (globals != null) {
-                        PdfDictionary decodeparms = new PdfDictionary();
-                        decodeparms.put(PdfName.JBIG2GLOBALS, getReferenceJBIG2Globals(globals));
-                        i.put(PdfName.DECODEPARMS, decodeparms);
-                    }
-                }
                 if (image.hasICCProfile()) {
                     PdfICCBased icc = new PdfICCBased(image.getICCProfile(), image.getCompressionLevel());
                     PdfIndirectReference iccRef = add(icc);

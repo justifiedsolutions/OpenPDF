@@ -54,7 +54,6 @@ import java.util.Iterator;
 
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.ListItem;
 
 /**
  * <CODE>PdfLine</CODE> defines an array with <CODE>PdfChunk</CODE>-objects
@@ -320,19 +319,6 @@ public class PdfLine {
             }
         }
         return numberOfSpaces;
-    }
-    
-    /**
-     * Sets the listsymbol of this line.
-     * <P>
-     * This is only necessary for the first line of a <CODE>ListItem</CODE>.
-     *
-     * @param listItem the list symbol
-     */
-    
-    public void setListItem(ListItem listItem) {
-        this.listSymbol = listItem.getListSymbol();
-        this.symbolIndent = listItem.getIndentationLeft();
     }
     
     /**

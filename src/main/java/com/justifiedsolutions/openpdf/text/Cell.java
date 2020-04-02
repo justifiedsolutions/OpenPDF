@@ -59,6 +59,7 @@ import java.util.Iterator;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 import com.justifiedsolutions.openpdf.text.pdf.PdfPCell;
+import java.util.List;
 
 /**
  * A <CODE>Cell</CODE> is a <CODE>Rectangle</CODE> containing other
@@ -253,8 +254,8 @@ public class Cell extends TableRectangle implements TextElementArray, WithHorizo
      *
      * @return    an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
-        ArrayList<Element> tmp = new ArrayList<>();
+    public List<Chunk> getChunks() {
+        List<Chunk> tmp = new ArrayList<>();
         for (Element o : arrayList) {
             tmp.addAll(o.getChunks());
         }
@@ -538,8 +539,6 @@ public class Cell extends TableRectangle implements TextElementArray, WithHorizo
                     case Element.PHRASE:
                     case Element.PARAGRAPH:
                         return ((Phrase) element).isEmpty();
-                    case Element.LIST:
-                        return ((List) element).isEmpty();
                 }
             return false;
             default:
@@ -589,14 +588,6 @@ public class Cell extends TableRectangle implements TextElementArray, WithHorizo
             case Element.ROW:
             case Element.CELL:
                 throw new BadElementException(MessageLocalization.getComposedMessage("you.can.t.add.listitems.rows.or.cells.to.a.cell"));
-            case Element.LIST:
-                List list = (List)element;
-                if (Float.isNaN(leading)) {
-                    setLeading(list.getTotalLeading());
-                }
-                if (list.isEmpty()) return;
-                arrayList.add(element);
-                return;
             case Element.ANCHOR:
             case Element.PARAGRAPH:
             case Element.PHRASE:

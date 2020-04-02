@@ -55,6 +55,7 @@ import java.util.Collection;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
+import java.util.List;
 
 /**
  * A <CODE>Phrase</CODE> is a series of <CODE>Chunk</CODE>s.
@@ -80,7 +81,6 @@ import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
  * @see        Element
  * @see        Chunk
  * @see        Paragraph
- * @see        Anchor
  */
 
 public class Phrase extends ArrayList<Element> implements TextElementArray {
@@ -236,8 +236,8 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
      *
      * @return    an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
-        ArrayList<Element> tmp = new ArrayList<>();
+    public java.util.List<Chunk> getChunks() {
+        List<Chunk> tmp = new ArrayList<>();
         for (Element element : this) {
             tmp.addAll(element.getChunks());
         }
@@ -262,14 +262,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
 
     // overriding some of the ArrayList-methods
 
-    /**
-     * Adds a <CODE>Chunk</CODE>, an <CODE>Anchor</CODE> or another <CODE>Phrase</CODE>
-     * to this <CODE>Phrase</CODE>.
-     *
-     * @param    index    index at which the specified element is to be inserted
-     * @param    element       an object of type <CODE>Chunk</CODE>, <CODE>Anchor</CODE> or <CODE>Phrase</CODE>
-     * @throws    ClassCastException    when you try to add something that isn't a <CODE>Chunk</CODE>, <CODE>Anchor</CODE> or <CODE>Phrase</CODE>
-     */
     public void add(int index, Element element) {
         if (element == null) return;
         try {
@@ -283,12 +275,7 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
                 }
                 super.add(index, chunk);
             }
-            else if (element.type() == Element.PHRASE ||
-            element.type() == Element.ANCHOR ||
-            element.type() == Element.ANNOTATION ||
-            element.type() == Element.TABLE || // line added by David Freels
-            element.type() == Element.YMARK ||
-            element.type() == Element.MARKED) {
+            else if (element.type() == Element.PHRASE || element.type() == Element.TABLE) {
                 super.add(index, element);
             }
             else {
@@ -314,9 +301,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
     }
     public boolean add(Element element) {
         if (element == null) return false;
-        if (element instanceof RtfElementInterface) {
-            return super.add(element);
-        }
         try {
             switch(element.type()) {
                 case Element.CHUNK:

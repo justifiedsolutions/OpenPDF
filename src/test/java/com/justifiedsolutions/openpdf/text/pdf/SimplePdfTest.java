@@ -3,7 +3,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import com.justifiedsolutions.openpdf.text.Annotation;
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import org.junit.jupiter.api.Test;
@@ -18,9 +17,7 @@ public class SimplePdfTest {
             // new page with a rectangle
             document.open();
             document.newPage();
-            Annotation ann = new Annotation("Title", "Text");
             Rectangle rect = new Rectangle(100, 100);
-            document.add(ann);
             document.add(rect);
         } finally {
             // close document

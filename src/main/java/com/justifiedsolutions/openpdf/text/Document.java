@@ -187,10 +187,7 @@ public class Document implements AutoCloseable, DocListener {
     
     /** This is the textual part of the footer */
     protected HeaderFooter footer = null;
-    
-    /** This is a chapter number in case ChapterAutoNumber is used. */
-    protected int chapternumber = 0;
-    
+
     // constructor
 
     /**
@@ -275,9 +272,6 @@ public class Document implements AutoCloseable, DocListener {
             throw new DocumentException(MessageLocalization.getComposedMessage("the.document.is.not.open.yet.you.can.only.add.meta.information"));
         }
         boolean success = false;
-        if (element instanceof ChapterAutoNumber) {
-            chapternumber = ((ChapterAutoNumber)element).setAutomaticNumber(chapternumber);
-        }
         for (DocListener listener : listeners) {
             success |= listener.add(element);
         }

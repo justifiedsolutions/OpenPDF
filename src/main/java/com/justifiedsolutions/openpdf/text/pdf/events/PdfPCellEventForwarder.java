@@ -77,9 +77,7 @@ public class PdfPCellEventForwarder implements PdfPCellEvent {
         events.add(event);
     }
 
-    /**
-     * @see PdfPCellEvent#cellLayout(PdfPCell, Rectangle, PdfContentByte[])
-     */
+
     public void cellLayout(PdfPCell cell, Rectangle position, PdfContentByte[] canvases) {
         PdfPCellEvent event;
         for (Object event1 : events) {

@@ -339,9 +339,6 @@ public class SimpleTable extends Rectangle implements PdfPTableEvent, TextElemen
         return true;
     }
 
-    /**
-     * @see TextElementArray#add(Element)
-     */
     public boolean add(Element o) {
         try {
             addElement((SimpleCell)o);

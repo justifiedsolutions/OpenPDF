@@ -54,7 +54,6 @@ import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.ListItem;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.SimpleTable;
@@ -64,7 +63,6 @@ import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Formats text in a columnwise form. The text is bound
@@ -348,7 +346,7 @@ public class ColumnText {
         if (bidiLine == null && waitPhrase != null) {
             bidiLine = new BidiLine();
             for (Object o : waitPhrase.getChunks()) {
-                bidiLine.addChunk(new PdfChunk((Chunk) o, null));
+                bidiLine.addChunk(new PdfChunk((Chunk) o));
             }
             waitPhrase = null;
         }
@@ -369,7 +367,7 @@ public class ColumnText {
             return;
         }
         for (Object o : phrase.getChunks()) {
-            bidiLine.addChunk(new PdfChunk((Chunk) o, null));
+            bidiLine.addChunk(new PdfChunk((Chunk) o));
         }
     }
     
@@ -1221,109 +1219,6 @@ public class ColumnText {
                 if ((status & NO_MORE_COLUMN) != 0) {
                     return NO_MORE_COLUMN;
                 }
-            }
-            else if (element.type() == Element.LIST) {
-                com.justifiedsolutions.openpdf.text.List list = (com.justifiedsolutions.openpdf.text.List)element;
-                java.util.List<Element> items = list.getItems();
-                ListItem item = null;
-                float listIndentation = list.getIndentationLeft();
-                int count = 0;
-                Stack<Object[]> stack = new Stack<>();
-                for (int k = 0; k < items.size(); ++k) {
-                    Object obj = items.get(k);
-                    if (obj instanceof ListItem) {
-                        if (count == listIdx) {
-                            item = (ListItem)obj;
-                            break;
-                        }
-                        else ++count;
-                    }
-                    else if (obj instanceof com.justifiedsolutions.openpdf.text.List) {
-                        stack.push(new Object[]{list, k, listIndentation});
-                        list = (com.justifiedsolutions.openpdf.text.List)obj;
-                        items = list.getItems();
-                        listIndentation += list.getIndentationLeft();
-                        k = -1;
-                        continue;
-                    }
-                    if (k == items.size() - 1) {
-                        if (!stack.isEmpty()) {
-                            Object[] objs = stack.pop();
-                            list = (com.justifiedsolutions.openpdf.text.List)objs[0];
-                            items = list.getItems();
-                            k = (Integer) objs[1];
-                            listIndentation = (Float) objs[2];
-                        }
-                    }
-                }
-                int status = 0;
-                for (int keep = 0; keep < 2; ++keep) {
-                    float lastY = yLine;
-                    boolean createHere = false;
-                    if (compositeColumn == null) {
-                        if (item == null) {
-                            listIdx = 0;
-                            compositeElements.removeFirst();
-                            continue main_loop;
-                        }
-                        compositeColumn = new ColumnText(canvas);
-                        compositeColumn.setUseAscender(firstPass && useAscender);
-                        compositeColumn.setAlignment(item.getAlignment());
-                        compositeColumn.setIndent(item.getIndentationLeft() + listIndentation + item.getFirstLineIndent());
-                        compositeColumn.setExtraParagraphSpace(item.getExtraParagraphSpace());
-                        compositeColumn.setFollowingIndent(compositeColumn.getIndent());
-                        compositeColumn.setRightIndent(item.getIndentationRight() + list.getIndentationRight());
-                        compositeColumn.setLeading(item.getLeading(), item.getMultipliedLeading());
-                        compositeColumn.setRunDirection(runDirection);
-                        compositeColumn.setArabicOptions(arabicOptions);
-                        compositeColumn.setSpaceCharRatio(spaceCharRatio);
-                        compositeColumn.addText(item);
-                        if (!firstPass) {
-                            yLine -= item.getSpacingBefore();
-                        }
-                        createHere = true;
-                    }
-                    compositeColumn.leftX = leftX;
-                    compositeColumn.rightX = rightX;
-                    compositeColumn.yLine = yLine;
-                    compositeColumn.rectangularWidth = rectangularWidth;
-                    compositeColumn.rectangularMode = rectangularMode;
-                    compositeColumn.minY = minY;
-                    compositeColumn.maxY = maxY;
-                    boolean keepCandidate = (item != null && item.getKeepTogether() && createHere && !firstPass);
-                    status = compositeColumn.go(simulate || (keepCandidate && keep == 0));
-                    updateFilledWidth(compositeColumn.filledWidth);
-                    if ((status & NO_MORE_TEXT) == 0 && keepCandidate) {
-                        compositeColumn = null;
-                        yLine = lastY;
-                        return NO_MORE_COLUMN;
-                    }
-                    if (simulate || !keepCandidate)
-                        break;
-                    if (keep == 0) {
-                        compositeColumn = null;
-                        yLine = lastY;
-                    }
-                }
-                firstPass = false;
-                yLine = compositeColumn.yLine;
-                linesWritten += compositeColumn.linesWritten;
-                descender = compositeColumn.descender;
-                if (!Float.isNaN(compositeColumn.firstLineY) && !compositeColumn.firstLineYDone) {
-                    if (!simulate && item != null) {
-                        showTextAligned(canvas, Element.ALIGN_LEFT, new Phrase(item.getListSymbol()), compositeColumn.leftX + listIndentation, compositeColumn.firstLineY, 0);
-                    }
-                    compositeColumn.firstLineYDone = true;
-                }
-                if ((status & NO_MORE_TEXT) != 0) {
-                    compositeColumn = null;
-                    ++listIdx;
-                    if (item != null) {
-                        yLine -= item.getSpacingAfter();
-                    }
-                }
-                if ((status & NO_MORE_COLUMN) != 0)
-                    return NO_MORE_COLUMN;
             }
             else if (element.type() == Element.PTABLE) {
                 // don't write anything in the current column if there's no more space available

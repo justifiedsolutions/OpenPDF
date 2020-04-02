@@ -71,13 +71,10 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 import java.util.zip.InflaterInputStream;
 
@@ -109,8 +106,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   protected PdfDictionary trailer;
   protected PdfDictionary catalog;
   protected PageRefs pageRefs;
-  protected PRAcroForm acroForm = null;
-  protected boolean acroFormParsed = false;
   protected boolean encrypted = false;
   protected boolean rebuilt = false;
   protected int freeXref;
@@ -135,7 +130,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   protected List<PdfObject> strings = new ArrayList<>();
   protected boolean sharedStreams = true;
   protected boolean consolidateNamedDestinations = false;
-  protected boolean remoteToLocalNamedDestinations = false;
   protected int rValue;
   protected int pValue;
   private int objNum;
@@ -391,27 +385,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   }
 
   /**
-   * Returns the document's acroform, if it has one.
-   * 
-   * @return the document's acroform
-   */
-  public PRAcroForm getAcroForm() {
-    if (!acroFormParsed) {
-      acroFormParsed = true;
-      PdfObject form = catalog.get(PdfName.ACROFORM);
-      if (form != null) {
-        try {
-          acroForm = new PRAcroForm(this);
-          acroForm.readAcroForm((PdfDictionary) getPdfObject(form));
-        } catch (Exception e) {
-          acroForm = null;
-        }
-      }
-    }
-    return acroForm;
-  }
-
-  /**
    * Gets the page rotation. This value can be 0, 90, 180 or 270.
    * 
    * @param index
@@ -431,18 +404,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       n %= 360;
       return n < 0 ? n + 360 : n;
     }
-  }
-
-  /**
-   * Gets the page size, taking rotation into account. This is a
-   * <CODE>Rectangle</CODE> with the value of the /MediaBox and the /Rotate key.
-   * 
-   * @param index
-   *          the page number. The first page is 1
-   * @return a <CODE>Rectangle</CODE>
-   */
-  public Rectangle getPageSizeWithRotation(int index) {
-    return getPageSizeWithRotation(pageRefs.getPageNRelease(index));
   }
 
   /**
@@ -484,25 +445,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   public Rectangle getPageSize(PdfDictionary page) {
     PdfArray mediaBox = page.getAsArray(PdfName.MEDIABOX);
     return getNormalizedRectangle(mediaBox);
-  }
-
-  /**
-   * Gets the crop box without taking rotation into account. This is the value
-   * of the /CropBox key. The crop box is the part of the document to be
-   * displayed or printed. It usually is the same as the media box but may be
-   * smaller. If the page doesn't have a crop box the page size will be
-   * returned.
-   * 
-   * @param index
-   *          the page number. The first page is 1
-   * @return the crop box
-   */
-  public Rectangle getCropBox(int index) {
-    PdfDictionary page = pageRefs.getPageNRelease(index);
-    PdfArray cropBox = (PdfArray) getPdfObjectRelease(page.get(PdfName.CROPBOX));
-    if (cropBox == null)
-      return getPageSize(page);
-    return getNormalizedRectangle(cropBox);
   }
 
   /**
@@ -1019,13 +961,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   /**
      *
      */
-  public void resetLastXrefPartial() {
-    lastXrefPartial = -1;
-  }
-
-  /**
-     *
-     */
   public void releaseLastXrefPartial() {
     if (partial && lastXrefPartial != -1) {
       xrefObj.set(lastXrefPartial, null);
@@ -1050,20 +985,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       reader.xrefObj.set(reader.lastXrefPartial, null);
     }
     reader.lastXrefPartial = -1;
-  }
-
-  private void setXrefPartialObject(int idx, PdfObject obj) {
-    if (!partial || idx < 0)
-      return;
-    xrefObj.set(idx, obj);
-  }
-
-  /**
-   * @return an indirect reference
-   */
-  public PRIndirectReference addPdfObject(PdfObject obj) {
-    xrefObj.add(obj);
-    return new PRIndirectReference(this, xrefObj.size() - 1);
   }
 
   protected void readPages() throws IOException {
@@ -1165,18 +1086,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     } finally {
       tokens = saveTokens;
     }
-  }
-
-  /**
-   * @return the percentage of the cross reference table that has been read
-   */
-  public double dumpPerc() {
-    int total = 0;
-    for (PdfObject aXrefObj : xrefObj) {
-      if (aXrefObj != null)
-        ++total;
-    }
-    return (total * 100.0 / xrefObj.size());
   }
 
   protected void readDocObj() throws IOException {
@@ -2060,12 +1969,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   }
 
   /**
-   */
-  public void releasePage(int pageNum) {
-    pageRefs.releasePage(pageNum);
-  }
-
-  /**
      *
      */
   public void resetReleasePage() {
@@ -2122,28 +2025,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       return new byte[0];
   }
 
-  /**
-   * Gets the contents of the page.
-   * 
-   * @param pageNum
-   *          the page number. 1 is the first
-   * @throws IOException
-   *           on error
-   * @return the content
-   */
-  public byte[] getPageContent(int pageNum) throws IOException {
-    RandomAccessFileOrArray rf = getSafeFile();
-    try {
-      rf.reOpen();
-      return getPageContent(pageNum, rf);
-    } finally {
-      try {
-        rf.close();
-      } catch (Exception ignored) {
-      }
-    }
-  }
-
   protected void killXref(PdfObject obj) {
     if (obj == null)
       return;
@@ -2173,42 +2054,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       break;
     }
     }
-  }
-
-  /**
-   * Sets the contents of the page.
-   * 
-   * @param content
-   *          the new page content
-   * @param pageNum
-   *          the page number. 1 is the first
-   */
-  public void setPageContent(int pageNum, byte[] content) {
-    setPageContent(pageNum, content, PdfStream.DEFAULT_COMPRESSION);
-  }
-
-  /**
-   * Sets the contents of the page.
-   * 
-   * @param content
-   *          the new page content
-   * @param pageNum
-   *          the page number. 1 is the first
-   * @since 2.1.3 (the method already existed without param compressionLevel)
-   */
-  public void setPageContent(int pageNum, byte[] content, int compressionLevel) {
-    PdfDictionary page = getPageN(pageNum);
-    if (page == null)
-      return;
-    PdfObject contents = page.get(PdfName.CONTENTS);
-    freeXref = -1;
-    killXref(contents);
-    if (freeXref == -1) {
-      xrefObj.add(null);
-      freeXref = xrefObj.size() - 1;
-    }
-    page.put(PdfName.CONTENTS, new PRIndirectReference(this, freeXref));
-    xrefObj.set(freeXref, new PRStream(this, content, compressionLevel));
   }
 
   /**
@@ -2484,15 +2329,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   }
 
   /**
-   * Gets the byte address of the %%EOF marker.
-   * 
-   * @return the byte address of the %%EOF marker
-   */
-  public int getEofPos() {
-    return eofPos;
-  }
-
-  /**
    * Gets the PDF version. Only the last version char is returned. For example
    * version 1.4 is returned as '4'.
    * 
@@ -2503,15 +2339,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   }
 
   /**
-   * Returns <CODE>true</CODE> if the PDF is encrypted.
-   * 
-   * @return <CODE>true</CODE> if the PDF is encrypted
-   */
-  public boolean isEncrypted() {
-    return encrypted;
-  }
-
-  /**
    * Gets the encryption permissions. It can be used directly in
    * <CODE>PdfWriter.setEncryption()</CODE>.
    * 
@@ -2519,15 +2346,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
    */
   public int getPermissions() {
     return pValue;
-  }
-
-  /**
-   * Returns <CODE>true</CODE> if the PDF has a 128 bit key encryption.
-   * 
-   * @return <CODE>true</CODE> if the PDF has a 128 bit key encryption
-   */
-  public boolean is128Key() {
-    return rValue == 3;
   }
 
   /**
@@ -2550,266 +2368,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
         return false;
     }
     return true;
-  }
-
-  private static boolean existsName(PdfDictionary dic, PdfName key, PdfName value) {
-    PdfObject type = getPdfObjectRelease(dic.get(key));
-    if (type == null || !type.isName())
-      return false;
-    PdfName name = (PdfName) type;
-    return name.equals(value);
-  }
-
-  static String getFontNameFromDescriptor(PdfDictionary dic) {
-    return getFontName(dic, PdfName.FONTNAME);
-  }
-
-  private static String getFontName(PdfDictionary dic) {
-    return getFontName(dic, PdfName.BASEFONT);
-  }
-
-  private static String getFontName(PdfDictionary dic, PdfName property) {
-    if (dic == null)
-      return null;
-    PdfObject type = getPdfObjectRelease(dic.get(property));
-    if (type == null || !type.isName())
-      return null;
-    return PdfName.decodeName(type.toString());
-  }
-
-  static boolean isFontSubset(String fontName) {
-    return fontName != null && fontName.length() >= 8
-        && fontName.charAt(6) == '+';
-  }
-
-  private static String getSubsetPrefix(PdfDictionary dic) {
-    if (dic == null)
-      return null;
-    String s = getFontName(dic);
-    if (s == null)
-      return null;
-    if (s.length() < 8 || s.charAt(6) != '+')
-      return null;
-    for (int k = 0; k < 6; ++k) {
-      char c = s.charAt(k);
-      if (c < 'A' || c > 'Z')
-        return null;
-    }
-    return s;
-  }
-
-  /**
-   * Finds all the font subsets and changes the prefixes to some random values.
-   * 
-   * @return the number of font subsets altered
-   */
-  public int shuffleSubsetNames() {
-    int total = 0;
-    for (int k = 1; k < xrefObj.size(); ++k) {
-      PdfObject obj = getPdfObjectRelease(k);
-      if (obj == null || !obj.isDictionary())
-        continue;
-      PdfDictionary dic = (PdfDictionary) obj;
-      if (!existsName(dic, PdfName.TYPE, PdfName.FONT))
-        continue;
-      if (existsName(dic, PdfName.SUBTYPE, PdfName.TYPE1)
-          || existsName(dic, PdfName.SUBTYPE, PdfName.MMTYPE1)
-          || existsName(dic, PdfName.SUBTYPE, PdfName.TRUETYPE)) {
-        String s = getSubsetPrefix(dic);
-        if (s == null)
-          continue;
-        String ns = BaseFont.createSubsetPrefix() + s.substring(7);
-        PdfName newName = new PdfName(ns);
-        dic.put(PdfName.BASEFONT, newName);
-        setXrefPartialObject(k, dic);
-        ++total;
-        PdfDictionary fd = dic.getAsDict(PdfName.FONTDESCRIPTOR);
-        if (fd == null)
-          continue;
-        fd.put(PdfName.FONTNAME, newName);
-      } else if (existsName(dic, PdfName.SUBTYPE, PdfName.TYPE0)) {
-        String s = getSubsetPrefix(dic);
-        PdfArray arr = dic.getAsArray(PdfName.DESCENDANTFONTS);
-        if (arr == null)
-          continue;
-        if (arr.isEmpty())
-          continue;
-        PdfDictionary desc = arr.getAsDict(0);
-        String sde = getSubsetPrefix(desc);
-        if (sde == null)
-          continue;
-        String ns = BaseFont.createSubsetPrefix();
-        if (s != null)
-          dic.put(PdfName.BASEFONT, new PdfName(ns + s.substring(7)));
-        setXrefPartialObject(k, dic);
-        PdfName newName = new PdfName(ns + sde.substring(7));
-        desc.put(PdfName.BASEFONT, newName);
-        ++total;
-        PdfDictionary fd = desc.getAsDict(PdfName.FONTDESCRIPTOR);
-        if (fd == null)
-          continue;
-        fd.put(PdfName.FONTNAME, newName);
-      }
-    }
-    return total;
-  }
-
-  /**
-   * Finds all the fonts not subset but embedded and marks them as subset.
-   * 
-   * @return the number of fonts altered
-   */
-  public int createFakeFontSubsets() {
-    int total = 0;
-    for (int k = 1; k < xrefObj.size(); ++k) {
-      PdfObject obj = getPdfObjectRelease(k);
-      if (obj == null || !obj.isDictionary())
-        continue;
-      PdfDictionary dic = (PdfDictionary) obj;
-      if (!existsName(dic, PdfName.TYPE, PdfName.FONT))
-        continue;
-      if (existsName(dic, PdfName.SUBTYPE, PdfName.TYPE1)
-          || existsName(dic, PdfName.SUBTYPE, PdfName.MMTYPE1)
-          || existsName(dic, PdfName.SUBTYPE, PdfName.TRUETYPE)) {
-        String s = getSubsetPrefix(dic);
-        if (s != null)
-          continue;
-        s = getFontName(dic);
-        if (s == null)
-          continue;
-        String ns = BaseFont.createSubsetPrefix() + s;
-        PdfDictionary fd = (PdfDictionary) getPdfObjectRelease(dic
-            .get(PdfName.FONTDESCRIPTOR));
-        if (fd == null)
-          continue;
-        if (fd.get(PdfName.FONTFILE) == null
-            && fd.get(PdfName.FONTFILE2) == null
-            && fd.get(PdfName.FONTFILE3) == null)
-          continue;
-        fd = dic.getAsDict(PdfName.FONTDESCRIPTOR);
-        PdfName newName = new PdfName(ns);
-        dic.put(PdfName.BASEFONT, newName);
-        fd.put(PdfName.FONTNAME, newName);
-        setXrefPartialObject(k, dic);
-        ++total;
-      }
-    }
-    return total;
-  }
-
-  private static PdfArray getNameArray(PdfObject obj) {
-    if (obj == null)
-      return null;
-    obj = getPdfObjectRelease(obj);
-    if (obj == null)
-      return null;
-    if (obj.isArray())
-      return (PdfArray) obj;
-    else if (obj.isDictionary()) {
-      PdfObject arr2 = getPdfObjectRelease(((PdfDictionary) obj).get(PdfName.D));
-      if (arr2 != null && arr2.isArray())
-        return (PdfArray) arr2;
-    }
-    return null;
-  }
-
-  /**
-   * Gets all the named destinations as an <CODE>HashMap</CODE>. The key is the
-   * name and the value is the destinations array.
-   * 
-   * @return gets all the named destinations
-   */
-  public HashMap<Object, PdfObject> getNamedDestination() {
-    return getNamedDestination(false);
-  }
-
-  /**
-   * Gets all the named destinations as an <CODE>HashMap</CODE>. The key is the
-   * name and the value is the destinations array.
-   * 
-   * @param keepNames
-   *          true if you want the keys to be real PdfNames instead of Strings
-   * @return gets all the named destinations
-   * @since 2.1.6
-   */
-  public HashMap<Object, PdfObject> getNamedDestination(boolean keepNames) {
-    HashMap<Object, PdfObject> names = getNamedDestinationFromNames(keepNames);
-    names.putAll(getNamedDestinationFromStrings());
-    return names;
-  }
-
-  /**
-   * Gets the named destinations from the /Dests key in the catalog as an
-   * <CODE>HashMap</CODE>. The key is the name and the value is the destinations
-   * array.
-   * 
-   * @return gets the named destinations
-   */
-  public HashMap getNamedDestinationFromNames() {
-    return getNamedDestinationFromNames(false);
-  }
-
-  /**
-   * Gets the named destinations from the /Dests key in the catalog as an
-   * <CODE>HashMap</CODE>. The key is the name and the value is the destinations
-   * array.
-   * 
-   * @param keepNames
-   *          true if you want the keys to be real PdfNames instead of Strings
-   * @return gets the named destinations
-   * @since 2.1.6
-   */
-  public HashMap<Object, PdfObject> getNamedDestinationFromNames(boolean keepNames) {
-    HashMap<Object, PdfObject> names = new HashMap<>();
-    if (catalog.get(PdfName.DESTS) != null) {
-      PdfDictionary dic = (PdfDictionary) getPdfObjectRelease(catalog.get(PdfName.DESTS));
-      if (dic == null)
-        return names;
-      Set keys = dic.getKeys();
-        for (Object key1 : keys) {
-            PdfName key = (PdfName) key1;
-            PdfArray arr = getNameArray(dic.get(key));
-            if (arr == null)
-                continue;
-            if (keepNames) {
-                names.put(key, arr);
-            } else {
-                String name = PdfName.decodeName(key.toString());
-                names.put(name, arr);
-            }
-        }
-    }
-    return names;
-  }
-
-  /**
-   * Gets the named destinations from the /Names key in the catalog as an
-   * <CODE>HashMap</CODE>. The key is the name and the value is the destinations
-   * array.
-   * 
-   * @return gets the named destinations
-   */
-  public HashMap getNamedDestinationFromStrings() {
-    if (catalog.get(PdfName.NAMES) != null) {
-      PdfDictionary dic = (PdfDictionary) getPdfObjectRelease(catalog
-          .get(PdfName.NAMES));
-      if (dic != null) {
-        dic = (PdfDictionary) getPdfObjectRelease(dic.get(PdfName.DESTS));
-        if (dic != null) {
-          HashMap<String, PdfObject> names = PdfNameTree.readTree(dic);
-          for (Iterator<Map.Entry<String, PdfObject>> it = names.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<String, PdfObject> entry = it.next();
-            PdfArray arr = getNameArray(entry.getValue());
-            if (arr != null)
-              entry.setValue(arr);
-            else
-              it.remove();
-          }
-          return names;
-        }
-      }
-    }
-    return new HashMap<>();
   }
 
   /**
@@ -2839,219 +2397,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     }
     catalog.remove(PdfName.ACROFORM);
     pageRefs.resetReleasePage();
-  }
-
-  /**
-   * Removes all the annotations and fields from the document.
-   */
-  public void removeAnnotations() {
-    pageRefs.resetReleasePage();
-    for (int k = 1; k <= pageRefs.size(); ++k) {
-      PdfDictionary page = pageRefs.getPageN(k);
-      if (page.get(PdfName.ANNOTS) == null)
-        pageRefs.releasePage(k);
-      else
-        page.remove(PdfName.ANNOTS);
-    }
-    catalog.remove(PdfName.ACROFORM);
-    pageRefs.resetReleasePage();
-  }
-
-  public ArrayList<PdfAnnotation.PdfImportedLink> getLinks(int page) {
-    pageRefs.resetReleasePage();
-    ArrayList<PdfAnnotation.PdfImportedLink> result = new ArrayList<>();
-    PdfDictionary pageDic = pageRefs.getPageN(page);
-    if (pageDic.get(PdfName.ANNOTS) != null) {
-      PdfArray annots = pageDic.getAsArray(PdfName.ANNOTS);
-      for (int j = 0; j < annots.size(); ++j) {
-        PdfDictionary annot = (PdfDictionary) getPdfObjectRelease(annots
-            .getPdfObject(j));
-
-        if (PdfName.LINK.equals(annot.get(PdfName.SUBTYPE))) {
-          result.add(new PdfAnnotation.PdfImportedLink(annot));
-        }
-      }
-    }
-    pageRefs.releasePage(page);
-    pageRefs.resetReleasePage();
-    return result;
-  }
-
-  private void iterateBookmarks(PdfObject outlineRef, Map<Object, PdfObject> names) {
-    while (outlineRef != null) {
-      replaceNamedDestination(outlineRef, names);
-      PdfDictionary outline = (PdfDictionary) getPdfObjectRelease(outlineRef);
-      PdfObject first = outline.get(PdfName.FIRST);
-      if (first != null) {
-        iterateBookmarks(first, names);
-      }
-      outlineRef = outline.get(PdfName.NEXT);
-    }
-  }
-
-  /**
-   * Replaces remote named links with local destinations that have the same
-   * name.
-   * 
-   * @since 5.0
-   */
-  public void makeRemoteNamedDestinationsLocal() {
-    if (remoteToLocalNamedDestinations)
-      return;
-    remoteToLocalNamedDestinations = true;
-    Map<Object, PdfObject> names = getNamedDestination(true);
-    if (names.isEmpty())
-      return;
-    for (int k = 1; k <= pageRefs.size(); ++k) {
-      PdfDictionary page = pageRefs.getPageN(k);
-      PdfObject annotsRef;
-      PdfArray annots = (PdfArray) getPdfObject(annotsRef = page
-          .get(PdfName.ANNOTS));
-      int annotIdx = lastXrefPartial;
-      releaseLastXrefPartial();
-      if (annots == null) {
-        pageRefs.releasePage(k);
-        continue;
-      }
-      boolean commitAnnots = false;
-      for (int an = 0; an < annots.size(); ++an) {
-        PdfObject objRef = annots.getPdfObject(an);
-        if (convertNamedDestination(objRef, names) && !objRef.isIndirect())
-          commitAnnots = true;
-      }
-      if (commitAnnots)
-        setXrefPartialObject(annotIdx, annots);
-      if (!commitAnnots || annotsRef.isIndirect())
-        pageRefs.releasePage(k);
-    }
-  }
-
-  /**
-   * Converts a remote named destination GoToR with a local named destination if
-   * there's a corresponding name.
-   * 
-   * @param obj
-   *          an annotation that needs to be screened for links to external
-   *          named destinations.
-   * @param names
-   *          a map with names of local named destinations
-   * @since iText 5.0
-   */
-  private boolean convertNamedDestination(PdfObject obj, Map<Object, PdfObject> names) {
-    obj = getPdfObject(obj);
-    int objIdx = lastXrefPartial;
-    releaseLastXrefPartial();
-    if (obj != null && obj.isDictionary()) {
-      PdfObject ob2 = getPdfObject(((PdfDictionary) obj).get(PdfName.A));
-      if (ob2 != null) {
-        int obj2Idx = lastXrefPartial;
-        releaseLastXrefPartial();
-        PdfDictionary dic = (PdfDictionary) ob2;
-        PdfName type = (PdfName) getPdfObjectRelease(dic.get(PdfName.S));
-        if (PdfName.GOTOR.equals(type)) {
-          PdfObject ob3 = getPdfObjectRelease(dic.get(PdfName.D));
-          Object name = null;
-          if (ob3 != null) {
-            if (ob3.isName())
-              name = ob3;
-            else if (ob3.isString())
-              name = ob3.toString();
-            PdfArray dest = (PdfArray) names.get(name);
-            if (dest != null) {
-              dic.remove(PdfName.F);
-              dic.remove(PdfName.NEWWINDOW);
-              dic.put(PdfName.S, PdfName.GOTO);
-              setXrefPartialObject(obj2Idx, ob2);
-              setXrefPartialObject(objIdx, obj);
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  /** Replaces all the local named links with the actual destinations. */
-  public void consolidateNamedDestinations() {
-    if (consolidateNamedDestinations)
-      return;
-    consolidateNamedDestinations = true;
-    Map<Object, PdfObject> names = getNamedDestination(true);
-    if (names.isEmpty())
-      return;
-    for (int k = 1; k <= pageRefs.size(); ++k) {
-      PdfDictionary page = pageRefs.getPageN(k);
-      PdfObject annotsRef;
-      PdfArray annots = (PdfArray) getPdfObject(annotsRef = page
-          .get(PdfName.ANNOTS));
-      int annotIdx = lastXrefPartial;
-      releaseLastXrefPartial();
-      if (annots == null) {
-        pageRefs.releasePage(k);
-        continue;
-      }
-      boolean commitAnnots = false;
-      for (int an = 0; an < annots.size(); ++an) {
-        PdfObject objRef = annots.getPdfObject(an);
-        if (replaceNamedDestination(objRef, names) && !objRef.isIndirect())
-          commitAnnots = true;
-      }
-      if (commitAnnots)
-        setXrefPartialObject(annotIdx, annots);
-      if (!commitAnnots || annotsRef.isIndirect())
-        pageRefs.releasePage(k);
-    }
-    PdfDictionary outlines = (PdfDictionary) getPdfObjectRelease(catalog
-        .get(PdfName.OUTLINES));
-    if (outlines == null)
-      return;
-    iterateBookmarks(outlines.get(PdfName.FIRST), names);
-  }
-
-  private boolean replaceNamedDestination(PdfObject obj, Map<Object, PdfObject> names) {
-    obj = getPdfObject(obj);
-    int objIdx = lastXrefPartial;
-    releaseLastXrefPartial();
-    if (obj != null && obj.isDictionary()) {
-      PdfObject ob2 = getPdfObjectRelease(((PdfDictionary) obj)
-          .get(PdfName.DEST));
-      Object name = null;
-      if (ob2 != null) {
-        if (ob2.isName())
-          name = ob2;
-        else if (ob2.isString())
-          name = ob2.toString();
-        PdfArray dest = (PdfArray) names.get(name);
-        if (dest != null) {
-          ((PdfDictionary) obj).put(PdfName.DEST, dest);
-          setXrefPartialObject(objIdx, obj);
-          return true;
-        }
-      } else if ((ob2 = getPdfObject(((PdfDictionary) obj).get(PdfName.A))) != null) {
-        int obj2Idx = lastXrefPartial;
-        releaseLastXrefPartial();
-        PdfDictionary dic = (PdfDictionary) ob2;
-        PdfName type = (PdfName) getPdfObjectRelease(dic.get(PdfName.S));
-        if (PdfName.GOTO.equals(type)) {
-          PdfObject ob3 = getPdfObjectRelease(dic.get(PdfName.D));
-          if (ob3 != null) {
-            if (ob3.isName())
-              name = ob3;
-            else if (ob3.isString())
-              name = ob3.toString();
-          }
-          PdfArray dest = (PdfArray) names.get(name);
-          if (dest != null) {
-            dic.put(PdfName.D, dest);
-            setXrefPartialObject(obj2Idx, ob2);
-            setXrefPartialObject(objIdx, obj);
-            return true;
-          }
-        }
-      }
-    }
-    return false;
   }
 
   protected static PdfDictionary duplicatePdfDictionary(PdfDictionary original,
@@ -3228,108 +2573,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   }
 
   /**
-   * Gets a read-only version of <CODE>AcroFields</CODE>.
-   * 
-   * @return a read-only version of <CODE>AcroFields</CODE>
-   */
-  public AcroFields getAcroFields() {
-    return new AcroFields(this, null);
-  }
-
-  /**
-   * Gets the global document JavaScript.
-   * 
-   * @param file
-   *          the document file
-   * @throws IOException
-   *           on error
-   * @return the global document JavaScript
-   */
-  public String getJavaScript(RandomAccessFileOrArray file) throws IOException {
-    PdfDictionary names = (PdfDictionary) getPdfObjectRelease(catalog
-        .get(PdfName.NAMES));
-    if (names == null)
-      return null;
-    PdfDictionary js = (PdfDictionary) getPdfObjectRelease(names
-        .get(PdfName.JAVASCRIPT));
-    if (js == null)
-      return null;
-    Map<String, PdfObject> jscript = PdfNameTree.readTree(js);
-    String[] sortedNames = new String[jscript.size()];
-    sortedNames = jscript.keySet().toArray(sortedNames);
-    Arrays.sort(sortedNames);
-    StringBuilder buf = new StringBuilder();
-    for (String sortedName : sortedNames) {
-      PdfDictionary j = (PdfDictionary) getPdfObjectRelease(jscript.get(sortedName));
-      if (j == null)
-        continue;
-      PdfObject obj = getPdfObjectRelease(j.get(PdfName.JS));
-      if (obj != null) {
-        if (obj.isString())
-          buf.append(((PdfString) obj).toUnicodeString()).append('\n');
-        else if (obj.isStream()) {
-          byte[] bytes = getStreamBytes((PRStream) obj, file);
-          if (bytes.length >= 2 && bytes[0] == (byte) 254
-                  && bytes[1] == (byte) 255)
-            buf.append(PdfEncodings.convertToString(bytes,
-                    PdfObject.TEXT_UNICODE));
-          else
-            buf.append(PdfEncodings.convertToString(bytes,
-                    PdfObject.TEXT_PDFDOCENCODING));
-          buf.append('\n');
-        }
-      }
-    }
-    return buf.toString();
-  }
-
-  /**
-   * Gets the global document JavaScript.
-   * 
-   * @throws IOException
-   *           on error
-   * @return the global document JavaScript
-   */
-  public String getJavaScript() throws IOException {
-    RandomAccessFileOrArray rf = getSafeFile();
-    try {
-      rf.reOpen();
-      return getJavaScript(rf);
-    } finally {
-      try {
-        rf.close();
-      } catch (Exception ignored) {
-      }
-    }
-  }
-
-  /**
-   * Selects the pages to keep in the document. The pages are described as
-   * ranges. The page ordering can be changed but no page repetitions are
-   * allowed. Note that it may be very slow in partial mode.
-   * 
-   * @param ranges
-   *          the comma separated ranges as described in {@link SequenceList}
-   */
-  public void selectPages(String ranges) {
-    selectPages(SequenceList.expand(ranges, getNumberOfPages()));
-  }
-
-  /**
-   * Selects the pages to keep in the document. The pages are described as a
-   * <CODE>List</CODE> of <CODE>Integer</CODE>. The page ordering can be changed
-   * but no page repetitions are allowed. Note that it may be very slow in
-   * partial mode.
-   * 
-   * @param pagesToKeep
-   *          the pages to keep in the document
-   */
-  public void selectPages(List<Integer> pagesToKeep) {
-    pageRefs.selectPages(pagesToKeep);
-    removeUnusedObjects();
-  }
-
-  /**
    * Sets the viewer preferences as the sum of several constants.
    * 
    * @param preferences
@@ -3359,18 +2602,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
 
   void setViewerPreferences(PdfViewerPreferencesImp vp) {
     vp.addToCatalog(catalog);
-  }
-
-  /**
-   * Returns a bitset representing the PageMode and PageLayout viewer
-   * preferences. Doesn't return any information about the ViewerPreferences
-   * dictionary.
-   * 
-   * @return an int that contains the Viewer Preferences.
-   */
-  public int getSimpleViewerPreferences() {
-    return PdfViewerPreferencesImp.getViewerPreferences(catalog)
-        .getPageLayoutAndMode();
   }
 
   /**
@@ -3486,11 +2717,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       reader.rootPages.put(PdfName.COUNT, new PdfNumber(refsn.size()));
     }
 
-    void reReadPages() {
-      refsn = null;
-      readPages();
-    }
-
     /**
      * Gets the dictionary that represents a page.
      * 
@@ -3511,16 +2737,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       PdfDictionary page = getPageN(pageNum);
       releasePage(pageNum);
       return page;
-    }
-
-    /**
-     * @param pageNum
-     * @return an indirect reference
-     */
-    public PRIndirectReference getPageOrigRefRelease(int pageNum) {
-      PRIndirectReference ref = getPageOrigRef(pageNum);
-      releasePage(pageNum);
-      return ref;
     }
 
     /**
@@ -3593,31 +2809,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       if (refsp == null)
         return;
       lastPageRead = -1;
-    }
-
-    void insertPage(int pageNum, PRIndirectReference ref) {
-      --pageNum;
-      if (refsn != null) {
-        if (pageNum >= refsn.size())
-          refsn.add(ref);
-        else
-          refsn.add(pageNum, ref);
-      } else {
-        ++sizep;
-        lastPageRead = -1;
-        if (pageNum >= size()) {
-          refsp.put(size(), ref.getNumber());
-        } else {
-          IntHashtable refs2 = new IntHashtable((refsp.size() + 1) * 2);
-          for (Iterator it = refsp.getEntryIterator(); it.hasNext();) {
-            IntHashtable.Entry entry = (IntHashtable.Entry) it.next();
-            int p = entry.getKey();
-            refs2.put(p >= pageNum ? p + 1 : p, entry.getValue());
-          }
-          refs2.put(pageNum, ref.getNumber());
-          refsp = refs2;
-        }
-      }
     }
 
     /**
@@ -3719,53 +2910,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       }
     }
 
-    private void selectPages(List<Integer> pagesToKeep) {
-      IntHashtable pg = new IntHashtable();
-      List<Integer> finalPages = new ArrayList<>();
-      int psize = size();
-      for (Integer aPagesToKeep : pagesToKeep) {
-        if (aPagesToKeep >= 1 && aPagesToKeep <= psize && pg.put(aPagesToKeep, 1) == 0)
-          finalPages.add(aPagesToKeep);
-      }
-      if (reader.partial) {
-        for (int k = 1; k <= psize; ++k) {
-          getPageOrigRef(k);
-          resetReleasePage();
-        }
-      }
-      PRIndirectReference parent = (PRIndirectReference) reader.catalog
-          .get(PdfName.PAGES);
-      PdfDictionary topPages = (PdfDictionary) PdfReader.getPdfObject(parent);
-      List<PdfObject> newPageRefs = new ArrayList<>(finalPages.size());
-      PdfArray kids = new PdfArray();
-      for (Object finalPage : finalPages) {
-        int p = (Integer) finalPage;
-        PRIndirectReference pref = getPageOrigRef(p);
-        resetReleasePage();
-        kids.add(pref);
-        newPageRefs.add(pref);
-        getPageN(p).put(PdfName.PARENT, parent);
-      }
-      AcroFields af = reader.getAcroFields();
-      boolean removeFields = (af.getAllFields().size() > 0);
-      for (int k = 1; k <= psize; ++k) {
-        if (!pg.containsKey(k)) {
-          if (removeFields)
-            af.removeFieldsFromPage(k);
-          PRIndirectReference pref = getPageOrigRef(k);
-          int nref = pref.getNumber();
-          reader.xrefObj.set(nref, null);
-          if (reader.partial) {
-            reader.xref[nref * 2] = -1;
-            reader.xref[nref * 2 + 1] = 0;
-          }
-        }
-      }
-      topPages.put(PdfName.COUNT, new PdfNumber(finalPages.size()));
-      topPages.put(PdfName.KIDS, kids);
-      refsp = null;
-      refsn = newPageRefs;
-    }
   }
 
   PdfIndirectReference getCryptoRef() {
@@ -3775,81 +2919,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
         cryptoRef.getGeneration());
   }
 
-  /**
-   * Removes any usage rights that this PDF may have. Only Adobe can grant usage
-   * rights and any PDF modification with iText will invalidate them.
-   * Invalidated usage rights may confuse Acrobat and it's advisable to remove
-   * them altogether.
-   */
-  public void removeUsageRights() {
-    PdfDictionary perms = catalog.getAsDict(PdfName.PERMS);
-    if (perms == null)
-      return;
-    perms.remove(PdfName.UR);
-    perms.remove(PdfName.UR3);
-    if (perms.size() == 0)
-      catalog.remove(PdfName.PERMS);
-  }
-
-  /**
-   * Gets the certification level for this document. The return values can be
-   * <code>PdfSignatureAppearance.NOT_CERTIFIED</code>,
-   * <code>PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED</code>,
-   * <code>PdfSignatureAppearance.CERTIFIED_FORM_FILLING</code> and
-   * <code>PdfSignatureAppearance.CERTIFIED_FORM_FILLING_AND_ANNOTATIONS</code>
-   * .
-   * <p>
-   * No signature validation is made, use the methods available for that in
-   * <CODE>AcroFields</CODE>.
-   * </p>
-   * 
-   * @return gets the certification level for this document
-   */
-  public int getCertificationLevel() {
-    PdfDictionary dic = catalog.getAsDict(PdfName.PERMS);
-    if (dic == null)
-      return PdfSignatureAppearance.NOT_CERTIFIED;
-    dic = dic.getAsDict(PdfName.DOCMDP);
-    if (dic == null)
-      return PdfSignatureAppearance.NOT_CERTIFIED;
-    PdfArray arr = dic.getAsArray(PdfName.REFERENCE);
-    if (arr == null || arr.size() == 0)
-      return PdfSignatureAppearance.NOT_CERTIFIED;
-    dic = arr.getAsDict(0);
-    if (dic == null)
-      return PdfSignatureAppearance.NOT_CERTIFIED;
-    dic = dic.getAsDict(PdfName.TRANSFORMPARAMS);
-    if (dic == null)
-      return PdfSignatureAppearance.NOT_CERTIFIED;
-    PdfNumber p = dic.getAsNumber(PdfName.P);
-    if (p == null)
-      return PdfSignatureAppearance.NOT_CERTIFIED;
-    return p.intValue();
-  }
-
-  /**
-   * Checks if an encrypted document may be modified if the owner password was not supplied.
-   * If the document is not encrypted, the setting has no effect.
-   *
-   * @return <CODE>true</CODE> if the document may be modified even if the owner password was not
-   *         supplied <CODE>false</CODE> otherwise
-   */
-  public boolean isModificationlowedWithoutOwnerPassword() {
-    return this.modificationAllowedWithoutOwnerPassword;
-  }
-
-  /**
-   * Sets whether the document (if encrypted) may be modified even if the owner password was not
-   * supplied. If this is set to <CODE>false</CODE> an exception will be thrown when attempting to
-   * access the Document if the owner password was not supplied (for encrypted documents.)
-   *
-   * @param modificationAllowedWithoutOwnerPassword
-   *         the modificationAllowedWithoutOwnerPassword state.
-   */
-  public void setModificationAllowedWithoutOwnerPassword(
-    boolean modificationAllowedWithoutOwnerPassword) {
-    this.modificationAllowedWithoutOwnerPassword = modificationAllowedWithoutOwnerPassword;
-  }
 
   /**
    * Checks if the document was opened with the owner password so that the end
@@ -3864,23 +2933,4 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     return !encrypted || ownerPasswordUsed || modificationAllowedWithoutOwnerPassword;
   }
 
-  public int getCryptoMode() {
-    if (decrypt == null)
-      return -1;
-    else
-      return decrypt.getCryptoMode();
-  }
-
-  public boolean isMetadataEncrypted() {
-    if (decrypt == null)
-      return false;
-    else
-      return decrypt.isMetadataEncrypted();
-  }
-
-  public byte[] computeUserPassword() {
-    if (!encrypted || !ownerPasswordUsed)
-      return null;
-    return decrypt.computeUserPassword(password);
-  }
 }

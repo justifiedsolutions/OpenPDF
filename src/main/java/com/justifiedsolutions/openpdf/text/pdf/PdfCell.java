@@ -52,13 +52,10 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.justifiedsolutions.openpdf.text.Anchor;
 import com.justifiedsolutions.openpdf.text.Cell;
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.List;
-import com.justifiedsolutions.openpdf.text.ListItem;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
@@ -202,7 +199,6 @@ public class PdfCell extends Rectangle {
 
         rowspan = cell.getRowspan();
 
-        java.util.List<PdfAction> allActions;
         int aCounter;
         // we loop over all the elements of the cell
         for (Iterator i = cell.getElements(); i.hasNext();) {
@@ -213,22 +209,8 @@ public class PdfCell extends Rectangle {
                 case Element.JBIG2:
                 case Element.IMGRAW:
                 case Element.IMGTEMPLATE:
-                    addImage((Image) element, left, right, 0.4f * leading, alignment); //
                     break;
-                    // if the element is a list
-                case Element.LIST:
-                    if (line != null && line.size() > 0) {
-                        line.resetAlignment();
-                        addLine(line);
-                    }
-                    // we loop over all the listitems
-                    addList((List)element, left, right, alignment);
-                    line = new PdfLine(left, right, alignment, leading);
-                    break;
-                    // if the element is something else
                 default:
-                    allActions = new ArrayList<>();
-                    processActions(element, null, allActions);
                     aCounter = 0;
 
                     float currentLineLeading = leading;
@@ -254,7 +236,7 @@ public class PdfCell extends Rectangle {
                     else {
                         for (Object chunk1 : chunks) {
                             Chunk c = (Chunk) chunk1;
-                            chunk = new PdfChunk(c, (allActions.get(aCounter++)));
+                            chunk = new PdfChunk(c);
                             while ((overflow = line.add(chunk)) != null) {
                                 addLine(line);
                                 line = new PdfLine(currentLeft, currentRight, alignment, currentLineLeading);
@@ -291,7 +273,7 @@ public class PdfCell extends Rectangle {
                         }
                         lastChunk.setValue(lastChunk.toString() + more);
                     } else {
-                        lastLine.add(new PdfChunk(new Chunk(more), null));
+                        lastLine.add(new PdfChunk(new Chunk(more)));
                     }
                 }
             }
@@ -317,38 +299,6 @@ public class PdfCell extends Rectangle {
         this.rownumber = rownumber;
     }
 
-    private void addList(List list, float left, float right, int alignment) {
-        PdfChunk chunk;
-        PdfChunk overflow;
-        java.util.List<PdfAction> allActions = new ArrayList<>();
-        processActions(list, null, allActions);
-        int aCounter = 0;
-        for (Object o1 : list.getItems()) {
-            Element ele = (Element) o1;
-            switch (ele.type()) {
-                case Element.LISTITEM:
-                    ListItem item = (ListItem) ele;
-                    line = new PdfLine(left + item.getIndentationLeft(), right, alignment, item.getLeading());
-                    line.setListItem(item);
-                    for (Object o : item.getChunks()) {
-                        chunk = new PdfChunk((Chunk) o, allActions.get(aCounter++));
-                        while ((overflow = line.add(chunk)) != null) {
-                            addLine(line);
-                            line = new PdfLine(left + item.getIndentationLeft(), right, alignment, item.getLeading());
-                            chunk = overflow;
-                        }
-                        line.resetAlignment();
-                        addLine(line);
-                        line = new PdfLine(left + item.getIndentationLeft(), right, alignment, leading);
-                    }
-                    break;
-                case Element.LIST:
-                    List sublist = (List) ele;
-                    addList(sublist, left + sublist.getIndentationLeft(), right, alignment);
-                    break;
-            }
-        }
-    }
 
     // overriding of the Rectangle methods
 
@@ -547,7 +497,7 @@ public class PdfCell extends Rectangle {
             left = left + ((right - left - image.getScaledWidth()) / 2f);
         }
         Chunk imageChunk = new Chunk(image, left, 0);
-        imageLine.add(new PdfChunk(imageChunk, null));
+        imageLine.add(new PdfChunk(imageChunk));
         addLine(imageLine);
         return imageLine.height();
     }
@@ -767,48 +717,6 @@ public class PdfCell extends Rectangle {
 
     public float cellpadding() {
         return cellpadding;
-    }
-
-    /**
-     * Processes all actions contained in the cell.
-     * @param element    an element in the cell
-     * @param action    an action that should be coupled to the cell
-     * @param allActions
-     */
-
-    protected void processActions(Element element, PdfAction action, java.util.List<PdfAction> allActions) {
-        if (element.type() == Element.ANCHOR) {
-            String url = ((Anchor) element).getReference();
-            if (url != null) {
-                action = new PdfAction(url);
-            }
-        }
-        Iterator i;
-        switch (element.type()) {
-            case Element.PHRASE:
-            case Element.SECTION:
-            case Element.ANCHOR:
-            case Element.CHAPTER:
-            case Element.LISTITEM:
-            case Element.PARAGRAPH:
-                for (i = ((ArrayList) element).iterator(); i.hasNext();) {
-                    processActions((Element) i.next(), action, allActions);
-                }
-                break;
-            case Element.CHUNK:
-                allActions.add(action);
-                break;
-            case Element.LIST:
-                for (i = ((List) element).getItems().iterator(); i.hasNext();) {
-                    processActions((Element) i.next(), action, allActions);
-                }
-                break;
-            default:
-                int n = element.getChunks().size();
-                while (n-- > 0)
-                    allActions.add(action);
-                break;
-        }
     }
 
     /**

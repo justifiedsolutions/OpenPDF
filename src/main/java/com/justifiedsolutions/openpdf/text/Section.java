@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.util.List;
 
 /**
  * A <CODE>Section</CODE> is a part of a <CODE>Document</CODE> containing
@@ -231,8 +232,8 @@ public class Section extends ArrayList<Element> implements TextElementArray, Lar
      *
      * @return    an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
-        ArrayList<Element> tmp = new ArrayList<>();
+    public List<Chunk> getChunks() {
+        ArrayList<Chunk> tmp = new ArrayList<>();
         for (Element o : this) {
             tmp.addAll(o.getChunks());
         }

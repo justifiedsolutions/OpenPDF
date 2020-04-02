@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import com.justifiedsolutions.openpdf.text.Cell;
-import com.justifiedsolutions.openpdf.text.Row;
 import com.justifiedsolutions.openpdf.text.Table;
 import com.justifiedsolutions.openpdf.text.alignment.HorizontalAlignment;
 import com.justifiedsolutions.openpdf.text.alignment.VerticalAlignment;
@@ -18,8 +17,7 @@ import org.junit.jupiter.api.TestFactory;
 
 /**
  * Tests for setting alignment through {@link WithHorizontalAlignment} and {@link WithVerticalAlignment} interfaces.
- * Testing classes: {@link Table} and {@link Cell}. {@link Row} cannot be tested because of its package-private access.
- *
+ * Testing classes: {@link Table} and {@link Cell}.
  * @author noavarice
  */
 public class TableElementsAlignmentTest {

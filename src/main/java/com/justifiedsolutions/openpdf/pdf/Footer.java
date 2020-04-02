@@ -7,7 +7,8 @@
 package com.justifiedsolutions.openpdf.pdf;
 
 /**
- * A footer for a {@link Document}.
+ * A footer for a {@link Document}. In order to add a footer to a Document, you must implement this
+ * interface.
  */
 public interface Footer extends RunningMarginal {
 

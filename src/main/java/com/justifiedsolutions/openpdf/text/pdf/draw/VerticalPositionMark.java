@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.pdf.PdfContentByte;
+import java.util.List;
 
 /**
  * Helper class implementing the DrawInterface. Can be used to add
@@ -134,8 +135,8 @@ public class VerticalPositionMark implements DrawInterface, Element {
     /**
      * @see Element#getChunks()
      */
-    public ArrayList<Element> getChunks() {
-        ArrayList<Element> list = new ArrayList<>();
+    public List<Chunk> getChunks() {
+        ArrayList<Chunk> list = new ArrayList<>();
         list.add(new Chunk(this, true));
         return list;
     }

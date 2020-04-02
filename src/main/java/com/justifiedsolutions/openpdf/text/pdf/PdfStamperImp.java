@@ -48,7 +48,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
@@ -60,11 +59,9 @@ import com.justifiedsolutions.openpdf.text.pdf.internal.PdfViewerPreferencesImp;
 import com.justifiedsolutions.openpdf.text.xml.xmp.XmpReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.xml.sax.SAXException;
@@ -93,7 +90,6 @@ class PdfStamperImp extends PdfWriter {
     protected boolean append;
     protected IntHashtable marked;
     protected int initialXrefSize;
-    protected PdfAction openAction;
     private boolean includeFileID = true;
     private PdfObject overrideFileId = null;
     private Calendar modificationDate = null;
@@ -120,8 +116,6 @@ class PdfStamperImp extends PdfWriter {
         if (append) {
             if (reader.isRebuilt())
                 throw new DocumentException(MessageLocalization.getComposedMessage("append.mode.requires.a.document.without.errors.even.if.recovery.was.possible"));
-            if (reader.isEncrypted())
-                crypto = new PdfEncryption(reader.getDecrypt());
             pdf_version.setAppendmode(true);
             file.reOpen();
             byte[] buf = new byte[8192];
@@ -167,28 +161,11 @@ class PdfStamperImp extends PdfWriter {
         PdfDictionary pages = (PdfDictionary)PdfReader.getPdfObject(catalog.get(PdfName.PAGES));
         pages.put(PdfName.ITXT, new PdfString(Document.getRelease()));
         markUsed(pages);
-        PdfObject acroFormObject = PdfReader.getPdfObject(catalog.get(PdfName.ACROFORM), reader.getCatalog());
-        if (acroFormObject instanceof PdfDictionary) {
-            PdfDictionary acroForm = (PdfDictionary) acroFormObject;
-            if (acroFields != null && acroFields.getXfa().isChanged()) {
-                markUsed(acroForm);
-                if (!flat)
-                    acroFields.getXfa().setXfa(this);
-            }
-            if (sigFlags != 0) {
-                acroForm.put(PdfName.SIGFLAGS, new PdfNumber(sigFlags));
-                markUsed(acroForm);
-                markUsed(catalog);
-            }
-        }
         closed = true;
         addSharedObjectsToBody();
         setOutlines();
         setJavaScript();
         addFileAttachments();
-        if (openAction != null) {
-            catalog.put(PdfName.OPENACTION, openAction);
-        }
         if (pdf.pageLabels != null)
             catalog.put(PdfName.PAGELABELS, pdf.pageLabels.getDictionary(this));
         // OCG
@@ -598,21 +575,6 @@ class PdfStamperImp extends PdfWriter {
         return ps.over;
     }
 
-    void correctAcroFieldPages(int page) {
-        if (acroFields == null)
-            return;
-        if (page > reader.getNumberOfPages())
-            return;
-        Map<String, Item> fields = acroFields.getAllFields();
-        for (Item item : fields.values()) {
-            for (int k = 0; k < item.size(); ++k) {
-                int p = item.getPage(k);
-                if (p >= page)
-                    item.forcePage(k, p + 1);
-            }
-        }
-    }
-
     private static void moveRectangle(PdfDictionary dic2, PdfReader r, int pageImported, PdfName key, String name) {
         Rectangle m = r.getBoxSize(pageImported, name);
         if (m == null)
@@ -641,68 +603,6 @@ class PdfStamperImp extends PdfWriter {
         ps.replacePoint = ps.over.getInternalBuffer().size();
     }
 
-    void insertPage(int pageNumber, Rectangle mediabox) {
-        Rectangle media = new Rectangle(mediabox);
-        int rotation = media.getRotation() % 360;
-        PdfDictionary page = new PdfDictionary(PdfName.PAGE);
-        PdfDictionary resources = new PdfDictionary();
-        PdfArray procset = new PdfArray();
-        procset.add(PdfName.PDF);
-        procset.add(PdfName.TEXT);
-        procset.add(PdfName.IMAGEB);
-        procset.add(PdfName.IMAGEC);
-        procset.add(PdfName.IMAGEI);
-        resources.put(PdfName.PROCSET, procset);
-        page.put(PdfName.RESOURCES, resources);
-        page.put(PdfName.ROTATE, new PdfNumber(rotation));
-        page.put(PdfName.MEDIABOX, new PdfRectangle(media, rotation));
-        PRIndirectReference pref = reader.addPdfObject(page);
-        PdfDictionary parent;
-        PRIndirectReference parentRef;
-        if (pageNumber > reader.getNumberOfPages()) {
-            PdfDictionary lastPage = reader.getPageNRelease(reader.getNumberOfPages());
-            parentRef = (PRIndirectReference)lastPage.get(PdfName.PARENT);
-            parentRef = new PRIndirectReference(reader, parentRef.getNumber());
-            parent = (PdfDictionary)PdfReader.getPdfObject(parentRef);
-            PdfArray kids = (PdfArray)PdfReader.getPdfObject(parent.get(PdfName.KIDS), parent);
-            kids.add(pref);
-            markUsed(kids);
-            reader.pageRefs.insertPage(pageNumber, pref);
-        }
-        else {
-            if (pageNumber < 1)
-                pageNumber = 1;
-            PdfDictionary firstPage = reader.getPageN(pageNumber);
-            PRIndirectReference firstPageRef = reader.getPageOrigRef(pageNumber);
-            reader.releasePage(pageNumber);
-            parentRef = (PRIndirectReference)firstPage.get(PdfName.PARENT);
-            parentRef = new PRIndirectReference(reader, parentRef.getNumber());
-            parent = (PdfDictionary)PdfReader.getPdfObject(parentRef);
-            PdfArray kids = (PdfArray)PdfReader.getPdfObject(parent.get(PdfName.KIDS), parent);
-            int len = kids.size();
-            int num = firstPageRef.getNumber();
-            for (int k = 0; k < len; ++k) {
-                PRIndirectReference cur = (PRIndirectReference)kids.getPdfObject(k);
-                if (num == cur.getNumber()) {
-                    kids.add(k, pref);
-                    break;
-                }
-            }
-            if (len == kids.size())
-                throw new RuntimeException(MessageLocalization.getComposedMessage("internal.inconsistence"));
-            markUsed(kids);
-            reader.pageRefs.insertPage(pageNumber, pref);
-            correctAcroFieldPages(pageNumber);
-        }
-        page.put(PdfName.PARENT, parentRef);
-        while (parent != null) {
-            markUsed(parent);
-            PdfNumber count = (PdfNumber)PdfReader.getPdfObjectRelease(parent.get(PdfName.COUNT));
-            parent.put(PdfName.COUNT, new PdfNumber(count.intValue() + 1));
-            parent = parent.getAsDict(PdfName.PARENT);
-        }
-    }
-
     /** Getter for property rotateContents.
      * @return Value of property rotateContents.
      *
@@ -723,35 +623,9 @@ class PdfStamperImp extends PdfWriter {
         return body.size() > 1;
     }
 
-    AcroFields getAcroFields() {
-        if (acroFields == null) {
-            acroFields = new AcroFields(reader, this);
-        }
-        return acroFields;
-    }
-
-    void setFormFlattening(boolean flat) {
-        this.flat = flat;
-    }
-
-    void setFreeTextFlattening(boolean flat) {
-        this.flatFreeText = flat;
-    }
-
-    boolean partialFormFlattening(String name) {
-        getAcroFields();
-        if (acroFields.getXfa().isXfaPresent())
-            throw new UnsupportedOperationException(MessageLocalization.getComposedMessage("partial.form.flattening.is.not.supported.with.xfa.forms"));
-        if (!acroFields.getAllFields().containsKey(name))
-            return false;
-        partialFlattening.add(name);
-        return true;
-    }
-
     void flatFields() {
         if (append)
             throw new IllegalArgumentException(MessageLocalization.getComposedMessage("field.flattening.is.not.supported.in.append.mode"));
-        getAcroFields();
         Map<String, Item> fields = acroFields.getAllFields();
         if (fieldsAdded && partialFlattening.isEmpty()) {
             partialFlattening.addAll(fields.keySet());
@@ -1017,35 +891,6 @@ class PdfStamperImp extends PdfWriter {
         return ref;
     }
 
-    /**
-     * @see PdfWriter#addAnnotation(PdfAnnotation)
-     */
-    public void addAnnotation(PdfAnnotation annot) {
-        throw new RuntimeException(MessageLocalization.getComposedMessage("unsupported.in.this.context.use.pdfstamper.addannotation"));
-    }
-
-    void addDocumentField(PdfIndirectReference ref) {
-        PdfDictionary catalog = reader.getCatalog();
-        PdfDictionary acroForm = (PdfDictionary)PdfReader.getPdfObject(catalog.get(PdfName.ACROFORM), catalog);
-        if (acroForm == null) {
-            acroForm = new PdfDictionary();
-            catalog.put(PdfName.ACROFORM, acroForm);
-            markUsed(catalog);
-        }
-        PdfArray fields = (PdfArray)PdfReader.getPdfObject(acroForm.get(PdfName.FIELDS), acroForm);
-        if (fields == null) {
-            fields = new PdfArray();
-            acroForm.put(PdfName.FIELDS, fields);
-            markUsed(acroForm);
-        }
-        if (!acroForm.contains(PdfName.DA)) {
-            acroForm.put(PdfName.DA, new PdfString("/Helv 0 Tf 0 g "));
-            markUsed(acroForm);
-        }
-        fields.add(ref);
-        markUsed(fields);
-    }
-
     void addFieldResources() throws IOException {
         if (fieldTemplates.isEmpty())
             return;
@@ -1091,101 +936,6 @@ class PdfStamperImp extends PdfWriter {
             acroForm.put(PdfName.DA, new PdfString("/Helv 0 Tf 0 g "));
             markUsed(acroForm);
         }
-    }
-
-    void expandFields(PdfFormField field, List<PdfAnnotation> annotations) {
-        annotations.add(field);
-        List<PdfFormField> kids = field.getKidFields();
-        if (kids != null) {
-            for (PdfFormField kid : kids) {
-                expandFields(kid, annotations);
-            }
-        }
-    }
-
-    void addAnnotation(PdfAnnotation annotation, PdfDictionary pageN) {
-        try {
-            List<PdfAnnotation> annotations = new ArrayList<>();
-            if (annotation.isForm()) {
-                fieldsAdded = true;
-                getAcroFields();
-                PdfFormField field = (PdfFormField)annotation;
-                if (field.getParent() != null)
-                    return;
-                expandFields(field, annotations);
-            }
-            else
-                annotations.add(annotation);
-            for (PdfAnnotation pdfAnnotation : annotations) {
-                annotation = pdfAnnotation;
-                if (annotation.getPlaceInPage() > 0)
-                    pageN = reader.getPageN(annotation.getPlaceInPage());
-                if (annotation.isForm()) {
-                    if (!annotation.isUsed()) {
-                        Map<PdfTemplate, Object> templates = annotation.getTemplates();
-                        if (templates != null)
-                            fieldTemplates.putAll(templates);
-                    }
-                    PdfFormField field = (PdfFormField) annotation;
-                    if (field.getParent() == null)
-                        addDocumentField(field.getIndirectReference());
-                }
-                if (annotation.isAnnotation()) {
-                    PdfObject pdfobj = PdfReader.getPdfObject(pageN.get(PdfName.ANNOTS), pageN);
-                    PdfArray annots = null;
-                    if (pdfobj == null || !pdfobj.isArray()) {
-                        annots = new PdfArray();
-                        pageN.put(PdfName.ANNOTS, annots);
-                        markUsed(pageN);
-                    } else
-                        annots = (PdfArray) pdfobj;
-                    annots.add(annotation.getIndirectReference());
-                    markUsed(annots);
-                    if (!annotation.isUsed()) {
-                        PdfRectangle rect = (PdfRectangle) annotation.get(PdfName.RECT);
-                        if (rect != null && (rect.left() != 0 || rect.right() != 0 || rect.top() != 0 || rect.bottom() != 0)) {
-                            int rotation = reader.getPageRotation(pageN);
-                            Rectangle pageSize = reader.getPageSizeWithRotation(pageN);
-                            switch (rotation) {
-                                case 90:
-                                    annotation.put(PdfName.RECT, new PdfRectangle(
-                                            pageSize.getTop() - rect.top(),
-                                            rect.right(),
-                                            pageSize.getTop() - rect.bottom(),
-                                            rect.left()));
-                                    break;
-                                case 180:
-                                    annotation.put(PdfName.RECT, new PdfRectangle(
-                                            pageSize.getRight() - rect.left(),
-                                            pageSize.getTop() - rect.bottom(),
-                                            pageSize.getRight() - rect.right(),
-                                            pageSize.getTop() - rect.top()));
-                                    break;
-                                case 270:
-                                    annotation.put(PdfName.RECT, new PdfRectangle(
-                                            rect.bottom(),
-                                            pageSize.getRight() - rect.left(),
-                                            rect.top(),
-                                            pageSize.getRight() - rect.right()));
-                                    break;
-                            }
-                        }
-                    }
-                }
-                if (!annotation.isUsed()) {
-                    annotation.setUsed();
-                    addToBody(annotation, annotation.getIndirectReference());
-                }
-            }
-        }
-        catch (IOException e) {
-            throw new ExceptionConverter(e);
-        }
-    }
-
-    void addAnnotation(PdfAnnotation annot, int page) {
-        annot.setPage(page);
-        addAnnotation(annot, reader.getPageN(page));
     }
 
     private void outlineTravel(PRIndirectReference outline) {
@@ -1312,37 +1062,6 @@ class PdfStamperImp extends PdfWriter {
         sigFlags |= f;
     }
 
-    /** Always throws an <code>UnsupportedOperationException</code>.
-     * @param actionType ignore
-     * @param action ignore
-     * @throws PdfException ignore
-     * @see PdfStamper#setPageAction(PdfName, PdfAction, int)
-     */
-    public void setPageAction(PdfName actionType, PdfAction action) throws PdfException {
-        throw new UnsupportedOperationException(MessageLocalization.getComposedMessage("use.setpageaction.pdfname.actiontype.pdfaction.action.int.page"));
-    }
-
-    /**
-     * Sets the open and close page additional action.
-     * @param actionType the action type. It can be <CODE>PdfWriter.PAGE_OPEN</CODE>
-     * or <CODE>PdfWriter.PAGE_CLOSE</CODE>
-     * @param action the action to perform
-     * @param page the page where the action will be applied. The first page is 1
-     * @throws PdfException if the action type is invalid
-     */
-    void setPageAction(PdfName actionType, PdfAction action, int page) throws PdfException {
-        if (!actionType.equals(PAGE_OPEN) && !actionType.equals(PAGE_CLOSE))
-            throw new PdfException(MessageLocalization.getComposedMessage("invalid.page.additional.action.type.1", actionType.toString()));
-        PdfDictionary pg = reader.getPageN(page);
-        PdfDictionary aa = (PdfDictionary)PdfReader.getPdfObject(pg.get(PdfName.AA), pg);
-        if (aa == null) {
-            aa = new PdfDictionary();
-            pg.put(PdfName.AA, aa);
-            markUsed(pg);
-        }
-        aa.put(actionType, action);
-        markUsed(aa);
-    }
 
     /**
      * Always throws an <code>UnsupportedOperationException</code>.
@@ -1413,44 +1132,6 @@ class PdfStamperImp extends PdfWriter {
         return append;
     }
 
-    /** Additional-actions defining the actions to be taken in
-     * response to various trigger events affecting the document
-     * as a whole. The actions types allowed are: <CODE>DOCUMENT_CLOSE</CODE>,
-     * <CODE>WILL_SAVE</CODE>, <CODE>DID_SAVE</CODE>, <CODE>WILL_PRINT</CODE>
-     * and <CODE>DID_PRINT</CODE>.
-     *
-     * @param actionType the action type
-     * @param action the action to execute in response to the trigger
-     * @throws PdfException on invalid action type
-     */
-    public void setAdditionalAction(PdfName actionType, PdfAction action) throws PdfException {
-        if (!(actionType.equals(DOCUMENT_CLOSE) ||
-        actionType.equals(WILL_SAVE) ||
-        actionType.equals(DID_SAVE) ||
-        actionType.equals(WILL_PRINT) ||
-        actionType.equals(DID_PRINT))) {
-            throw new PdfException(MessageLocalization.getComposedMessage("invalid.additional.action.type.1", actionType.toString()));
-        }
-        PdfDictionary aa = reader.getCatalog().getAsDict(PdfName.AA);
-        if (aa == null) {
-            if (action == null)
-                return;
-            aa = new PdfDictionary();
-            reader.getCatalog().put(PdfName.AA, aa);
-        }
-        markUsed(aa);
-        if (action == null)
-            aa.remove(actionType);
-        else
-            aa.put(actionType, action);
-    }
-
-    /**
-     * @see PdfWriter#setOpenAction(PdfAction)
-     */
-    public void setOpenAction(PdfAction action) {
-        openAction = action;
-    }
 
     /**
      * @see PdfWriter#setOpenAction(java.lang.String)

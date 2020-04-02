@@ -50,6 +50,7 @@
 package com.justifiedsolutions.openpdf.text;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is an <CODE>Element</CODE> that contains
@@ -130,7 +131,7 @@ public class Meta implements Element {
      *
      * @return    an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
+    public List<Chunk> getChunks() {
         return new ArrayList<>();
     }
     

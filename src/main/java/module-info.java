@@ -14,4 +14,6 @@ module com.justifiedsolutions.openpdf {
     exports com.justifiedsolutions.openpdf.pdf;
     exports com.justifiedsolutions.openpdf.pdf.font;
     exports com.justifiedsolutions.openpdf.pdf.content;
+    exports com.justifiedsolutions.openpdf.text;
+    exports com.justifiedsolutions.openpdf.text.pdf;
 }

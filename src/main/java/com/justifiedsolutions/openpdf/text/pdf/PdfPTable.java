@@ -49,6 +49,7 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Chunk;
 import java.util.ArrayList;
 
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
@@ -61,6 +62,7 @@ import com.justifiedsolutions.openpdf.text.LargeElement;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPTableEventForwarder;
+import java.util.List;
 
 /**
  * This is a table that can be put at an absolute position but can also
@@ -1032,7 +1034,7 @@ public class PdfPTable implements LargeElement{
      *
      * @return    an <CODE>ArrayList</CODE>
      */
-    public ArrayList<Element> getChunks() {
+    public List<Chunk> getChunks() {
         return new ArrayList<>();
     }
     

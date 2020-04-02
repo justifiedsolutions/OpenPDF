@@ -62,7 +62,6 @@ import com.justifiedsolutions.openpdf.text.Table;
  * <CODE>PdfTable</CODE> is an object that contains the graphics and text of a table.
  *
  * @see        Table
- * @see        Row
  * @see        Cell
  * @see        PdfCell
  */

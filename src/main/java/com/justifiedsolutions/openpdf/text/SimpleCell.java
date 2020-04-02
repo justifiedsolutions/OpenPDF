@@ -250,9 +250,6 @@ public class SimpleCell extends Rectangle implements PdfPCellEvent, TextElementA
         return cell;
     }
 
-    /**
-     * @see PdfPCellEvent#cellLayout(PdfPCell, Rectangle, PdfContentByte[])
-     */
     public void cellLayout(PdfPCell cell, Rectangle position, PdfContentByte[] canvases) {
         float sp_left = spacing_left;
         if (Float.isNaN(sp_left)) sp_left = 0f;

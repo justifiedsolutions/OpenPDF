@@ -49,30 +49,18 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import java.awt.Graphics2D;
-import java.awt.color.ICC_Profile;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.pdf.PRIndirectReference;
 import com.justifiedsolutions.openpdf.text.pdf.PdfArray;
-import com.justifiedsolutions.openpdf.text.pdf.PdfContentByte;
 import com.justifiedsolutions.openpdf.text.pdf.PdfDictionary;
 import com.justifiedsolutions.openpdf.text.pdf.PdfIndirectReference;
 import com.justifiedsolutions.openpdf.text.pdf.PdfName;
-import com.justifiedsolutions.openpdf.text.pdf.PdfNumber;
 import com.justifiedsolutions.openpdf.text.pdf.PdfOCG;
 import com.justifiedsolutions.openpdf.text.pdf.PdfObject;
-import com.justifiedsolutions.openpdf.text.pdf.PdfReader;
 import com.justifiedsolutions.openpdf.text.pdf.PdfStream;
 import com.justifiedsolutions.openpdf.text.pdf.PdfTemplate;
-import com.justifiedsolutions.openpdf.text.pdf.PdfWriter;
-import com.justifiedsolutions.openpdf.text.pdf.codec.CCITTG4Encoder;
+import java.awt.color.ICC_Profile;
+import java.lang.reflect.Constructor;
+import java.net.URL;
 
 
 /**
@@ -131,30 +119,6 @@ public abstract class Image extends Rectangle {
 
     /** type of image */
     public static final int ORIGINAL_NONE = 0;
-
-    /** type of image */
-    public static final int ORIGINAL_JPEG = 1;
-
-    /** type of image */
-    public static final int ORIGINAL_PNG = 2;
-
-    /** type of image */
-    public static final int ORIGINAL_GIF = 3;
-
-    /** type of image */
-    public static final int ORIGINAL_BMP = 4;
-
-    /** type of image */
-    public static final int ORIGINAL_TIFF = 5;
-
-    /** type of image */
-    public static final int ORIGINAL_WMF = 6;
-
-    /** type of image */
-    public static final int ORIGINAL_PS = 7;
-
-    /** type of image */
-    public static final int ORIGINAL_JPEG2000 = 8;
 
     /**
      * type of image
@@ -234,577 +198,6 @@ public abstract class Image extends Rectangle {
         rotationRadians = 0;
     }
 
-    /**
-     * Gets an instance of an Image.
-     *
-     * @param url
-     *            an URL
-     * @return an Image
-     * @throws BadElementException
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public static Image getInstance(URL url) throws BadElementException,
-            IOException {
-        InputStream is = null;
-        Image img = null;
-        try {
-            is = url.openStream();
-            int c1 = is.read();
-            int c2 = is.read();
-            int c3 = is.read();
-            int c4 = is.read();
-            // jbig2
-            int c5 = is.read();
-            int c6 = is.read();
-            int c7 = is.read();
-            int c8 = is.read();
-            is.close();
-
-            is = null;
-            if (c1 == 'G' && c2 == 'I' && c3 == 'F') {
-                img = ImageLoader.getGifImage(url);
-                return img;
-            }
-            if (c1 == 0xFF && c2 == 0xD8) {
-                img = ImageLoader.getJpegImage(url);
-                return img;
-            }
-            if (c1 == 0x00 && c2 == 0x00 && c3 == 0x00 && c4 == 0x0c) {
-                img = ImageLoader.getJpeg2000Image(url);
-                return img;
-            }
-            if (c1 == 0xff && c2 == 0x4f && c3 == 0xff && c4 == 0x51) {
-                img = ImageLoader.getJpeg2000Image(url);
-                return img;
-            }
-            if (c1 == PNGID[0] && c2 == PNGID[1]
-                    && c3 == PNGID[2] && c4 == PNGID[3]) {
-                img = ImageLoader.getPngImage(url);
-                return img;
-            }
-            if (c1 == 0xD7 && c2 == 0xCD) {
-                img = new ImgWMF(url);
-                return img;
-            }
-            if (c1 == 'B' && c2 == 'M') {
-                img = ImageLoader.getBmpImage(url);
-                return img;
-            }
-            if ((c1 == 'M' && c2 == 'M' && c3 == 0 && c4 == 42)
-                    || (c1 == 'I' && c2 == 'I' && c3 == 42 && c4 == 0)) {
-                img = ImageLoader.getTiffImage(url);
-                return img;
-            }
-            if ( c1 == 0x97 && c2 == 'J' && c3 == 'B' && c4 == '2' &&
-                    c5 == '\r' && c6 == '\n' && c7 == 0x1a && c8 == '\n' ) {
-                throw new IOException(url.toString()
-                        + " is not a recognized imageformat. JBIG2 support has been removed.");
-            }
-            throw new IOException(url.toString()
-                    + " is not a recognized imageformat.");
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-            if (img != null) {
-                // Make sure the URL is always set
-                img.setUrl(url);
-            }
-        }
-    }
-
-    /**
-     * Gets an instance of an Image.
-     *
-     * @param filename
-     *            a filename
-     * @return an object of type <CODE>Gif</CODE>,<CODE>Jpeg</CODE> or
-     *         <CODE>Png</CODE>
-     * @throws BadElementException
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public static Image getInstance(String filename)
-            throws BadElementException, IOException {
-        return getInstance(Utilities.toURL(filename));
-    }
-
-    /**
-     * gets an instance of an Image
-     *
-     * @param imgb
-     *            raw image date
-     * @return an Image object
-     * @throws BadElementException
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public static Image getInstance(byte[] imgb) throws BadElementException,
-            IOException {
-        InputStream is = null;
-        try {
-            is = new java.io.ByteArrayInputStream(imgb);
-            int c1 = is.read();
-            int c2 = is.read();
-            int c3 = is.read();
-            int c4 = is.read();
-            is.close();
-
-            is = null;
-            if (c1 == 'G' && c2 == 'I' && c3 == 'F') {
-                return ImageLoader.getGifImage(imgb);
-            }
-            if (c1 == 0xFF && c2 == 0xD8) {
-                return ImageLoader.getJpegImage(imgb);
-            }
-            if (c1 == 0x00 && c2 == 0x00 && c3 == 0x00 && c4 == 0x0c) {
-                return ImageLoader.getJpeg2000Image(imgb);
-            }
-            if (c1 == 0xff && c2 == 0x4f && c3 == 0xff && c4 == 0x51) {
-                return ImageLoader.getJpeg2000Image(imgb);
-            }
-            if (c1 == PNGID[0] && c2 == PNGID[1]
-                    && c3 == PNGID[2] && c4 == PNGID[3]) {
-                return ImageLoader.getPngImage(imgb);
-            }
-            if (c1 == 0xD7 && c2 == 0xCD) {
-                return new ImgWMF(imgb);
-            }
-            if (c1 == 'B' && c2 == 'M') {
-                return ImageLoader.getBmpImage(imgb);
-            }
-            if ((c1 == 'M' && c2 == 'M' && c3 == 0 && c4 == 42)
-                    || (c1 == 'I' && c2 == 'I' && c3 == 42 && c4 == 0)) {
-                return ImageLoader.getTiffImage(imgb);
-            }
-            if ( c1 == 0x97 && c2 == 'J' && c3 == 'B' && c4 == '2' ) {
-                is = new java.io.ByteArrayInputStream(imgb);
-                is.skip(4);
-                int c5 = is.read();
-                int c6 = is.read();
-                int c7 = is.read();
-                int c8 = is.read();
-                if ( c5 == '\r' && c6 == '\n' && c7 == 0x1a && c8 == '\n' ) {
-                    throw new IOException(MessageLocalization.getComposedMessage("the.byte.array.is.not.a.recognized.imageformat"));
-                }
-            }
-            throw new IOException(MessageLocalization.getComposedMessage("the.byte.array.is.not.a.recognized.imageformat"));
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-        }
-    }
-
-    /**
-     * Gets an instance of an Image in raw mode.
-     *
-     * @param width
-     *            the width of the image in pixels
-     * @param height
-     *            the height of the image in pixels
-     * @param components
-     *            1,3 or 4 for GrayScale, RGB and CMYK
-     * @param data
-     *            the image data
-     * @param bpc
-     *            bits per component
-     * @return an object of type <CODE>ImgRaw</CODE>
-     * @throws BadElementException
-     *             on error
-     */
-    public static Image getInstance(int width, int height, int components,
-                                    int bpc, byte[] data) throws BadElementException {
-        return Image.getInstance(width, height, components, bpc, data, null);
-    }
-
-    /**
-     * Creates a JBIG2 Image.
-     * @param    width    the width of the image
-     * @param    height    the height of the image
-     * @param    data    the raw image data
-     * @param    globals    JBIG2 globals
-     * @since    2.1.5
-     */
-    public static Image getInstance(int width, int height, byte[] data, byte[] globals) {
-        Image img = new ImgJBIG2(width, height, data, globals);
-        return img;
-    }
-
-    /**
-     * Creates an Image with CCITT G3 or G4 compression. It assumes that the
-     * data bytes are already compressed.
-     *
-     * @param width
-     *            the exact width of the image
-     * @param height
-     *            the exact height of the image
-     * @param reverseBits
-     *            reverses the bits in <code>data</code>. Bit 0 is swapped
-     *            with bit 7 and so on
-     * @param typeCCITT
-     *            the type of compression in <code>data</code>. It can be
-     *            CCITTG4, CCITTG31D, CCITTG32D
-     * @param parameters
-     *            parameters associated with this stream. Possible values are
-     *            CCITT_BLACKIS1, CCITT_ENCODEDBYTEALIGN, CCITT_ENDOFLINE and
-     *            CCITT_ENDOFBLOCK or a combination of them
-     * @param data
-     *            the image data
-     * @return an Image object
-     * @throws BadElementException
-     *             on error
-     */
-    public static Image getInstance(int width, int height, boolean reverseBits,
-            int typeCCITT, int parameters, byte[] data)
-            throws BadElementException {
-        return Image.getInstance(width, height, reverseBits, typeCCITT,
-                parameters, data, null);
-    }
-
-    /**
-     * Creates an Image with CCITT G3 or G4 compression. It assumes that the
-     * data bytes are already compressed.
-     *
-     * @param width
-     *            the exact width of the image
-     * @param height
-     *            the exact height of the image
-     * @param reverseBits
-     *            reverses the bits in <code>data</code>. Bit 0 is swapped
-     *            with bit 7 and so on
-     * @param typeCCITT
-     *            the type of compression in <code>data</code>. It can be
-     *            CCITTG4, CCITTG31D, CCITTG32D
-     * @param parameters
-     *            parameters associated with this stream. Possible values are
-     *            CCITT_BLACKIS1, CCITT_ENCODEDBYTEALIGN, CCITT_ENDOFLINE and
-     *            CCITT_ENDOFBLOCK or a combination of them
-     * @param data
-     *            the image data
-     * @param transparency
-     *            transparency information in the Mask format of the image
-     *            dictionary
-     * @return an Image object
-     * @throws BadElementException
-     *             on error
-     */
-    public static Image getInstance(int width, int height, boolean reverseBits,
-                                    int typeCCITT, int parameters, byte[] data, int[] transparency)
-            throws BadElementException {
-        if (transparency != null && transparency.length != 2)
-            throw new BadElementException(MessageLocalization.getComposedMessage("transparency.length.must.be.equal.to.2.with.ccitt.images"));
-        Image img = new ImgCCITT(width, height, reverseBits, typeCCITT,
-                parameters, data);
-        img.transparency = transparency;
-        return img;
-    }
-
-    /**
-     * Gets an instance of an Image in raw mode.
-     *
-     * @param width
-     *            the width of the image in pixels
-     * @param height
-     *            the height of the image in pixels
-     * @param components
-     *            1,3 or 4 for GrayScale, RGB and CMYK
-     * @param data
-     *            the image data
-     * @param bpc
-     *            bits per component
-     * @param transparency
-     *            transparency information in the Mask format of the image
-     *            dictionary
-     * @return an object of type <CODE>ImgRaw</CODE>
-     * @throws BadElementException
-     *             on error
-     */
-    public static Image getInstance(int width, int height, int components,
-                                    int bpc, byte[] data, int[] transparency)
-            throws BadElementException {
-        if (transparency != null && transparency.length != components * 2)
-            throw new BadElementException(MessageLocalization.getComposedMessage("transparency.length.must.be.equal.to.componentes.2"));
-        if (components == 1 && bpc == 1) {
-            byte[] g4 = CCITTG4Encoder.compress(data, width, height);
-            return Image.getInstance(width, height, false, Image.CCITTG4,
-                    Image.CCITT_BLACKIS1, g4, transparency);
-        }
-        Image img = new ImgRaw(width, height, components, bpc, data);
-        img.transparency = transparency;
-        return img;
-    }
-
-    // images from a PdfTemplate
-
-    /**
-     * gets an instance of an Image
-     *
-     * @param template
-     *            a PdfTemplate that has to be wrapped in an Image object
-     * @return an Image object
-     * @throws BadElementException
-     */
-    public static Image getInstance(PdfTemplate template)
-            throws BadElementException {
-        return new ImgTemplate(template);
-    }
-
-    // images from a java.awt.Image
-
-    /**
-     * Gets an instance of an Image from a java.awt.Image.
-     *
-     * @param image
-     *            the <CODE>java.awt.Image</CODE> to convert
-     * @param color
-     *            if different from <CODE>null</CODE> the transparency pixels
-     *            are replaced by this color
-     * @param forceBW
-     *            if <CODE>true</CODE> the image is treated as black and white
-     * @return an object of type <CODE>ImgRaw</CODE>
-     * @throws BadElementException
-     *             on error
-     * @throws IOException
-     *             on error
-     */
-    public static Image getInstance(java.awt.Image image, java.awt.Color color,
-            boolean forceBW) throws BadElementException, IOException {
-
-        if(image instanceof BufferedImage){
-            BufferedImage bi = (BufferedImage) image;
-            if(bi.getType() == BufferedImage.TYPE_BYTE_BINARY && bi.getColorModel().getNumColorComponents() <= 2) {
-                forceBW=true;
-            }
-        }
-
-        java.awt.image.PixelGrabber pg = new java.awt.image.PixelGrabber(image,
-                0, 0, -1, -1, true);
-        try {
-            pg.grabPixels();
-        } catch (InterruptedException e) {
-            throw new IOException(MessageLocalization.getComposedMessage("java.awt.image.interrupted.waiting.for.pixels"));
-        }
-        if ((pg.getStatus() & java.awt.image.ImageObserver.ABORT) != 0) {
-            throw new IOException(MessageLocalization.getComposedMessage("java.awt.image.fetch.aborted.or.errored"));
-        }
-        int w = pg.getWidth();
-        int h = pg.getHeight();
-        int[] pixels = (int[]) pg.getPixels();
-        if (forceBW) {
-            int byteWidth = (w / 8) + ((w & 7) != 0 ? 1 : 0);
-            byte[] pixelsByte = new byte[byteWidth * h];
-
-            int index = 0;
-            int size = h * w;
-            int transColor = 1;
-            if (color != null) {
-                transColor = (color.getRed() + color.getGreen()
-                        + color.getBlue() < 384) ? 0 : 1;
-            }
-            int[] transparency = null;
-            int cbyte = 0x80;
-            int wMarker = 0;
-            int currByte = 0;
-            if (color != null) {
-                for (int j = 0; j < size; j++) {
-                    int alpha = (pixels[j] >> 24) & 0xff;
-                    if (alpha < 250) {
-                        if (transColor == 1)
-                            currByte |= cbyte;
-                    } else {
-                        if ((pixels[j] & 0x888) != 0)
-                            currByte |= cbyte;
-                    }
-                    cbyte >>= 1;
-                    if (cbyte == 0 || wMarker + 1 >= w) {
-                        pixelsByte[index++] = (byte) currByte;
-                        cbyte = 0x80;
-                        currByte = 0;
-                    }
-                    ++wMarker;
-                    if (wMarker >= w)
-                        wMarker = 0;
-                }
-            } else {
-                for (int j = 0; j < size; j++) {
-                    if (transparency == null) {
-                        int alpha = (pixels[j] >> 24) & 0xff;
-                        if (alpha == 0) {
-                            transparency = new int[2];
-                            /* bugfix by M.P. Liston, ASC, was: ... ? 1: 0; */
-                            transparency[0] = transparency[1] = ((pixels[j] & 0x888) != 0) ? 0xff : 0;
-                        }
-                    }
-                    if ((pixels[j] & 0x888) != 0)
-                        currByte |= cbyte;
-                    cbyte >>= 1;
-                    if (cbyte == 0 || wMarker + 1 >= w) {
-                        pixelsByte[index++] = (byte) currByte;
-                        cbyte = 0x80;
-                        currByte = 0;
-                    }
-                    ++wMarker;
-                    if (wMarker >= w)
-                        wMarker = 0;
-                }
-            }
-            return Image.getInstance(w, h, 1, 1, pixelsByte, transparency);
-        } else {
-            byte[] pixelsByte = new byte[w * h * 3];
-            byte[] smask = null;
-
-            int index = 0;
-            int size = h * w;
-            int red = 255;
-            int green = 255;
-            int blue = 255;
-            if (color != null) {
-                red = color.getRed();
-                green = color.getGreen();
-                blue = color.getBlue();
-            }
-            int[] transparency = null;
-            if (color != null) {
-                for (int j = 0; j < size; j++) {
-                    int alpha = (pixels[j] >> 24) & 0xff;
-                    if (alpha < 250) {
-                        pixelsByte[index++] = (byte) red;
-                        pixelsByte[index++] = (byte) green;
-                        pixelsByte[index++] = (byte) blue;
-                    } else {
-                        pixelsByte[index++] = (byte) ((pixels[j] >> 16) & 0xff);
-                        pixelsByte[index++] = (byte) ((pixels[j] >> 8) & 0xff);
-                        pixelsByte[index++] = (byte) ((pixels[j]) & 0xff);
-                    }
-                }
-            } else {
-                int transparentPixel = 0;
-                smask = new byte[w * h];
-                boolean shades = false;
-                for (int j = 0; j < size; j++) {
-                    byte alpha = smask[j] = (byte) ((pixels[j] >> 24) & 0xff);
-                    /* bugfix by Chris Nokleberg */
-                    if (!shades) {
-                        if (alpha != 0 && alpha != -1) {
-                            shades = true;
-                        } else if (transparency == null) {
-                            if (alpha == 0) {
-                                transparentPixel = pixels[j] & 0xffffff;
-                                transparency = new int[6];
-                                transparency[0] = transparency[1] = (transparentPixel >> 16) & 0xff;
-                                transparency[2] = transparency[3] = (transparentPixel >> 8) & 0xff;
-                                transparency[4] = transparency[5] = transparentPixel & 0xff;
-                                for (int prevPixel = 0; prevPixel < j; prevPixel++) {
-                                    if ((pixels[prevPixel] & 0xffffff) == transparentPixel) {
-                                        shades = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        } else if ((pixels[j] & 0xffffff) != transparentPixel && alpha == 0
-                                || (pixels[j] & 0xffffff) == transparentPixel && alpha != 0) {
-                            shades = true;
-                        }
-                    }
-                    pixelsByte[index++] = (byte) ((pixels[j] >> 16) & 0xff);
-                    pixelsByte[index++] = (byte) ((pixels[j] >> 8) & 0xff);
-                    pixelsByte[index++] = (byte) ((pixels[j]) & 0xff);
-                }
-                if (shades)
-                    transparency = null;
-                else
-                    smask = null;
-            }
-            Image img = Image.getInstance(w, h, 3, 8, pixelsByte, transparency);
-            if (smask != null) {
-                Image sm = Image.getInstance(w, h, 1, 8, smask);
-                try {
-                    sm.makeMask();
-                    img.setImageMask(sm);
-                } catch (DocumentException de) {
-                    throw new ExceptionConverter(de);
-                }
-            }
-            return img;
-        }
-    }
-
-    /**
-     * Gets an instance of an Image from a java.awt.Image.
-     *
-     * @param image
-     *            the <CODE>java.awt.Image</CODE> to convert
-     * @param color
-     *            if different from <CODE>null</CODE> the transparency pixels
-     *            are replaced by this color
-     * @return an object of type <CODE>ImgRaw</CODE>
-     * @throws BadElementException
-     *             on error
-     * @throws IOException
-     *             on error
-     */
-    public static Image getInstance(java.awt.Image image, java.awt.Color color)
-            throws BadElementException, IOException {
-        return Image.getInstance(image, color, false);
-    }
-
-    /**
-     * Gets an instance of a Image from a java.awt.Image.
-     * The image is added as a JPEG with a user defined quality.
-     *
-     * @param writer
-     *            the <CODE>PdfWriter</CODE> object to which the image will be added
-     * @param awtImage
-     *            the <CODE>java.awt.Image</CODE> to convert
-     * @param quality
-     *            a float value between 0 and 1
-     * @return an object of type <CODE>PdfTemplate</CODE>
-     * @throws BadElementException
-     *             on error
-     * @throws IOException
-     */
-    public static Image getInstance(PdfWriter writer, java.awt.Image awtImage, float quality) throws BadElementException, IOException {
-        return getInstance(new PdfContentByte(writer), awtImage, quality);
-    }
-
-    /**
-     * Gets an instance of a Image from a java.awt.Image.
-     * The image is added as a JPEG with a user defined quality.
-     *
-     * @param cb
-     *            the <CODE>PdfContentByte</CODE> object to which the image will be added
-     * @param awtImage
-     *            the <CODE>java.awt.Image</CODE> to convert
-     * @param quality
-     *            a float value between 0 and 1
-     * @return an object of type <CODE>PdfTemplate</CODE>
-     * @throws BadElementException
-     *             on error
-     * @throws IOException
-     */
-    public static Image getInstance(PdfContentByte cb, java.awt.Image awtImage, float quality) throws BadElementException, IOException {
-        java.awt.image.PixelGrabber pg = new java.awt.image.PixelGrabber(awtImage,
-                0, 0, -1, -1, true);
-        try {
-            pg.grabPixels();
-        } catch (InterruptedException e) {
-            throw new IOException(MessageLocalization.getComposedMessage("java.awt.image.interrupted.waiting.for.pixels"));
-        }
-        if ((pg.getStatus() & java.awt.image.ImageObserver.ABORT) != 0) {
-            throw new IOException(MessageLocalization.getComposedMessage("java.awt.image.fetch.aborted.or.errored"));
-        }
-        int w = pg.getWidth();
-        int h = pg.getHeight();
-        PdfTemplate tp = cb.createTemplate(w, h);
-        Graphics2D g2d = tp.createGraphics(w, h, true, quality);
-        g2d.drawImage(awtImage, 0, 0, null);
-        g2d.dispose();
-        return getInstance(tp);
-    }
-
-    // image from indirect reference
 
     /**
      * Holds value of property directReference.
@@ -829,34 +222,6 @@ public abstract class Image extends Rectangle {
         this.directReference = directReference;
     }
 
-    /**
-     * Reuses an existing image.
-     * @param ref the reference to the image dictionary
-     * @throws BadElementException on error
-     * @return the image
-     */
-    public static Image getInstance(PRIndirectReference ref) throws BadElementException {
-        PdfDictionary dic = (PdfDictionary)PdfReader.getPdfObjectRelease(ref);
-        int width = ((PdfNumber)PdfReader.getPdfObjectRelease(dic.get(PdfName.WIDTH))).intValue();
-        int height = ((PdfNumber)PdfReader.getPdfObjectRelease(dic.get(PdfName.HEIGHT))).intValue();
-        Image imask = null;
-        PdfObject obj = dic.get(PdfName.SMASK);
-        if (obj != null && obj.isIndirect()) {
-            imask = getInstance((PRIndirectReference)obj);
-        }
-        else {
-            obj = dic.get(PdfName.MASK);
-            if (obj != null && obj.isIndirect()) {
-                PdfObject obj2 = PdfReader.getPdfObjectRelease(obj);
-                if (obj2 instanceof PdfDictionary)
-                    imask = getInstance((PRIndirectReference)obj);
-            }
-        }
-        Image img = new ImgRaw(width, height, 1, 1, null);
-        img.imageMask = imask;
-        img.directReference = ref;
-        return img;
-    }
 
     // copy constructor
 
@@ -893,7 +258,6 @@ public abstract class Image extends Rectangle {
         this.spacingAfter = image.spacingAfter;
 
         this.widthPercentage = image.widthPercentage;
-        this.annotation = image.annotation;
         this.layer = image.layer;
         this.interpolation = image.interpolation;
         this.originalType = image.originalType;
@@ -1514,30 +878,6 @@ public abstract class Image extends Rectangle {
         this.widthPercentage = widthPercentage;
     }
 
-    // annotation
-
-    /** if the annotation is not null the image will be clickable. */
-    protected Annotation annotation = null;
-
-    /**
-     * Sets the annotation of this Image.
-     *
-     * @param annotation
-     *            the annotation
-     */
-    public void setAnnotation(Annotation annotation) {
-        this.annotation = annotation;
-    }
-
-    /**
-     * Gets the annotation.
-     *
-     * @return the annotation that is linked to this image
-     */
-    public Annotation getAnnotation() {
-        return annotation;
-    }
-
     // Optional Content
 
     /** Optional Content layer to which we want this Image to belong. */
@@ -1577,17 +917,6 @@ public abstract class Image extends Rectangle {
         return interpolation;
     }
 
-    /**
-     * Sets the image interpolation. Image interpolation attempts to produce a
-     * smooth transition between adjacent sample values.
-     *
-     * @param interpolation
-     *            New value of property interpolation.
-     */
-    public void setInterpolation(boolean interpolation) {
-        this.interpolation = interpolation;
-    }
-
     // original type and data
 
     /** Holds value of property originalType. */
@@ -1595,48 +924,6 @@ public abstract class Image extends Rectangle {
 
     /** Holds value of property originalData. */
     protected byte[] originalData;
-
-    /**
-     * Getter for property originalType.
-     *
-     * @return Value of property originalType.
-     *
-     */
-    public int getOriginalType() {
-        return this.originalType;
-    }
-
-    /**
-     * Setter for property originalType.
-     *
-     * @param originalType
-     *            New value of property originalType.
-     *
-     */
-    public void setOriginalType(int originalType) {
-        this.originalType = originalType;
-    }
-
-    /**
-     * Getter for property originalData.
-     *
-     * @return Value of property originalData.
-     *
-     */
-    public byte[] getOriginalData() {
-        return this.originalData;
-    }
-
-    /**
-     * Setter for property originalData.
-     *
-     * @param originalData
-     *            New value of property originalData.
-     *
-     */
-    public void setOriginalData(byte[] originalData) {
-        this.originalData = originalData;
-    }
 
     // the following values are only set for specific types of images.
 
@@ -1653,16 +940,6 @@ public abstract class Image extends Rectangle {
         return this.deflated;
     }
 
-    /**
-     * Setter for property deflated.
-     *
-     * @param deflated
-     *            New value of property deflated.
-     */
-    public void setDeflated(boolean deflated) {
-        this.deflated = deflated;
-    }
-
     // DPI info
 
     /** Holds value of property dpiX. */
@@ -1671,60 +948,10 @@ public abstract class Image extends Rectangle {
     /** Holds value of property dpiY. */
     protected int dpiY = 0;
 
-    /**
-     * Gets the dots-per-inch in the X direction. Returns 0 if not available.
-     *
-     * @return the dots-per-inch in the X direction
-     */
-    public int getDpiX() {
-        return dpiX;
-    }
-
-    /**
-     * Gets the dots-per-inch in the Y direction. Returns 0 if not available.
-     *
-     * @return the dots-per-inch in the Y direction
-     */
-    public int getDpiY() {
-        return dpiY;
-    }
-
-    /**
-     * Sets the dots per inch value
-     *
-     * @param dpiX
-     *            dpi for x coordinates
-     * @param dpiY
-     *            dpi for y coordinates
-     */
-    public void setDpi(int dpiX, int dpiY) {
-        this.dpiX = dpiX;
-        this.dpiY = dpiY;
-    }
-
     // XY Ratio
 
     /** Holds value of property XYRatio. */
     private float XYRatio = 0;
-
-    /**
-     * Gets the X/Y pixel dimensionless aspect ratio.
-     *
-     * @return the X/Y pixel dimensionless aspect ratio
-     */
-    public float getXYRatio() {
-        return this.XYRatio;
-    }
-
-    /**
-     * Sets the X/Y pixel dimensionless aspect ratio.
-     *
-     * @param XYRatio
-     *            the X/Y pixel dimensionless aspect ratio
-     */
-    public void setXYRatio(float XYRatio) {
-        this.XYRatio = XYRatio;
-    }
 
     // color, colorspaces and transparency
 
@@ -1766,16 +993,6 @@ public abstract class Image extends Rectangle {
 
     /** ICC Profile attached */
     protected ICC_Profile profile = null;
-
-    /**
-     * Tags this image with an ICC profile.
-     *
-     * @param profile
-     *            the profile
-     */
-    public void tagICC(ICC_Profile profile) {
-        this.profile = profile;
-    }
 
     /**
      * Checks is the image has an ICC profile.
