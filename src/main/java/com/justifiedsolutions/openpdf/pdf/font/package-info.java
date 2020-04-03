@@ -5,6 +5,7 @@
  */
 
 /**
- * This package models fonts for a PDF document.
+ * This package models fonts for a PDF document. Currently, only the "native" PDF fonts are
+ * supported through the {@link com.justifiedsolutions.openpdf.pdf.font.PDFFont} class.
  */
 package com.justifiedsolutions.openpdf.pdf.font;

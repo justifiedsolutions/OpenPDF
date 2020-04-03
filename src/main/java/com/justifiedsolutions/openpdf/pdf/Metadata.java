@@ -13,19 +13,19 @@ public enum Metadata {
     /**
      * Title of the document
      */
-    TITLE,
+    TITLE("title"),
     /**
      * Subject of the document
      */
-    SUBJECT,
+    SUBJECT("subject"),
     /**
      * Keywords associated with the document
      */
-    KEYWORDS,
+    KEYWORDS("keywords"),
     /**
      * Author of the document
      */
-    AUTHOR,
+    AUTHOR("author"),
     /**
      * The creation date of the document Date values used in a PDF shall conform to a standard date
      * format, which closely follows that of the international standard ASN.1 (Abstract Syntax
@@ -52,9 +52,15 @@ public enum Metadata {
      * local time. EXAMPLE For example, December 23, 1998, at 7:52 PM, U.S. Pacific Standard Time,
      * is represented by the string <code>D:199812231952-08'00</code>
      */
-    CREATE_DATE,
-    /**
-     * The product that created the document
-     */
-    CREATOR
+    CREATE_DATE("creationdate");
+
+    private String value;
+
+    Metadata(String value) {
+        this.value = value;
+    }
+
+    public String value() {
+        return value;
+    }
 }

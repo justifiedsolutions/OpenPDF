@@ -7,82 +7,165 @@
 package com.justifiedsolutions.openpdf.pdf.content;
 
 import com.justifiedsolutions.openpdf.pdf.HorizontalAlignment;
+import com.justifiedsolutions.openpdf.pdf.font.Font;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * A Paragraph is a series of {@link Chunk}s and {@link Phrase}s. A Paragraph extends {@link Phrase}
- * and adds indentation and alignment.
+ * A Paragraph is a series of {@link Chunk}s and {@link Phrase}s. The Paragraph has an associated
+ * {@link com.justifiedsolutions.openpdf.pdf.font.Font} and any Chunks or Phrases added to the
+ * Paragraph inherit the Font of the Paragraph unless they specify a Font themselves.
  */
-public interface Paragraph extends Phrase {
+public class Paragraph implements Content {
+
+    private float leading = 16f;
+    private Font font;
+    private float leftIndent = 0f;
+    private float rightIndent = 0f;
+    private float firstLineIndent = 0f;
+    private float spacingBefore = 0f;
+    private float spacingAfter = 0f;
+    private boolean keepTogether = false;
+    private HorizontalAlignment alignment;
+    private final List<Content> content = new ArrayList<>();
+
+    /**
+     * Creates an empty Paragraph.
+     */
+    public Paragraph() {
+        // do nothing
+    }
+
+    /**
+     * Creates a new Paragraph adding the specified content.
+     *
+     * @param content the content
+     * @throws NullPointerException     if content is null
+     * @throws IllegalArgumentException if content is not a Chunk or Phrase
+     */
+    public Paragraph(Content content) {
+        addContent(content);
+    }
+
+    /**
+     * Get the leading for the Paragraph. The default value is 16.0f.
+     *
+     * @return the leading
+     */
+    public float getLeading() {
+        return leading;
+    }
+
+    /**
+     * Set the leading for the Paragraph.
+     *
+     * @param leading the leading
+     */
+    public void setLeading(float leading) {
+        this.leading = leading;
+    }
+
+    @Override
+    public Font getFont() {
+        return font;
+    }
+
+    @Override
+    public void setFont(Font font) {
+        this.font = font;
+    }
 
     /**
      * Gets the left indent of the Paragraph. The default is <code>0</code>.
      *
      * @return left indent
      */
-    float getLeftIndent();
+    public float getLeftIndent() {
+        return leftIndent;
+    }
 
     /**
      * Sets the left indent of the Paragraph.
      *
      * @param leftIndent left indent
      */
-    void setLeftIndent(float leftIndent);
+    public void setLeftIndent(float leftIndent) {
+        this.leftIndent = leftIndent;
+    }
 
     /**
      * Gets the right indent of the Paragraph. The default is <code>0</code>    .
      *
      * @return right indent
      */
-    float getRightIndent();
+    public float getRightIndent() {
+        return rightIndent;
+    }
 
     /**
      * Sets the right indent of the Paragraph.
      *
      * @param rightIndent right indent
      */
-    void setRightIndent(float rightIndent);
+    public void setRightIndent(float rightIndent) {
+        this.rightIndent = rightIndent;
+    }
 
     /**
-     * Specifies if the first line is indented. The default is <code>false</code>.
+     * Specifies the amount of the first line indentation. The default is <code>0</code>.
      *
-     * @return true if the first line is indented
+     * @return the amount of indentation
      */
-    boolean isFirstLineIndent();
+    public float getFirstLineIndent() {
+        return firstLineIndent;
+    }
 
     /**
-     * Specifies whether the first line is indented.
+     * Specifies the amount of the first line indentation.
      *
-     * @param firstLineIndent true if the first line should be indented
+     * @param firstLineIndent the amount of indentation
      */
-    void setFirstLineIndent(boolean firstLineIndent);
+    public void setFirstLineIndent(float firstLineIndent) {
+        this.firstLineIndent = firstLineIndent;
+    }
 
     /**
      * Gets the amount of vertical spacing before the Paragraph. The default is <code>0</code>.
      *
      * @return the amount of vertical spacing before the Paragraph
      */
-    float getSpacingBefore();
+    public float getSpacingBefore() {
+        return spacingBefore;
+    }
 
     /**
      * Sets the amount of vertical spacing before the Paragraph.
      *
      * @param spacingBefore vertical spacing before
      */
-    void setSpacingBefore(float spacingBefore);
+    public void setSpacingBefore(float spacingBefore) {
+        this.spacingBefore = spacingBefore;
+    }
 
     /**
      * Gets the amount of vertical spacing after the Paragraph. The default is <code>0</code>.
      *
      * @return the amount of vertical spacing after the Paragraph
      */
-    float getSpacingAfter();
+    public float getSpacingAfter() {
+        return spacingAfter;
+    }
 
     /**
      * Sets the amount of vertical spacing after the Paragraph.
      *
      * @param spacingAfter vertical spacing after
      */
-    void setSpacingAfter(float spacingAfter);
+    public void setSpacingAfter(float spacingAfter) {
+        this.spacingAfter = spacingAfter;
+    }
 
     /**
      * Specifies if the Paragraph should be broken between pages. The default is
@@ -90,14 +173,18 @@ public interface Paragraph extends Phrase {
      *
      * @return true if the paragraph should be kept together
      */
-    boolean isKeepTogether();
+    public boolean isKeepTogether() {
+        return keepTogether;
+    }
 
     /**
      * Specifies if the Paragraph should be broken between pages.
      *
      * @param keepTogether true if the paragraph should be kept together
      */
-    void setKeepTogether(boolean keepTogether);
+    public void setKeepTogether(boolean keepTogether) {
+        this.keepTogether = keepTogether;
+    }
 
     /**
      * Gets the {@link HorizontalAlignment} of the Paragraph. If not specified, it will default to
@@ -105,12 +192,68 @@ public interface Paragraph extends Phrase {
      *
      * @return the alignment of the paragraph or <code>null</code> if it isn't specified
      */
-    HorizontalAlignment getAlignment();
+    public HorizontalAlignment getAlignment() {
+        return alignment;
+    }
 
     /**
      * Sets the {@link HorizontalAlignment} of the Paragraph.
      *
      * @param alignment the alignment or <code>null</code> if it isn't specified
      */
-    void setAlignment(HorizontalAlignment alignment);
+    public void setAlignment(HorizontalAlignment alignment) {
+        this.alignment = alignment;
+    }
+
+    /**
+     * Get an {@link Collections#unmodifiableList(List)} of {@link Content}s for the Paragraph.
+     *
+     * @return the list of Content
+     */
+    public List<Content> getContent() {
+        return Collections.unmodifiableList(content);
+    }
+
+    /**
+     * Adds the specified content to the Paragraph.
+     *
+     * @param content the content
+     * @throws NullPointerException     if content is null
+     * @throws IllegalArgumentException if content is not a Chunk or Phrase
+     */
+    public void addContent(Content content) {
+        Objects.requireNonNull(content);
+        if ((content instanceof Chunk) || (content instanceof Phrase)) {
+            this.content.add(content);
+        } else {
+            throw new IllegalArgumentException("Invalid content type: " + content.getClass());
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Paragraph paragraph = (Paragraph) o;
+        return Float.compare(paragraph.leading, leading) == 0 &&
+                Float.compare(paragraph.leftIndent, leftIndent) == 0 &&
+                Float.compare(paragraph.rightIndent, rightIndent) == 0 &&
+                firstLineIndent == paragraph.firstLineIndent &&
+                Float.compare(paragraph.spacingBefore, spacingBefore) == 0 &&
+                Float.compare(paragraph.spacingAfter, spacingAfter) == 0 &&
+                keepTogether == paragraph.keepTogether &&
+                Objects.equals(font, paragraph.font) &&
+                alignment == paragraph.alignment &&
+                content.equals(paragraph.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(leading, font, leftIndent, rightIndent, firstLineIndent, spacingBefore,
+                spacingAfter, keepTogether, alignment, content);
+    }
 }

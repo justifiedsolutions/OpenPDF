@@ -6,10 +6,26 @@
 
 package com.justifiedsolutions.openpdf.pdf.content;
 
+import com.justifiedsolutions.openpdf.pdf.font.Font;
+
 /**
  * Content is a marker interface for things that can be added to a {@link
  * com.justifiedsolutions.openpdf.pdf.Document}.
  */
 public interface Content {
+
+    /**
+     * Get the {@link Font} for the Content.
+     *
+     * @return the font
+     */
+    Font getFont();
+
+    /**
+     * Set the {@link Font} for the Content.
+     *
+     * @param font the font
+     */
+    void setFont(Font font);
 
 }

@@ -66,7 +66,7 @@ public enum PageSize {
      *
      * @return the page size
      */
-    Rectangle size() {
+    public Rectangle size() {
         return this.size;
     }
 }
