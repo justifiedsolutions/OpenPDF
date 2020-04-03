@@ -10,8 +10,8 @@
  * com.justifiedsolutions.openpdf.pdf.Section}s must be created via Chapters.
  * <p>
  * A {@link com.justifiedsolutions.openpdf.pdf.content.Cell} is created via a {@link
- * com.justifiedsolutions.openpdf.pdf.content.Table}. They fill the Table in a left->right and
- * top->bottom order.
+ * com.justifiedsolutions.openpdf.pdf.content.Table}. They fill the Table in a left to right and
+ * top to bottom order.
  * <p>
  * {@link com.justifiedsolutions.openpdf.pdf.content.Chunk}s, {@link
  * com.justifiedsolutions.openpdf.pdf.content.Phrase}s, {@link com.justifiedsolutions.openpdf.pdf.content.Paragraph}s,
