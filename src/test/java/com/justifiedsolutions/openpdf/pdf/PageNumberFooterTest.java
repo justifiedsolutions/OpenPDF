@@ -14,23 +14,23 @@ import com.justifiedsolutions.openpdf.pdf.font.Font;
 import com.justifiedsolutions.openpdf.pdf.font.PDFFont;
 import org.junit.jupiter.api.Test;
 
-class PageNumberFooterTest {
+public class PageNumberFooterTest {
 
     @Test
-    void isValidForPageNumberTrue() {
+    public void isValidForPageNumberTrue() {
         PageNumberFooter footer = new PageNumberFooter(true, new PDFFont());
         assertTrue(footer.isValidForPageNumber(1));
         assertTrue(footer.isValidForPageNumber(2));
     }
     @Test
-    void isValidForPageNumberFalse() {
+    public void isValidForPageNumberFalse() {
         PageNumberFooter footer = new PageNumberFooter(false, new PDFFont());
         assertFalse(footer.isValidForPageNumber(1));
         assertTrue(footer.isValidForPageNumber(2));
     }
 
     @Test
-    void getParagraph() {
+    public void getParagraph() {
         Font expectedFont = new PDFFont();
         PageNumberFooter footer = new PageNumberFooter(true, expectedFont);
         Paragraph actual = footer.getParagraph(1);
