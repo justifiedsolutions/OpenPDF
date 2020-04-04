@@ -30,7 +30,7 @@ public class Chapter extends Section {
     }
 
     @Override
-    public void setStartsNewPage(boolean startsNewPage) throws IllegalStateException {
+    public void setStartsNewPage(boolean startsNewPage) {
         if (!startsNewPage) {
             throw new IllegalStateException("A Chapter always starts a new page.");
         }

@@ -6,11 +6,8 @@
 
 package com.justifiedsolutions.openpdf.pdf;
 
-import com.justifiedsolutions.openpdf.pdf.content.Chunk;
 import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
-import com.justifiedsolutions.openpdf.pdf.content.Phrase;
-import com.justifiedsolutions.openpdf.pdf.content.Table;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,17 +95,11 @@ public class Section {
      * Add {@link Content} to the Section.
      *
      * @param content the content to add
-     * @throws NullPointerException     if content is null
-     * @throws IllegalArgumentException if content is not a Chunk, Phrase, Paragraph, or Table
+     * @throws NullPointerException if content is null
      */
     public void addContent(Content content) {
         Objects.requireNonNull(content);
-        if ((content instanceof Chunk) || (content instanceof Phrase)
-                || (content instanceof Paragraph) || (content instanceof Table)) {
-            this.content.add(content);
-        } else {
-            throw new IllegalArgumentException("Invalid content type: " + content.getClass());
-        }
+        this.content.add(content);
     }
 
     /**

@@ -52,7 +52,7 @@ public class JSPDFWriter {
         document.open();
         if (model.hasChapters()) {
             for (Chapter chapter : model.getChapters()) {
-                document.add(processChapter(chapter));
+                document.add(com.justifiedsolutions.openpdf.text.Chapter.getInstance(chapter));
             }
         } else if (model.hasContent()) {
             for (Content content : model.getContent()) {
@@ -84,52 +84,21 @@ public class JSPDFWriter {
     }
 
     private Element processContent(Content content) {
+        Element result = null;
         if (content instanceof Paragraph) {
-            return com.justifiedsolutions.openpdf.text.Paragraph.getInstance((Paragraph) content);
+            result = com.justifiedsolutions.openpdf.text.Paragraph.getInstance((Paragraph) content);
         }
         if (content instanceof Phrase) {
-            return com.justifiedsolutions.openpdf.text.Phrase.getInstance((Phrase) content);
+            result = com.justifiedsolutions.openpdf.text.Phrase.getInstance((Phrase) content);
         }
         if (content instanceof Chunk) {
-            return com.justifiedsolutions.openpdf.text.Chunk.getInstance((Chunk) content);
+            result = com.justifiedsolutions.openpdf.text.Chunk.getInstance((Chunk) content);
         }
         if (content instanceof Table) {
-            return PdfPTable.getInstance((Table) content);
-        }
-        throw new IllegalArgumentException("Invalid content type: " + content.getClass());
-    }
-
-    private com.justifiedsolutions.openpdf.text.Chapter processChapter(Chapter chapter) {
-        com.justifiedsolutions.openpdf.text.Paragraph title = com.justifiedsolutions.openpdf.text
-                .Paragraph.getInstance(chapter.getTitle());
-        com.justifiedsolutions.openpdf.text.Chapter result = new com.justifiedsolutions.openpdf.text.Chapter(
-                title, chapter.getSectionNumber());
-        result.setTriggerNewPage(true);
-        result.setNumberStyle(
-                com.justifiedsolutions.openpdf.text.Section.NUMBERSTYLE_DOTTED_WITHOUT_FINAL_DOT);
-        for (Content content : chapter.getContent()) {
-            result.add(processContent(content));
-        }
-        for (Section section : chapter.getSections()) {
-            processSection(section, result);
+            result = PdfPTable.getInstance((Table) content);
         }
         return result;
     }
 
-    private void processSection(Section section,
-            com.justifiedsolutions.openpdf.text.Section parent) {
-        com.justifiedsolutions.openpdf.text.Paragraph title = com.justifiedsolutions.openpdf.text
-                .Paragraph.getInstance(section.getTitle());
-        com.justifiedsolutions.openpdf.text.Section result = parent.addSection(title);
-        result.setTriggerNewPage(section.isStartsNewPage());
-        result.setNumberStyle(
-                com.justifiedsolutions.openpdf.text.Section.NUMBERSTYLE_DOTTED_WITHOUT_FINAL_DOT);
-        for (Content content : section.getContent()) {
-            result.add(processContent(content));
-        }
-        for (Section child : section.getSections()) {
-            processSection(child, result);
-        }
-    }
 
 }
