@@ -19,7 +19,7 @@ import java.util.Objects;
  *
  * @see <a href="https://techterms.com/definition/leading">Leading</a>
  */
-public class Phrase implements Content {
+public class Phrase implements TextContent {
 
     private final List<Chunk> chunks = new ArrayList<>();
     private float leading = 16f;

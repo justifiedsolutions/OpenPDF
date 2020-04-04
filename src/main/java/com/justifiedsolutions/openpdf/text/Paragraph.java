@@ -49,6 +49,9 @@
 
 package com.justifiedsolutions.openpdf.text;
 
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
+
+import com.justifiedsolutions.openpdf.pdf.content.Content;
 import java.util.List;
 
 /**
@@ -464,5 +467,32 @@ public class Paragraph extends Phrase {
      */
     public void setExtraParagraphSpace(float extraParagraphSpace) {
         this.extraParagraphSpace = extraParagraphSpace;
+    }
+
+    /**
+     * Creates a new internal Paragraph from an API Paragraph.
+     *
+     * @param paragraph API paragraph
+     * @return internal paragraph
+     */
+    public static Paragraph getInstance(com.justifiedsolutions.openpdf.pdf.content.Paragraph paragraph) {
+        Paragraph result = new Paragraph();
+        result.setLeading(paragraph.getLeading());
+        result.setFont(FontFactory.getFont(paragraph.getFont()));
+        result.setIndentationLeft(paragraph.getLeftIndent());
+        result.setIndentationRight(paragraph.getRightIndent());
+        result.setFirstLineIndent(paragraph.getFirstLineIndent());
+        result.setSpacingBefore(paragraph.getSpacingBefore());
+        result.setSpacingAfter(paragraph.getSpacingAfter());
+        result.setKeepTogether(paragraph.isKeepTogether());
+        result.setAlignment(convertHorizontalAlignment(paragraph.getAlignment()));
+        for (Content content : paragraph.getContent()) {
+            if (content instanceof com.justifiedsolutions.openpdf.pdf.content.Phrase) {
+                result.add(Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) content));
+            } else if (content instanceof com.justifiedsolutions.openpdf.pdf.content.Chunk) {
+                result.add(Chunk.getInstance((com.justifiedsolutions.openpdf.pdf.content.Chunk) content));
+            }
+        }
+        return result;
     }
 }

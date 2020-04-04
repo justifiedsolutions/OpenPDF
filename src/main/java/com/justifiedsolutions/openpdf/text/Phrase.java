@@ -56,6 +56,7 @@ import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A <CODE>Phrase</CODE> is a series of <CODE>Chunk</CODE>s.
@@ -564,4 +565,20 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
         return p;
     }
 
+    /**
+     * Creates a new internal Phrase from an API Phrase.
+     *
+     * @param phrase API phrase
+     * @return internal phrase
+     */
+    public static Phrase getInstance(com.justifiedsolutions.openpdf.pdf.content.Phrase phrase) {
+        Objects.requireNonNull(phrase);
+        Phrase result = new Phrase();
+        result.setLeading(phrase.getLeading());
+        result.setFont(FontFactory.getFont(phrase.getFont()));
+        for (com.justifiedsolutions.openpdf.pdf.content.Chunk chunk : phrase.getChunks()) {
+            result.add(Chunk.getInstance(chunk));
+        }
+        return result;
+    }
 }

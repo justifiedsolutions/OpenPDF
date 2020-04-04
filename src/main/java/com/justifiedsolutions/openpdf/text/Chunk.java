@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This is the smallest significant part of text that can be added to a document.
@@ -245,7 +246,10 @@ public class Chunk implements Element {
      * @param font    the font
      */
     public Chunk(String content, Font font) {
-        this.content = new StringBuffer(content);
+        this.content = new StringBuffer();
+        if (content != null) {
+            this.content.append(content);
+        }
         this.font = font;
     }
 
@@ -372,6 +376,19 @@ public class Chunk implements Element {
     }
 
     /**
+     * Creates a new internal Chunk from an API Chunk.
+     *
+     * @param chunk API chunk
+     * @return internal chunk
+     */
+    public static Chunk getInstance(com.justifiedsolutions.openpdf.pdf.content.Chunk chunk) {
+        Objects.requireNonNull(chunk);
+        Chunk result = new Chunk(chunk.getText());
+        result.setFont(FontFactory.getFont(chunk.getFont()));
+        return result;
+    }
+
+    /**
      * Processes the element by adding it (or the different parts) to an <CODE>
      * ElementListener</CODE>.
      *
@@ -489,30 +506,6 @@ public class Chunk implements Element {
         return attributes != null;
     }
 
-    /**
-     * Gets the attributes for this <CODE>Chunk</CODE>.
-     * <p>
-     * It may be null.
-     *
-     * @return the attributes for this <CODE>Chunk</CODE>
-     * @deprecated use {@link #getChunkAttributes()}
-     */
-    @Deprecated
-    public HashMap getAttributes() {
-        return (HashMap) attributes;
-    }
-
-    /**
-     * Sets the attributes all at once.
-     *
-     * @param attributes the attributes of a Chunk
-     * @deprecated use {@link #setChunkAttributes(Map)}
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public void setAttributes(HashMap attributes) {
-        this.attributes = attributes;
-    }
 
     /**
      * Gets the attributes for this <CODE>Chunk</CODE>.
@@ -803,6 +796,8 @@ public class Chunk implements Element {
         return setAttribute(NEWPAGE, null);
     }
 
+    // keys used in PdfChunk
+
     /**
      * @see Element#isContent()
      * @since iText 2.0.8
@@ -810,8 +805,6 @@ public class Chunk implements Element {
     public boolean isContent() {
         return true;
     }
-
-    // keys used in PdfChunk
 
     /**
      * @see Element#isNestable()

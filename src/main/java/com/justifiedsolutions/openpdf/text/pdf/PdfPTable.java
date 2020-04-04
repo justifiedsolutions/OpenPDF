@@ -49,6 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.pdf.content.Cell;
+import com.justifiedsolutions.openpdf.pdf.content.Table;
 import com.justifiedsolutions.openpdf.text.Chunk;
 import java.util.ArrayList;
 
@@ -63,6 +65,7 @@ import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPTableEventForwarder;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This is a table that can be put at an absolute position but can also
@@ -1601,5 +1604,20 @@ public class PdfPTable implements LargeElement{
      */
     public void setComplete(boolean complete) {
         this.complete = complete;
+    }
+
+    public static PdfPTable getInstance(Table table) {
+        Objects.requireNonNull(table);
+        PdfPTable result = new PdfPTable(table.getRelativeColumnWidths());
+        result.setKeepTogether(table.isKeepTogether());
+        result.setWidthPercentage(table.getWidthPercentage());
+        result.setSpacingBefore(table.getSpacingBefore());
+        result.setSpacingAfter(table.getSpacingAfter());
+
+        for (Cell cell : table.getCells()) {
+            result.addCell(PdfPCell.getInstance(cell));
+        }
+
+        return result;
     }
 }

@@ -50,6 +50,7 @@
 
 package com.justifiedsolutions.openpdf.text;
 
+import com.justifiedsolutions.openpdf.pdf.font.PDFFont;
 import java.awt.Color;
 import java.util.Properties;
 import java.util.Set;
@@ -431,5 +432,13 @@ public static Set<String> getRegisteredFamilies() {
         if (fontImp == null)
             throw new NullPointerException(MessageLocalization.getComposedMessage("fontfactoryimp.cannot.be.null"));
         FontFactory.fontImp = fontImp;
+    }
+
+    public static Font getFont(com.justifiedsolutions.openpdf.pdf.font.Font font) {
+        if (font instanceof PDFFont) {
+            PDFFont pdfFont = (PDFFont) font;
+            return getFont(pdfFont.getName().getName(),pdfFont.getSize(),pdfFont.getColor());
+        }
+        return new Font();
     }
 }

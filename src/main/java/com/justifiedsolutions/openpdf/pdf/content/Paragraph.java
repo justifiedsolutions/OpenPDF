@@ -18,7 +18,7 @@ import java.util.Objects;
  * {@link com.justifiedsolutions.openpdf.pdf.font.Font} and any Chunks or Phrases added to the
  * Paragraph inherit the Font of the Paragraph unless they specify a Font themselves.
  */
-public class Paragraph implements Content {
+public class Paragraph implements TextContent {
 
     private float leading = 16f;
     private Font font;

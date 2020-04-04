@@ -79,9 +79,7 @@ public class HeaderFooter extends Rectangle {
     public Paragraph paragraph() {
         final Paragraph result;
         if (runningMarginal.isValidForPageNumber(pageNumber)) {
-            //TODO when Paragraph is done
-            //result = runningMarginal.getParagraph(pageNumber);
-            result = new Paragraph("TODO");
+            result = Paragraph.getInstance(runningMarginal.getParagraph(pageNumber));
         } else {
             result = new Paragraph();
         }

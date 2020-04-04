@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * Smallest part of text that can be added to a {@link com.justifiedsolutions.openpdf.pdf.Document}.
  */
-public class Chunk implements Content {
+public class Chunk implements TextContent {
 
     private String text;
     private Font font;

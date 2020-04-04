@@ -28,10 +28,5 @@ public enum HorizontalAlignment {
     /**
      * Justified alignment.
      */
-    JUSTIFIED,
-
-    /**
-     * Unspecified alignment.
-     */
-    UNDEFINED
+    JUSTIFIED
 }

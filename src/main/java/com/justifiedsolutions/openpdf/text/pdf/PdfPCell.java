@@ -49,16 +49,21 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
+
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
+import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPCellEventForwarder;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A cell in a PdfPTable.
@@ -1038,4 +1043,28 @@ public class PdfPCell extends Rectangle {
         }
         return height;
     }
+
+    public static PdfPCell getInstance(com.justifiedsolutions.openpdf.pdf.content.Cell cell) {
+        Objects.requireNonNull(cell);
+        PdfPCell result = new PdfPCell();
+        result.setRowspan(cell.getRowSpan());
+        result.setColspan(cell.getColumnSpan());
+        result.setHorizontalAlignment(convertHorizontalAlignment(cell.getHorizontalAlignment()));
+        result.setVerticalAlignment(convertVerticalAlignment(cell.getVerticalAlignment()));
+        result.setMinimumHeight(cell.getMinimumHeight());
+        result.setPaddingTop(cell.getPaddingTop());
+        result.setPaddingBottom(cell.getPaddingBottom());
+        result.setPaddingLeft(cell.getPaddingLeft());
+        result.setPaddingRight(cell.getPaddingRight());
+        result.setGrayFill(cell.getGreyFill());
+        if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Paragraph) {
+            result.addElement(Paragraph.getInstance((com.justifiedsolutions.openpdf.pdf.content.Paragraph) cell.getContent()));
+        }
+        if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Phrase) {
+            result.addElement(Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) cell.getContent()));
+        }
+
+        return result;
+    }
+
 }
