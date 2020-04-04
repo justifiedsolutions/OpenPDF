@@ -48,11 +48,7 @@ public class Cell {
      */
     Cell(Content content) {
         this();
-        if ((content instanceof Phrase) || (content instanceof Paragraph)) {
-            this.content = content;
-        } else {
-            throw new IllegalArgumentException("Invalid content type: " + content.getClass());
-        }
+        setContent(content);
     }
 
     /**
@@ -62,6 +58,21 @@ public class Cell {
      */
     public Content getContent() {
         return content;
+    }
+
+    /**
+     * Sets the content of the Cell. The {@link Content} must be a {@link Phrase}
+     * or a {@link Paragraph}.
+     *
+     * @param content the cell content
+     * @throws IllegalArgumentException if the content isn't the correct type.
+     */
+    public void setContent(Content content) {
+        if ((content instanceof Phrase) || (content instanceof Paragraph)) {
+            this.content = content;
+        } else {
+            throw new IllegalArgumentException("Invalid content type: " + content.getClass());
+        }
     }
 
     /**
