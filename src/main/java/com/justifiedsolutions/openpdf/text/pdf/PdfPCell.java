@@ -52,6 +52,7 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
 import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
 
+import com.justifiedsolutions.openpdf.pdf.content.Cell.Border;
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
@@ -1047,6 +1048,7 @@ public class PdfPCell extends Rectangle {
     public static PdfPCell getInstance(com.justifiedsolutions.openpdf.pdf.content.Cell cell) {
         Objects.requireNonNull(cell);
         PdfPCell result = new PdfPCell();
+        result.setBorder(convertBorder(cell.getBorders()));
         result.setRowspan(cell.getRowSpan());
         result.setColspan(cell.getColumnSpan());
         result.setHorizontalAlignment(convertHorizontalAlignment(cell.getHorizontalAlignment()));
@@ -1058,13 +1060,41 @@ public class PdfPCell extends Rectangle {
         result.setPaddingRight(cell.getPaddingRight());
         result.setGrayFill(cell.getGreyFill());
         if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Paragraph) {
-            result.addElement(Paragraph.getInstance((com.justifiedsolutions.openpdf.pdf.content.Paragraph) cell.getContent()));
+            result.setPhrase(Paragraph.getInstance((com.justifiedsolutions.openpdf.pdf.content.Paragraph) cell.getContent()));
         }
         if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Phrase) {
-            result.addElement(Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) cell.getContent()));
+            result.setPhrase(Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) cell.getContent()));
         }
 
         return result;
     }
 
+    private static int convertBorder(List<Border> borders) {
+        int result = NO_BORDER;
+        if (borders != null) {
+            for (Border border : borders) {
+                switch (border) {
+                    case TOP:
+                        result |= TOP;
+                        break;
+                    case BOTTOM:
+                        result |= BOTTOM;
+                        break;
+                    case LEFT:
+                        result |= LEFT;
+                        break;
+                    case RIGHT:
+                        result |= RIGHT;
+                        break;
+                    case ALL:
+                        result = BOX;
+                        break;
+                }
+                if (result == BOX) {
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }
