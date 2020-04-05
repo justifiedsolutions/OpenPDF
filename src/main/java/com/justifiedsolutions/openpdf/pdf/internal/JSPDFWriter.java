@@ -86,14 +86,11 @@ public class JSPDFWriter {
         Element result = null;
         if (content instanceof Paragraph) {
             result = com.justifiedsolutions.openpdf.text.Paragraph.getInstance((Paragraph) content);
-        }
-        if (content instanceof Phrase) {
+        } else if (content instanceof Phrase) {
             result = com.justifiedsolutions.openpdf.text.Phrase.getInstance((Phrase) content);
-        }
-        if (content instanceof Chunk) {
+        } else if (content instanceof Chunk) {
             result = com.justifiedsolutions.openpdf.text.Chunk.getInstance((Chunk) content);
-        }
-        if (content instanceof Table) {
+        } else if (content instanceof Table) {
             result = PdfPTable.getInstance((Table) content);
         }
         return result;

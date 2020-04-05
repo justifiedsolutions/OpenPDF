@@ -20,7 +20,9 @@ import java.util.Objects;
  */
 public class Paragraph implements TextContent {
 
+    private final List<Content> content = new ArrayList<>();
     private float leading = 16f;
+    private float lineHeight = 0;
     private Font font;
     private float leftIndent = 0f;
     private float rightIndent = 0f;
@@ -29,7 +31,6 @@ public class Paragraph implements TextContent {
     private float spacingAfter = 0f;
     private boolean keepTogether = false;
     private HorizontalAlignment alignment;
-    private final List<Content> content = new ArrayList<>();
 
     /**
      * Creates an empty Paragraph.
@@ -50,6 +51,41 @@ public class Paragraph implements TextContent {
     }
 
     /**
+     * Creates a new Paragraph adding the specified text.
+     *
+     * @param text the content
+     * @throws NullPointerException if text is null
+     */
+    public Paragraph(String text) {
+        add(text);
+    }
+
+    /**
+     * Creates a new Paragraph adding the specified content and font.
+     *
+     * @param content the content
+     * @param font    the font
+     * @throws NullPointerException     if content is null
+     * @throws IllegalArgumentException if content is not a Chunk or Phrase
+     */
+    public Paragraph(Content content, Font font) {
+        add(content);
+        setFont(font);
+    }
+
+    /**
+     * Creates a new Paragraph adding the specified text and font.
+     *
+     * @param text the content
+     * @param font the font
+     * @throws NullPointerException if text is null
+     */
+    public Paragraph(String text, Font font) {
+        add(text);
+        setFont(font);
+    }
+
+    /**
      * Get the leading for the Paragraph. The default value is 16.0f.
      *
      * @return the leading
@@ -59,12 +95,36 @@ public class Paragraph implements TextContent {
     }
 
     /**
-     * Set the leading for the Paragraph.
+     * Set the leading for the Paragraph. You can have either leading or line height but not both.
+     * Setting one will set the other to 0.
      *
      * @param leading the leading
      */
     public void setLeading(float leading) {
         this.leading = leading;
+        this.lineHeight = 0;
+    }
+
+    /**
+     * Gets the line height for the Paragraph. This multiplied by the maximum height of the largest
+     * font in the Paragraph.
+     *
+     * @return the line height
+     */
+    public float getLineHeight() {
+        return lineHeight;
+    }
+
+    /**
+     * Sets the line height for the Paragraph. This multiplied by the maximum height of the largest
+     * font in the Paragraph. You can have either leading or line height but not both. Setting one
+     * will set the other to 0.
+     *
+     * @param lineHeight the line height
+     */
+    public void setLineHeight(float lineHeight) {
+        this.lineHeight = lineHeight;
+        this.leading = 0;
     }
 
     @Override
@@ -230,6 +290,17 @@ public class Paragraph implements TextContent {
         }
     }
 
+    /**
+     * Adds the specified text to the Paragraph as a Chunk.
+     *
+     * @param text the text
+     * @throws NullPointerException if text is null
+     */
+    public void add(String text) {
+        Objects.requireNonNull(text);
+        add(new Chunk(text));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -240,20 +311,22 @@ public class Paragraph implements TextContent {
         }
         Paragraph paragraph = (Paragraph) o;
         return Float.compare(paragraph.leading, leading) == 0 &&
+                Float.compare(paragraph.lineHeight, lineHeight) == 0 &&
                 Float.compare(paragraph.leftIndent, leftIndent) == 0 &&
                 Float.compare(paragraph.rightIndent, rightIndent) == 0 &&
-                firstLineIndent == paragraph.firstLineIndent &&
+                Float.compare(paragraph.firstLineIndent, firstLineIndent) == 0 &&
                 Float.compare(paragraph.spacingBefore, spacingBefore) == 0 &&
                 Float.compare(paragraph.spacingAfter, spacingAfter) == 0 &&
                 keepTogether == paragraph.keepTogether &&
+                content.equals(paragraph.content) &&
                 Objects.equals(font, paragraph.font) &&
-                alignment == paragraph.alignment &&
-                content.equals(paragraph.content);
+                alignment == paragraph.alignment;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(leading, font, leftIndent, rightIndent, firstLineIndent, spacingBefore,
-                spacingAfter, keepTogether, alignment, content);
+        return Objects
+                .hash(content, leading, lineHeight, font, leftIndent, rightIndent, firstLineIndent,
+                        spacingBefore, spacingAfter, keepTogether, alignment);
     }
 }

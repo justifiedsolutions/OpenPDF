@@ -1060,10 +1060,17 @@ public class PdfPCell extends Rectangle {
         result.setPaddingRight(cell.getPaddingRight());
         result.setGrayFill(cell.getGreyFill());
         if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Paragraph) {
-            result.setPhrase(Paragraph.getInstance((com.justifiedsolutions.openpdf.pdf.content.Paragraph) cell.getContent()));
-        }
-        if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Phrase) {
-            result.setPhrase(Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) cell.getContent()));
+            Paragraph paragraph = Paragraph.getInstance((com.justifiedsolutions.openpdf.pdf.content.Paragraph) cell.getContent());
+            if (paragraph.getAlignment() == ALIGN_UNDEFINED) {
+                paragraph.setAlignment(result.getHorizontalAlignment());
+            }
+            result.addElement(paragraph);
+        } else if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Phrase) {
+            Phrase phrase = Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) cell.getContent());
+            Paragraph paragraph = new Paragraph(phrase);
+            paragraph.setAlignment(result.getHorizontalAlignment());
+            paragraph.setLeading(0, 1);
+            result.addElement(paragraph);
         }
 
         return result;

@@ -24,7 +24,8 @@ public class PhraseTest {
     @Test
     public void getInstanceDefault() {
         Phrase actual = Phrase.getInstance(new com.justifiedsolutions.openpdf.pdf.content.Phrase());
-        assertEquals(16, actual.getLeading());
+        //when no leading is set, the default is calculated based on the font.
+        assertEquals(18, actual.getLeading());
         FontAssertions.assertUndefinedFont(actual.getFont());
         assertTrue(actual.getChunks().isEmpty());
     }
@@ -43,7 +44,6 @@ public class PhraseTest {
     public void getInstanceString() {
         Phrase actual = Phrase
                 .getInstance(new com.justifiedsolutions.openpdf.pdf.content.Phrase("string"));
-        assertEquals(16, actual.getLeading());
         FontAssertions.assertUndefinedFont(actual.getFont());
         assertEquals(1, actual.getChunks().size());
         assertEquals("string", actual.getChunks().get(0).getContent());
@@ -53,7 +53,6 @@ public class PhraseTest {
     public void getInstanceStringFont() {
         Phrase actual = Phrase.getInstance(
                 new com.justifiedsolutions.openpdf.pdf.content.Phrase("string", new PDFFont()));
-        assertEquals(16, actual.getLeading());
         FontAssertions.assertDefaultFont(actual.getFont());
         assertEquals(1, actual.getChunks().size());
         assertEquals("string", actual.getChunks().get(0).getContent());

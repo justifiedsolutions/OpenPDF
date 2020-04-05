@@ -29,7 +29,7 @@ public class SectionTest {
     @Test
     public void addSectionNullParent() throws DocumentException {
         Document document = new Document(PageSize.LETTER, new Margin(10, 10, 10, 10));
-        Chapter chapter = document.addChapter(new Paragraph());
+        Chapter chapter = document.createChapter(new Paragraph());
         com.justifiedsolutions.openpdf.pdf.Section child = chapter
                 .addSection(new Paragraph(new Chunk("title")));
 
@@ -50,7 +50,7 @@ public class SectionTest {
                 1);
 
         Document document = new Document(PageSize.LETTER, new Margin(10, 10, 10, 10));
-        Chapter chapter = document.addChapter(new Paragraph());
+        Chapter chapter = document.createChapter(new Paragraph());
         com.justifiedsolutions.openpdf.pdf.Section child = chapter
                 .addSection(new Paragraph(new Chunk("title")));
         child.setDisplaySectionNumber(true);
@@ -71,7 +71,7 @@ public class SectionTest {
                 1);
 
         Document document = new Document(PageSize.LETTER, new Margin(10, 10, 10, 10));
-        Chapter chapter = document.addChapter(new Paragraph());
+        Chapter chapter = document.createChapter(new Paragraph());
         com.justifiedsolutions.openpdf.pdf.Section child = chapter
                 .addSection(new Paragraph(new Chunk("title")));
         child.setDisplaySectionNumber(false);
@@ -109,7 +109,6 @@ public class SectionTest {
         assertEquals(1, pdfTable.getRows().size());
         PdfPRow row = pdfTable.getRow(0);
         assertEquals(1, row.getCells().length);
-        assertEquals("text", row.getCells()[0].getPhrase().getContent());
     }
 
     @Test

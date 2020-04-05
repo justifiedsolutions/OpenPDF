@@ -73,9 +73,10 @@ public class PdfPTableTest {
         assertNotNull(row.getCells());
         assertEquals(2, row.getCells().length);
         PdfPCell c0 = row.getCells()[0];
-        assertEquals("p1", c0.getPhrase().getContent());
+
+        assertEquals("p1", c0.getColumn().compositeElements.getFirst().getChunks().get(0).getContent());
         PdfPCell c1 = row.getCells()[1];
-        assertEquals("p2", c1.getPhrase().getContent());
+        assertEquals("p2", c1.getColumn().compositeElements.getFirst().getChunks().get(0).getContent());
     }
 
 

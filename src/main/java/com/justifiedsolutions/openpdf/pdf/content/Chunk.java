@@ -38,10 +38,6 @@ public class Chunk implements TextContent {
         this(text, null);
     }
 
-    private Chunk(boolean pageBreak) {
-        this.pageBreak = pageBreak;
-    }
-
     /**
      * Creates a Chunk with the specified text and font.
      *
@@ -49,8 +45,12 @@ public class Chunk implements TextContent {
      * @param font the font
      */
     public Chunk(String text, Font font) {
-        this.text = text;
+        this.text = (text != null) ? text : "";
         this.font = font;
+    }
+
+    private Chunk(boolean pageBreak) {
+        this.pageBreak = pageBreak;
     }
 
     /**

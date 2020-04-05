@@ -29,7 +29,7 @@ public class ChapterTest {
     public void getInstanceWithNumbers() throws DocumentException {
         Document document = new Document(PageSize.LETTER, new Margin(10, 10, 10, 10));
         com.justifiedsolutions.openpdf.pdf.Chapter chapter = document
-                .addChapter(new Paragraph(new Chunk("title")));
+                .createChapter(new Paragraph(new Chunk("title")));
         chapter.setDisplaySectionNumber(true);
 
         Chapter actual = Chapter.getInstance(chapter);
@@ -44,7 +44,7 @@ public class ChapterTest {
     public void addSectionNoNumbers() throws DocumentException {
         Document document = new Document(PageSize.LETTER, new Margin(10, 10, 10, 10));
         com.justifiedsolutions.openpdf.pdf.Chapter chapter = document
-                .addChapter(new Paragraph(new Chunk("title")));
+                .createChapter(new Paragraph(new Chunk("title")));
         chapter.setDisplaySectionNumber(false);
 
         Chapter actual = Chapter.getInstance(chapter);

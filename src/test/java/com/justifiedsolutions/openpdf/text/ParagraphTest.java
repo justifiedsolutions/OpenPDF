@@ -40,6 +40,18 @@ public class ParagraphTest {
         input.setLeading(8);
         Paragraph actual = Paragraph.getInstance(input);
         assertEquals(8, actual.getLeading());
+        assertEquals(0,actual.getMultipliedLeading());
+        FontAssertions.assertUndefinedFont(actual.getFont());
+        assertTrue(actual.getChunks().isEmpty());
+    }
+
+    @Test
+    public void getInstanceDefaultChangeLineHeight() {
+        com.justifiedsolutions.openpdf.pdf.content.Paragraph input = new com.justifiedsolutions.openpdf.pdf.content.Paragraph();
+        input.setLineHeight(1.3f);
+        Paragraph actual = Paragraph.getInstance(input);
+        assertEquals(0, actual.getLeading());
+        assertEquals(1.3f,actual.getMultipliedLeading());
         FontAssertions.assertUndefinedFont(actual.getFont());
         assertTrue(actual.getChunks().isEmpty());
     }
@@ -89,11 +101,11 @@ public class ParagraphTest {
 
         assertEquals(16, actual.getLeading());
         FontAssertions.assertDefaultFont(actual.getFont());
-        assertEquals(value,actual.getIndentationLeft());
-        assertEquals(value,actual.getIndentationRight());
-        assertEquals(value,actual.getFirstLineIndent());
-        assertEquals(value,actual.getSpacingBefore());
-        assertEquals(value,actual.getSpacingAfter());
+        assertEquals(value, actual.getIndentationLeft());
+        assertEquals(value, actual.getIndentationRight());
+        assertEquals(value, actual.getFirstLineIndent());
+        assertEquals(value, actual.getSpacingBefore());
+        assertEquals(value, actual.getSpacingAfter());
         assertTrue(actual.getKeepTogether());
         assertEquals(Element.ALIGN_JUSTIFIED, actual.getAlignment());
         assertEquals(1, actual.getChunks().size());

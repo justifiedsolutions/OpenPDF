@@ -68,7 +68,7 @@ public class Document {
         Objects.requireNonNull(metadata);
         if (value != null) {
             this.metadata.put(metadata, value);
-        } else if (this.metadata.containsKey(metadata)) {
+        } else {
             this.metadata.remove(metadata);
         }
     }
@@ -156,7 +156,7 @@ public class Document {
      * @throws DocumentException    if other {@link Content} has already been added to the Document
      * @throws NullPointerException if title is <code>null</code>
      */
-    public Chapter addChapter(Paragraph title) throws DocumentException {
+    public Chapter createChapter(Paragraph title) throws DocumentException {
         if (hasContent()) {
             throw new DocumentException(
                     "Unable to create Chapter with Content already added to Document.");
@@ -193,7 +193,7 @@ public class Document {
      * @throws DocumentException    if {@link Chapter}s have already been added to the Document
      * @throws NullPointerException if content is <code>null</code>
      */
-    public void addContent(Content content) throws DocumentException {
+    public void add(Content content) throws DocumentException {
         if (hasChapters()) {
             throw new DocumentException(
                     "Unable to add Content with Chapters already added to Document.");

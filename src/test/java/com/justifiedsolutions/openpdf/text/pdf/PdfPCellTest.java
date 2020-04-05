@@ -96,11 +96,11 @@ public class PdfPCellTest {
         Cell input = table.createCell(phrase);
 
         PdfPCell actual = PdfPCell.getInstance(input);
-        assertNotNull(actual.getPhrase());
-        assertNotNull(actual.getPhrase().getChunks());
-        assertEquals(1, actual.getPhrase().getChunks().size());
-        assertNotNull(actual.getPhrase().getChunks().get(0));
-        assertEquals(expectedText, actual.getPhrase().getChunks().get(0).getContent());
+        assertNotNull(actual.getColumn().compositeElements.getFirst());
+        assertNotNull(actual.getColumn().compositeElements.getFirst().getChunks());
+        assertEquals(1, actual.getColumn().compositeElements.getFirst().getChunks().size());
+        assertNotNull(actual.getColumn().compositeElements.getFirst().getChunks().get(0));
+        assertEquals(expectedText, actual.getColumn().compositeElements.getFirst().getChunks().get(0).getContent());
     }
 
 }
