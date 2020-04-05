@@ -383,6 +383,9 @@ public class Chunk implements Element {
      */
     public static Chunk getInstance(com.justifiedsolutions.openpdf.pdf.content.Chunk chunk) {
         Objects.requireNonNull(chunk);
+        if (chunk.isPageBreak()) {
+            return Chunk.NEXTPAGE;
+        }
         Chunk result = new Chunk(chunk.getText());
         result.setFont(FontFactory.getFont(chunk.getFont()));
         return result;

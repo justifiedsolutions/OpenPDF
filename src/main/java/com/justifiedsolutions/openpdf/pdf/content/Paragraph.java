@@ -46,7 +46,7 @@ public class Paragraph implements TextContent {
      * @throws IllegalArgumentException if content is not a Chunk or Phrase
      */
     public Paragraph(Content content) {
-        addContent(content);
+        add(content);
     }
 
     /**
@@ -221,7 +221,7 @@ public class Paragraph implements TextContent {
      * @throws NullPointerException     if content is null
      * @throws IllegalArgumentException if content is not a Chunk or Phrase
      */
-    public void addContent(Content content) {
+    public void add(Content content) {
         Objects.requireNonNull(content);
         if ((content instanceof Chunk) || (content instanceof Phrase)) {
             this.content.add(content);

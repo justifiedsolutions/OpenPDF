@@ -33,6 +33,26 @@ public class Phrase implements TextContent {
     }
 
     /**
+     * Creates a Phrase with the specified chunk.
+     *
+     * @param chunk the chunk
+     */
+    public Phrase(Chunk chunk) {
+        this(chunk, null);
+    }
+
+    /**
+     * Creates a Phrase with the specified chunk and font. The font is associated with the Phrase.
+     *
+     * @param chunk the chunk
+     * @param font  the font
+     */
+    public Phrase(Chunk chunk, Font font) {
+        add(chunk);
+        this.font = font;
+    }
+
+    /**
      * Creates a Phrase with the specified text. The text is turned into a Chunk.
      *
      * @param text the text
@@ -43,13 +63,13 @@ public class Phrase implements TextContent {
 
     /**
      * Creates a Phrase with the specified text and font. The text is turned into a Chunk and the
-     * font is assoicated with the Phrase.
+     * font is associated with the Phrase.
      *
      * @param text the text
      * @param font the font
      */
     public Phrase(String text, Font font) {
-        addText(text);
+        add(text);
         this.font = font;
     }
 
@@ -95,7 +115,7 @@ public class Phrase implements TextContent {
      *
      * @param chunk the chunk to add
      */
-    public void addChunk(Chunk chunk) {
+    public void add(Chunk chunk) {
         chunks.add(chunk);
     }
 
@@ -105,9 +125,9 @@ public class Phrase implements TextContent {
      *
      * @param text the text to add
      */
-    public void addText(String text) {
+    public void add(String text) {
         if (text != null) {
-            addChunk(new Chunk(text));
+            add(new Chunk(text));
         }
     }
 

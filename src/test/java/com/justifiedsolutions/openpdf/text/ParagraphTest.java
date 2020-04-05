@@ -76,7 +76,7 @@ public class ParagraphTest {
         com.justifiedsolutions.openpdf.pdf.content.Paragraph input =
                 new com.justifiedsolutions.openpdf.pdf.content.Paragraph(chunk);
         input.setFont(new PDFFont());
-        input.addContent(chunk2);
+        input.add(chunk2);
         input.setLeftIndent(value);
         input.setRightIndent(value);
         input.setFirstLineIndent(value);
@@ -106,7 +106,7 @@ public class ParagraphTest {
         Phrase phrase = new Phrase("string2");
         com.justifiedsolutions.openpdf.pdf.content.Paragraph input =
                 new com.justifiedsolutions.openpdf.pdf.content.Paragraph(chunk);
-        input.addContent(phrase);
+        input.add(phrase);
 
         Paragraph actual = Paragraph.getInstance(input);
 

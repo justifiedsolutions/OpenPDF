@@ -8,8 +8,10 @@ package com.justifiedsolutions.openpdf.text;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.justifiedsolutions.openpdf.pdf.font.PDFFont;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 public class ChunkTest {
@@ -37,4 +39,14 @@ public class ChunkTest {
         assertEquals("", actual.getContent());
         FontAssertions.assertUndefinedFont(actual.getFont());
     }
+
+    @Test
+    public void getInstancePageBreak() {
+        com.justifiedsolutions.openpdf.text.Chunk actual = com.justifiedsolutions.openpdf.text.Chunk
+                .getInstance(com.justifiedsolutions.openpdf.pdf.content.Chunk.PAGE_BREAK);
+
+        Map<String, Object> attributes = actual.getChunkAttributes();
+        assertTrue(attributes.containsKey(Chunk.NEWPAGE));
+    }
+
 }

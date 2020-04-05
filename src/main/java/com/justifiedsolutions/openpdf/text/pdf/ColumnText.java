@@ -78,7 +78,7 @@ import java.util.List;
  * I the column ended, a new column definition can be loaded with the method
  * <CODE>setColumns</CODE> and the method <CODE>go</CODE> can be called again.
  * <P>
- * If the text ended, more text can be loaded with <CODE>addText</CODE>
+ * If the text ended, more text can be loaded with <CODE>add</CODE>
  * and the method <CODE>go</CODE> can be called again.<BR>
  * The only limitation is that one or more complete paragraphs must be loaded
  * each time.
@@ -404,7 +404,7 @@ public class ColumnText {
      * <CODE>List</CODE>, <CODE>PdfPTable</CODE>, <CODE>Image</CODE> and
      * <CODE>Graphic</CODE>.
      * <p>
-     * It removes all the text placed with <CODE>addText()</CODE>.
+     * It removes all the text placed with <CODE>add()</CODE>.
      * 
      * @param element the <CODE>Element</CODE>
      */    

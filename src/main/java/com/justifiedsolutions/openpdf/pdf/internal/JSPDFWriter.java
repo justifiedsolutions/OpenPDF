@@ -11,7 +11,6 @@ import com.justifiedsolutions.openpdf.pdf.Document;
 import com.justifiedsolutions.openpdf.pdf.Margin;
 import com.justifiedsolutions.openpdf.pdf.Metadata;
 import com.justifiedsolutions.openpdf.pdf.PageSize;
-import com.justifiedsolutions.openpdf.pdf.Section;
 import com.justifiedsolutions.openpdf.pdf.content.Chunk;
 import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;

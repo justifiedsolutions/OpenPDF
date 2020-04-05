@@ -15,8 +15,12 @@ import java.util.Objects;
  */
 public class Chunk implements TextContent {
 
+    public static final Chunk LINE_BREAK = new Chunk("\n");
+    public static final Chunk PAGE_BREAK = new Chunk(true);
+
     private String text;
     private Font font;
+    private boolean pageBreak = false;
 
     /**
      * Creates an empty Chunk.
@@ -32,6 +36,10 @@ public class Chunk implements TextContent {
      */
     public Chunk(String text) {
         this(text, null);
+    }
+
+    private Chunk(boolean pageBreak) {
+        this.pageBreak = pageBreak;
     }
 
     /**
@@ -90,6 +98,15 @@ public class Chunk implements TextContent {
         this.font = font;
     }
 
+    /**
+     * Specifies if this Chunk represents a page break.
+     *
+     * @return true if it is a page break
+     */
+    public boolean isPageBreak() {
+        return pageBreak;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -99,12 +116,13 @@ public class Chunk implements TextContent {
             return false;
         }
         Chunk chunk = (Chunk) o;
-        return Objects.equals(text, chunk.text) &&
+        return pageBreak == chunk.pageBreak &&
+                Objects.equals(text, chunk.text) &&
                 Objects.equals(font, chunk.font);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(text, font);
+        return Objects.hash(text, font, pageBreak);
     }
 }

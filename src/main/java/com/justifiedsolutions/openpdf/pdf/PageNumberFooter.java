@@ -60,7 +60,7 @@ public class PageNumberFooter implements Footer {
     @Override
     public Paragraph getParagraph(int pageNumber) {
         Paragraph result = new Paragraph(new Chunk("Page "));
-        result.addContent(new Chunk(String.valueOf(pageNumber)));
+        result.add(new Chunk(String.valueOf(pageNumber)));
         result.setAlignment(HorizontalAlignment.RIGHT);
         result.setFont(getFont());
         return result;
