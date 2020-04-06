@@ -6,7 +6,6 @@
 
 package com.justifiedsolutions.openpdf.pdf;
 
-import com.justifiedsolutions.openpdf.pdf.content.Chunk;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.font.Font;
 
@@ -17,16 +16,19 @@ import com.justifiedsolutions.openpdf.pdf.font.Font;
 public class PageNumberFooter implements Footer {
 
     private final boolean validForFirstPage;
+    private final HorizontalAlignment alignment;
     private final Font font;
 
     /**
      * Creates a new PageNumberFooter.
      *
      * @param validForFirstPage true if the page number should be on the first page
+     * @param alignment         where on the line the page number should appear
      * @param font              the font to use for the text
      */
-    public PageNumberFooter(boolean validForFirstPage, Font font) {
+    public PageNumberFooter(boolean validForFirstPage, HorizontalAlignment alignment, Font font) {
         this.validForFirstPage = validForFirstPage;
+        this.alignment = alignment;
         this.font = font;
     }
 
@@ -37,6 +39,15 @@ public class PageNumberFooter implements Footer {
      */
     public boolean isValidForFirstPage() {
         return validForFirstPage;
+    }
+
+    /**
+     * Specifies the {@link HorizontalAlignment} of the page number on the page
+     *
+     * @return the alignment
+     */
+    public HorizontalAlignment getAlignment() {
+        return alignment;
     }
 
     /**
@@ -59,9 +70,8 @@ public class PageNumberFooter implements Footer {
 
     @Override
     public Paragraph getParagraph(int pageNumber) {
-        Paragraph result = new Paragraph(new Chunk("Page "));
-        result.add(new Chunk(String.valueOf(pageNumber)));
-        result.setAlignment(HorizontalAlignment.RIGHT);
+        Paragraph result = new Paragraph("Page " + pageNumber);
+        result.setAlignment(getAlignment());
         result.setFont(getFont());
         return result;
     }

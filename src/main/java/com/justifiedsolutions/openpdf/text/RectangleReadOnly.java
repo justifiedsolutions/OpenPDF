@@ -64,7 +64,6 @@ import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
  * @see Element
  * @see Table
  * @see Cell
- * @see HeaderFooter
  * @since 2.1.2
  */
 

@@ -66,7 +66,6 @@ import java.util.List;
  * @see Element
  * @see Table
  * @see Cell
- * @see HeaderFooter
  */
 public class Rectangle implements Element {
 

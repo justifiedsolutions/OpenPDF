@@ -177,17 +177,9 @@ public class Document implements AutoCloseable, DocListener {
      */
     protected boolean marginMirroringTopBottom = false;
 
-    // headers, footers
-    
     /** Current pagenumber */
     protected int pageN = 0;
     
-    /** This is the textual part of a Page; it can contain a header */
-    protected HeaderFooter header = null;
-    
-    /** This is the textual part of the footer */
-    protected HeaderFooter footer = null;
-
     // constructor
 
     /**
@@ -357,52 +349,6 @@ public class Document implements AutoCloseable, DocListener {
             listener.newPage();
         }
         return true;
-    }
-    
-    /**
- * Changes the header of this document.
- *
-     * @param header
-     *            the new header
- */
-    public void setHeader(HeaderFooter header) {
-        this.header = header;
-        for (DocListener listener : listeners) {
-            listener.setHeader(header);
-        }
-    }
-    
-    /**
- * Resets the header of this document.
- */
-    public void resetHeader() {
-        this.header = null;
-        for (DocListener listener : listeners) {
-            listener.resetHeader();
-        }
-    }
-    
-    /**
- * Changes the footer of this document.
- *
-     * @param footer
-     *            the new footer
- */
-    public void setFooter(HeaderFooter footer) {
-        this.footer = footer;
-        for (DocListener listener : listeners) {
-            listener.setFooter(footer);
-        }
-    }
-
-    /**
-     * Resets the footer of this document.
-     */
-    public void resetFooter() {
-        this.footer = null;
-        for (DocListener listener : listeners) {
-            listener.resetFooter();
-        }
     }
 
     /**

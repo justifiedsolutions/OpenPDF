@@ -18,13 +18,13 @@ public class PageNumberFooterTest {
 
     @Test
     public void isValidForPageNumberTrue() {
-        PageNumberFooter footer = new PageNumberFooter(true, new PDFFont());
+        PageNumberFooter footer = new PageNumberFooter(true, HorizontalAlignment.CENTER, new PDFFont());
         assertTrue(footer.isValidForPageNumber(1));
         assertTrue(footer.isValidForPageNumber(2));
     }
     @Test
     public void isValidForPageNumberFalse() {
-        PageNumberFooter footer = new PageNumberFooter(false, new PDFFont());
+        PageNumberFooter footer = new PageNumberFooter(false, HorizontalAlignment.CENTER, new PDFFont());
         assertFalse(footer.isValidForPageNumber(1));
         assertTrue(footer.isValidForPageNumber(2));
     }
@@ -32,14 +32,13 @@ public class PageNumberFooterTest {
     @Test
     public void getParagraph() {
         Font expectedFont = new PDFFont();
-        PageNumberFooter footer = new PageNumberFooter(true, expectedFont);
+        HorizontalAlignment expectedAlignment = HorizontalAlignment.CENTER;
+        PageNumberFooter footer = new PageNumberFooter(true, expectedAlignment, expectedFont);
         Paragraph actual = footer.getParagraph(1);
-        assertEquals(HorizontalAlignment.RIGHT, actual.getAlignment());
+        assertEquals(expectedAlignment, actual.getAlignment());
         assertEquals(expectedFont, actual.getFont());
-        assertEquals(2, actual.getContent().size());
-        Chunk chunk1 = (Chunk) actual.getContent().get(0);
-        Chunk chunk2 = (Chunk) actual.getContent().get(1);
-        assertEquals("Page ", chunk1.getText());
-        assertEquals("1",chunk2.getText());
+        assertEquals(1, actual.getContent().size());
+        Chunk chunk = (Chunk) actual.getContent().get(0);
+        assertEquals("Page 1", chunk.getText());
     }
 }
