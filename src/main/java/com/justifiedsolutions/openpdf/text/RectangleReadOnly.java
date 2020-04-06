@@ -61,9 +61,6 @@ import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
  * methods like {@link #setBorderWidthLeft(float)}or
  * {@link #setBorderColorLeft(java.awt.Color)}.
  * 
- * @see Element
- * @see Table
- * @see Cell
  * @since 2.1.2
  */
 

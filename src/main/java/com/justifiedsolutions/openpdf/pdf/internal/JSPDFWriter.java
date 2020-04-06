@@ -82,8 +82,7 @@ public class JSPDFWriter {
     private void addMetadata(com.justifiedsolutions.openpdf.text.Document document) {
         Map<Metadata, String> metadata = model.getMetadata();
         for (Metadata key : metadata.keySet()) {
-            String keyString = key.value();
-            Meta meta = new Meta(keyString, metadata.get(key));
+            Meta meta = new Meta(key, metadata.get(key));
             document.add(meta);
         }
     }

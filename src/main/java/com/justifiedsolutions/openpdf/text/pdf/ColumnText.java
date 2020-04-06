@@ -56,7 +56,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
-import com.justifiedsolutions.openpdf.text.SimpleTable;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 
@@ -448,13 +447,6 @@ public class ColumnText {
         }
         else if (element.type() == Element.PHRASE) {
             element = new Paragraph((Phrase)element);
-        }
-        if (element instanceof SimpleTable) {
-            try {
-                element = ((SimpleTable)element).createPdfPTable();
-            } catch (DocumentException e) {
-                throw new IllegalArgumentException(MessageLocalization.getComposedMessage("element.not.allowed"));
-            }
         }
         else if (element.type() != Element.PARAGRAPH && element.type() != Element.LIST && element.type() != Element.PTABLE && element.type() != Element.YMARK)
             throw new IllegalArgumentException(MessageLocalization.getComposedMessage("element.not.allowed"));

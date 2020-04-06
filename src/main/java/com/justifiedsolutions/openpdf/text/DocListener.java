@@ -53,9 +53,6 @@ package com.justifiedsolutions.openpdf.text;
  * A class that implements <CODE>DocListener</CODE> will perform some
  * actions when some actions are performed on a <CODE>Document</CODE>.
  *
- * @see        ElementListener
- * @see        Document
- * @see        DocWriter
  */
 
 public interface DocListener extends ElementListener {

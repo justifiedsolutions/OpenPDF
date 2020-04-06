@@ -62,10 +62,6 @@ import java.util.List;
  * borders that vary in width/color on each side using methods like
  * {@link #setBorderWidthLeft(float)}or
  * {@link #setBorderColorLeft(java.awt.Color)}.
- * 
- * @see Element
- * @see Table
- * @see Cell
  */
 public class Rectangle implements Element {
 

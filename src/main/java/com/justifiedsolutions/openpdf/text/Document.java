@@ -400,142 +400,7 @@ public class Document implements AutoCloseable, DocListener {
     }
 
     // methods concerning the header or some meta information
-    
-    /**
- * Adds a user defined header to the document.
- *
-     * @param name
-     *            the name of the header
-     * @param content
-     *            the content of the header
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addHeader(String name, String content) {
-        try {
-            return add(new Header(name, content));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the title to a Document.
- *
-     * @param title
-     *            the title
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addTitle(String title) {
-        try {
-            return add(new Meta(Element.TITLE, title));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the subject to a Document.
- *
-     * @param subject
-     *            the subject
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addSubject(String subject) {
-        try {
-            return add(new Meta(Element.SUBJECT, subject));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the keywords to a Document.
- *
-     * @param keywords
-     *            adds the keywords to the document
- * @return <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addKeywords(String keywords) {
-        try {
-            return add(new Meta(Element.KEYWORDS, keywords));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the author to a Document.
- *
-     * @param author
-     *            the name of the author
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addAuthor(String author) {
-        try {
-            return add(new Meta(Element.AUTHOR, author));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the creator to a Document.
- *
-     * @param creator
-     *            the name of the creator
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addCreator(String creator) {
-        try {
-            return add(new Meta(Element.CREATOR, creator));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the producer to a Document.
- *
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addProducer() {
-        return this.addProducer(getVersion());
-    }
 
-    /**
-     * Adds the provided value as the producer to a Document.
-     *
-     * @param producer new producer line value
-     * @return <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
-     */
-    public boolean addProducer(final String producer) {
-        return add(new Meta(Element.PRODUCER, producer));
-    }
-    
-    /**
- * Adds the current date and time to a Document.
- *
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addCreationDate() {
-        try {
-            /* bugfix by 'taqua' (Thomas) */
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    "EEE MMM dd HH:mm:ss zzz yyyy");
-            return add(new Meta(Element.CREATIONDATE, sdf.format(new Date())));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
     // methods to get the layout of the document.
     
     /**
@@ -707,8 +572,7 @@ public class Document implements AutoCloseable, DocListener {
     /**
      * Set the margin mirroring. It will mirror right/left margins for odd/even pages.
      * <p>
-     * Note: it will not work with {@link Table}.
-     * 
+     *
      * @param marginMirroring
      *            <CODE>true</CODE> to mirror the margins
      * @return always <CODE>true</CODE>
@@ -724,8 +588,7 @@ public class Document implements AutoCloseable, DocListener {
     /**
      * Set the margin mirroring. It will mirror top/bottom margins for odd/even pages.
      * <p>
-     * Note: it will not work with {@link Table}.
-     * 
+     *
      * @param marginMirroringTopBottom
      *            <CODE>true</CODE> to mirror the margins
      * @return always <CODE>true</CODE>
