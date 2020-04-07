@@ -88,7 +88,6 @@ public class BidiLine {
     protected int storedCurrentChar = 0;
     
     protected boolean shortStore;
-//    protected ArabicShaping arabic = new ArabicShaping(ArabicShaping.LETTERS_SHAPE | ArabicShaping.LENGTH_GROW_SHRINK | ArabicShaping.TEXT_DIRECTION_LOGICAL);
     protected static final IntHashtable mirrorChars = new IntHashtable();
     protected int arabicOptions;
     
@@ -204,15 +203,6 @@ public class BidiLine {
     
     public void addChunk(PdfChunk chunk) {
         chunks.add(chunk);
-    }
-
-    /**
-     * Deprecated use {@link BidiLine#addChunks(List)}, since 1.2.22
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public void addChunks(ArrayList chunks) {
-        addChunks((List<PdfChunk>)chunks);
     }
 
     public void addChunks(List<PdfChunk> chunks) {

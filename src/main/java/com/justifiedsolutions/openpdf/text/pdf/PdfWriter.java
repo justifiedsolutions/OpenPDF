@@ -1220,13 +1220,7 @@ public class PdfWriter extends DocWriter implements
         return pdf_version;
     }
 
-
-
-    public void setOpenAction(String name) {
-         pdf.setOpenAction(name);
-     }
-
-//  [C7] portable collections
+    //  [C7] portable collections
 
     /**
      * Use this method to add the Collection dictionary.
