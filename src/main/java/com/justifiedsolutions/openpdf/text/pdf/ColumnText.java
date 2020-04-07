@@ -54,17 +54,14 @@ import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.ListItem;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
-import com.justifiedsolutions.openpdf.text.SimpleTable;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Formats text in a columnwise form. The text is bound
@@ -80,7 +77,7 @@ import java.util.Stack;
  * I the column ended, a new column definition can be loaded with the method
  * <CODE>setColumns</CODE> and the method <CODE>go</CODE> can be called again.
  * <P>
- * If the text ended, more text can be loaded with <CODE>addText</CODE>
+ * If the text ended, more text can be loaded with <CODE>add</CODE>
  * and the method <CODE>go</CODE> can be called again.<BR>
  * The only limitation is that one or more complete paragraphs must be loaded
  * each time.
@@ -92,54 +89,7 @@ import java.util.Stack;
  */
 
 public class ColumnText {
-    /** Eliminate the arabic vowels */    
-    public static final int AR_NOVOWEL = ArabicLigaturizer.ar_novowel;
-    /** Compose the tashkeel in the ligatures. */    
-    public static final int AR_COMPOSEDTASHKEEL = ArabicLigaturizer.ar_composedtashkeel;
-    /** Do some extra double ligatures. */    
-    public static final int AR_LIG = ArabicLigaturizer.ar_lig;
-    /**
-     * Digit shaping option: Replace European digits (U+0030...U+0039) by Arabic-Indic digits.
-     */
-    public static final int DIGITS_EN2AN = ArabicLigaturizer.DIGITS_EN2AN;
-    
-    /**
-     * Digit shaping option: Replace Arabic-Indic digits by European digits (U+0030...U+0039).
-     */
-    public static final int DIGITS_AN2EN = ArabicLigaturizer.DIGITS_AN2EN;
-    
-    /**
-     * Digit shaping option:
-     * Replace European digits (U+0030...U+0039) by Arabic-Indic digits
-     * if the most recent strongly directional character
-     * is an Arabic letter (its Bidi direction value is RIGHT_TO_LEFT_ARABIC).
-     * The initial state at the start of the text is assumed to be not an Arabic,
-     * letter, so European digits at the start of the text will not change.
-     * Compare to DIGITS_ALEN2AN_INIT_AL.
-     */
-    public static final int DIGITS_EN2AN_INIT_LR = ArabicLigaturizer.DIGITS_EN2AN_INIT_LR;
-    
-    /**
-     * Digit shaping option:
-     * Replace European digits (U+0030...U+0039) by Arabic-Indic digits
-     * if the most recent strongly directional character
-     * is an Arabic letter (its Bidi direction value is RIGHT_TO_LEFT_ARABIC).
-     * The initial state at the start of the text is assumed to be an Arabic,
-     * letter, so European digits at the start of the text will change.
-     * Compare to DIGITS_ALEN2AN_INT_LR.
-     */
-    public static final int DIGITS_EN2AN_INIT_AL = ArabicLigaturizer.DIGITS_EN2AN_INIT_AL;
-    
-    /**
-     * Digit type option: Use Arabic-Indic digits (U+0660...U+0669).
-     */
-    public static final int DIGIT_TYPE_AN = ArabicLigaturizer.DIGIT_TYPE_AN;
-    
-    /**
-     * Digit type option: Use Eastern (Extended) Arabic-Indic digits (U+06f0...U+06f9).
-     */
-    public static final int DIGIT_TYPE_AN_EXTENDED = ArabicLigaturizer.DIGIT_TYPE_AN_EXTENDED;
-    
+
     protected int runDirection = PdfWriter.RUN_DIRECTION_DEFAULT;
     
     /** the space char ratio */
@@ -348,7 +298,7 @@ public class ColumnText {
         if (bidiLine == null && waitPhrase != null) {
             bidiLine = new BidiLine();
             for (Object o : waitPhrase.getChunks()) {
-                bidiLine.addChunk(new PdfChunk((Chunk) o, null));
+                bidiLine.addChunk(new PdfChunk((Chunk) o));
             }
             waitPhrase = null;
         }
@@ -369,7 +319,7 @@ public class ColumnText {
             return;
         }
         for (Object o : phrase.getChunks()) {
-            bidiLine.addChunk(new PdfChunk((Chunk) o, null));
+            bidiLine.addChunk(new PdfChunk((Chunk) o));
         }
     }
     
@@ -406,7 +356,7 @@ public class ColumnText {
      * <CODE>List</CODE>, <CODE>PdfPTable</CODE>, <CODE>Image</CODE> and
      * <CODE>Graphic</CODE>.
      * <p>
-     * It removes all the text placed with <CODE>addText()</CODE>.
+     * It removes all the text placed with <CODE>add()</CODE>.
      * 
      * @param element the <CODE>Element</CODE>
      */    
@@ -450,13 +400,6 @@ public class ColumnText {
         }
         else if (element.type() == Element.PHRASE) {
             element = new Paragraph((Phrase)element);
-        }
-        if (element instanceof SimpleTable) {
-            try {
-                element = ((SimpleTable)element).createPdfPTable();
-            } catch (DocumentException e) {
-                throw new IllegalArgumentException(MessageLocalization.getComposedMessage("element.not.allowed"));
-            }
         }
         else if (element.type() != Element.PARAGRAPH && element.type() != Element.LIST && element.type() != Element.PTABLE && element.type() != Element.YMARK)
             throw new IllegalArgumentException(MessageLocalization.getComposedMessage("element.not.allowed"));
@@ -1221,109 +1164,6 @@ public class ColumnText {
                 if ((status & NO_MORE_COLUMN) != 0) {
                     return NO_MORE_COLUMN;
                 }
-            }
-            else if (element.type() == Element.LIST) {
-                com.justifiedsolutions.openpdf.text.List list = (com.justifiedsolutions.openpdf.text.List)element;
-                java.util.List<Element> items = list.getItems();
-                ListItem item = null;
-                float listIndentation = list.getIndentationLeft();
-                int count = 0;
-                Stack<Object[]> stack = new Stack<>();
-                for (int k = 0; k < items.size(); ++k) {
-                    Object obj = items.get(k);
-                    if (obj instanceof ListItem) {
-                        if (count == listIdx) {
-                            item = (ListItem)obj;
-                            break;
-                        }
-                        else ++count;
-                    }
-                    else if (obj instanceof com.justifiedsolutions.openpdf.text.List) {
-                        stack.push(new Object[]{list, k, listIndentation});
-                        list = (com.justifiedsolutions.openpdf.text.List)obj;
-                        items = list.getItems();
-                        listIndentation += list.getIndentationLeft();
-                        k = -1;
-                        continue;
-                    }
-                    if (k == items.size() - 1) {
-                        if (!stack.isEmpty()) {
-                            Object[] objs = stack.pop();
-                            list = (com.justifiedsolutions.openpdf.text.List)objs[0];
-                            items = list.getItems();
-                            k = (Integer) objs[1];
-                            listIndentation = (Float) objs[2];
-                        }
-                    }
-                }
-                int status = 0;
-                for (int keep = 0; keep < 2; ++keep) {
-                    float lastY = yLine;
-                    boolean createHere = false;
-                    if (compositeColumn == null) {
-                        if (item == null) {
-                            listIdx = 0;
-                            compositeElements.removeFirst();
-                            continue main_loop;
-                        }
-                        compositeColumn = new ColumnText(canvas);
-                        compositeColumn.setUseAscender(firstPass && useAscender);
-                        compositeColumn.setAlignment(item.getAlignment());
-                        compositeColumn.setIndent(item.getIndentationLeft() + listIndentation + item.getFirstLineIndent());
-                        compositeColumn.setExtraParagraphSpace(item.getExtraParagraphSpace());
-                        compositeColumn.setFollowingIndent(compositeColumn.getIndent());
-                        compositeColumn.setRightIndent(item.getIndentationRight() + list.getIndentationRight());
-                        compositeColumn.setLeading(item.getLeading(), item.getMultipliedLeading());
-                        compositeColumn.setRunDirection(runDirection);
-                        compositeColumn.setArabicOptions(arabicOptions);
-                        compositeColumn.setSpaceCharRatio(spaceCharRatio);
-                        compositeColumn.addText(item);
-                        if (!firstPass) {
-                            yLine -= item.getSpacingBefore();
-                        }
-                        createHere = true;
-                    }
-                    compositeColumn.leftX = leftX;
-                    compositeColumn.rightX = rightX;
-                    compositeColumn.yLine = yLine;
-                    compositeColumn.rectangularWidth = rectangularWidth;
-                    compositeColumn.rectangularMode = rectangularMode;
-                    compositeColumn.minY = minY;
-                    compositeColumn.maxY = maxY;
-                    boolean keepCandidate = (item != null && item.getKeepTogether() && createHere && !firstPass);
-                    status = compositeColumn.go(simulate || (keepCandidate && keep == 0));
-                    updateFilledWidth(compositeColumn.filledWidth);
-                    if ((status & NO_MORE_TEXT) == 0 && keepCandidate) {
-                        compositeColumn = null;
-                        yLine = lastY;
-                        return NO_MORE_COLUMN;
-                    }
-                    if (simulate || !keepCandidate)
-                        break;
-                    if (keep == 0) {
-                        compositeColumn = null;
-                        yLine = lastY;
-                    }
-                }
-                firstPass = false;
-                yLine = compositeColumn.yLine;
-                linesWritten += compositeColumn.linesWritten;
-                descender = compositeColumn.descender;
-                if (!Float.isNaN(compositeColumn.firstLineY) && !compositeColumn.firstLineYDone) {
-                    if (!simulate && item != null) {
-                        showTextAligned(canvas, Element.ALIGN_LEFT, new Phrase(item.getListSymbol()), compositeColumn.leftX + listIndentation, compositeColumn.firstLineY, 0);
-                    }
-                    compositeColumn.firstLineYDone = true;
-                }
-                if ((status & NO_MORE_TEXT) != 0) {
-                    compositeColumn = null;
-                    ++listIdx;
-                    if (item != null) {
-                        yLine -= item.getSpacingAfter();
-                    }
-                }
-                if ((status & NO_MORE_COLUMN) != 0)
-                    return NO_MORE_COLUMN;
             }
             else if (element.type() == Element.PTABLE) {
                 // don't write anything in the current column if there's no more space available

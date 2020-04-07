@@ -49,32 +49,25 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_COLOR_VALUE;
+import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_FLOAT_COLOR_VALUE;
+import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_INT_COLOR_VALUE;
+
+import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.Element;
+import com.justifiedsolutions.openpdf.text.ExceptionConverter;
+import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Rectangle;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.exceptions.IllegalPdfSyntaxException;
+import com.justifiedsolutions.openpdf.text.pdf.internal.PdfXConformanceImp;
 import java.awt.Color;
-import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
-import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.justifiedsolutions.openpdf.text.Annotation;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Element;
-
-import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.ImgJBIG2;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.exceptions.IllegalPdfSyntaxException;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfAnnotationsImp;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfXConformanceImp;
-
-import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_COLOR_VALUE;
-import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_FLOAT_COLOR_VALUE;
-import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_INT_COLOR_VALUE;
 
 /**
  * <CODE>PdfContentByte</CODE> is an object containing the user positioned
@@ -329,39 +322,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Gets the current word spacing.
-     *
-     * @return the current word spacing
-     */
-    public float getWordSpacing() {
-        return state.wordSpace;
-    }
-
-    /**
-     * Gets the current character spacing.
-     *
-     * @return the current character spacing
-     */
-    public float getHorizontalScaling() {
-        return state.scale;
-    }
-
-    /**
-     * Changes the <VAR>Flatness</VAR>.
-     * <P>
-     * <VAR>Flatness</VAR> sets the maximum permitted distance in device pixels between the
-     * mathematically correct path and an approximation constructed from straight line segments.<BR>
-     *
-     * @param       flatness        a value
-     */
-
-    public void setFlatness(float flatness) {
-        if (flatness >= 0 && flatness <= 100) {
-            content.append(flatness).append(" i").append_i(separator);
-        }
-    }
-
-    /**
      * Changes the <VAR>Line cap style</VAR>.
      * <P>
      * The <VAR>line cap style</VAR> specifies the shape to be used at the end of open subpaths
@@ -375,21 +335,6 @@ public class PdfContentByte {
         if (style >= 0 && style <= 2) {
             content.append(style).append(" J").append_i(separator);
         }
-    }
-
-    /**
-     * Changes the value of the <VAR>line dash pattern</VAR>.
-     * <P>
-     * The line dash pattern controls the pattern of dashes and gaps used to stroke paths.
-     * It is specified by an <I>array</I> and a <I>phase</I>. The array specifies the length
-     * of the alternating dashes and gaps. The phase specifies the distance into the dash
-     * pattern to start the dash.<BR>
-     *
-     * @param       phase       the value of the phase
-     */
-
-    public void setLineDash(float phase) {
-        content.append("[] ").append(phase).append(" d").append_i(separator);
     }
 
     /**
@@ -426,27 +371,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Changes the value of the <VAR>line dash pattern</VAR>.
-     * <P>
-     * The line dash pattern controls the pattern of dashes and gaps used to stroke paths.
-     * It is specified by an <I>array</I> and a <I>phase</I>. The array specifies the length
-     * of the alternating dashes and gaps. The phase specifies the distance into the dash
-     * pattern to start the dash.<BR>
-     *
-     * @param       array       length of the alternating dashes and gaps
-     * @param       phase       the value of the phase
-     */
-
-    public final void setLineDash(float[] array, float phase) {
-        content.append("[");
-        for (int i = 0; i < array.length; i++) {
-            content.append(array[i]);
-            if (i < array.length - 1) content.append(' ');
-        }
-        content.append("] ").append(phase).append(" d").append_i(separator);
-    }
-
-    /**
      * Changes the <VAR>Line join style</VAR>.
      * <P>
      * The <VAR>line join style</VAR> specifies the shape to be used at the corners of paths
@@ -476,23 +400,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Changes the <VAR>Miter limit</VAR>.
-     * <P>
-     * When two line segments meet at a sharp angle and mitered joins have been specified as the
-     * line join style, it is possible for the miter to extend far beyond the thickness of the line
-     * stroking path. The miter limit imposes a maximum on the ratio of the miter length to the line
-     * witdh. When the limit is exceeded, the join is converted from a miter to a bevel.<BR>
-     *
-     * @param       miterLimit      a miter limit
-     */
-
-    public void setMiterLimit(float miterLimit) {
-        if (miterLimit > 1) {
-            content.append(miterLimit).append(" M").append_i(separator);
-        }
-    }
-
-    /**
      * Modify the current clipping path by intersecting it with the current path, using the
      * nonzero winding number rule to determine which regions lie inside the clipping
      * path.
@@ -500,15 +407,6 @@ public class PdfContentByte {
 
     public void clip() {
         content.append("W").append_i(separator);
-    }
-
-    /**
-     * Modify the current clipping path by intersecting it with the current path, using the
-     * even-odd rule to determine which regions lie inside the clipping path.
-     */
-
-    public void eoClip() {
-        content.append("W*").append_i(separator);
     }
 
     /**
@@ -807,32 +705,6 @@ public class PdfContentByte {
         content.append(x1).append(' ').append(y1).append(' ').append(x2).append(' ').append(y2).append(' ').append(x3).append(' ').append(y3).append(" c").append_i(separator);
     }
 
-    /**
-     * Appends a B&#xea;zier curve to the path, starting from the current point.
-     *
-     * @param       x2      x-coordinate of the second control point
-     * @param       y2      y-coordinate of the second control point
-     * @param       x3      x-coordinate of the ending point (= new current point)
-     * @param       y3      y-coordinate of the ending point (= new current point)
-     */
-
-    public void curveTo(float x2, float y2, float x3, float y3) {
-        content.append(x2).append(' ').append(y2).append(' ').append(x3).append(' ').append(y3).append(" v").append_i(separator);
-    }
-
-    /**
-     * Appends a B&#xea;zier curve to the path, starting from the current point.
-     *
-     * @param       x1      x-coordinate of the first control point
-     * @param       y1      y-coordinate of the first control point
-     * @param       x3      x-coordinate of the ending point (= new current point)
-     * @param       y3      y-coordinate of the ending point (= new current point)
-     */
-
-    public void curveFromTo(float x1, float y1, float x3, float y3) {
-        content.append(x1).append(' ').append(y1).append(' ').append(x3).append(' ').append(y3).append(" y").append_i(separator);
-    }
-
     /** Draws a circle. The endpoint will (x+r, y).
      *
      * @param x x center of circle
@@ -1088,15 +960,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Closes the current subpath by appending a straight line segment from the current point
-     * to the starting point of the subpath.
-     */
-
-    public void closePath() {
-        content.append("h").append_i(separator);
-    }
-
-    /**
      * Ends the path without filling or stroking it.
      */
 
@@ -1113,59 +976,11 @@ public class PdfContentByte {
     }
 
     /**
-     * Closes the path and strokes it.
-     */
-
-    public void closePathStroke() {
-        content.append("s").append_i(separator);
-    }
-
-    /**
      * Fills the path, using the non-zero winding number rule to determine the region to fill.
      */
 
     public void fill() {
         content.append("f").append_i(separator);
-    }
-
-    /**
-     * Fills the path, using the even-odd rule to determine the region to fill.
-     */
-
-    public void eoFill() {
-        content.append("f*").append_i(separator);
-    }
-
-    /**
-     * Fills the path using the non-zero winding number rule to determine the region to fill and strokes it.
-     */
-
-    public void fillStroke() {
-        content.append("B").append_i(separator);
-    }
-
-    /**
-     * Closes the path, fills it using the non-zero winding number rule to determine the region to fill and strokes it.
-     */
-
-    public void closePathFillStroke() {
-        content.append("b").append_i(separator);
-    }
-
-    /**
-     * Fills the path, using the even-odd rule to determine the region to fill and strokes it.
-     */
-
-    public void eoFillStroke() {
-        content.append("B*").append_i(separator);
-    }
-
-    /**
-     * Closes the path, fills it using the even-odd rule to determine the region to fill and strokes it.
-     */
-
-    public void closePathEoFillStroke() {
-        content.append("b*").append_i(separator);
     }
 
     /**
@@ -1247,14 +1062,6 @@ public class PdfContentByte {
                 if (inlineImage) {
                     content.append("\nBI\n");
                     PdfImage pimage = new PdfImage(image, "", null);
-                    if (image instanceof ImgJBIG2) {
-                        byte[] globals = ((ImgJBIG2)image).getGlobalBytes();
-                        if (globals != null) {
-                            PdfDictionary decodeparms = new PdfDictionary();
-                            decodeparms.put(PdfName.JBIG2GLOBALS, writer.getReferenceJBIG2Globals(globals));
-                            pimage.put(PdfName.DECODEPARMS, decodeparms);
-                        }
-                    }
                     for (PdfName key : pimage.getKeys()) {
                         PdfObject value = pimage.get(key);
                         String s = abrev.get(key);
@@ -1310,30 +1117,6 @@ public class PdfContentByte {
             }
             if (image.getLayer() != null)
                 endLayer();
-            Annotation annot = image.getAnnotation();
-            if (annot == null)
-                return;
-            float[] r = new float[unitRect.length];
-            for (int k = 0; k < unitRect.length; k += 2) {
-                r[k] = a * unitRect[k] + c * unitRect[k + 1] + e;
-                r[k + 1] = b * unitRect[k] + d * unitRect[k + 1] + f;
-            }
-            float llx = r[0];
-            float lly = r[1];
-            float urx = llx;
-            float ury = lly;
-            for (int k = 2; k < r.length; k += 2) {
-                llx = Math.min(llx, r[k]);
-                lly = Math.min(lly, r[k + 1]);
-                urx = Math.max(urx, r[k]);
-                ury = Math.max(ury, r[k + 1]);
-            }
-            annot = new Annotation(annot);
-            annot.setDimensions(llx, lly, urx, ury);
-            PdfAnnotation an = PdfAnnotationsImp.convertAnnotation(writer, annot, new Rectangle(llx, lly, urx, ury));
-            if (an == null)
-                return;
-            addAnnotation(an);
         }
         catch (Exception ee) {
             throw new DocumentException(ee);
@@ -1431,16 +1214,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Sets the horizontal scaling parameter.
-     *
-     * @param       scale               a parameter
-     */
-    public void setHorizontalScaling(float scale) {
-        state.scale = scale;
-        content.append(scale).append(" Tz").append_i(separator);
-    }
-
-    /**
      * Sets the text leading parameter.
      * <P>
      * The leading parameter is measured in text space units. It specifies the vertical distance
@@ -1514,13 +1287,7 @@ public class PdfContentByte {
         showText2(text);
         content.append("Tj").append_i(separator);
     }
-    
-    public void showText(GlyphVector glyphVector) {
-        byte[] b = state.fontDetails.convertToBytes(glyphVector);
-        escapeString(b, content);
-        content.append("Tj").append_i(separator);
-    }
-    
+
     /**
      * Constructs a kern array for a text in a certain font
      * @param text the text
@@ -1567,36 +1334,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Moves to the next line and shows <CODE>text</CODE>.
-     *
-     * @param text the text to write
-     */
-    public void newlineShowText(String text) {
-        state.yTLM -= state.leading;
-        showText2(text);
-        content.append("'").append_i(separator);
-    }
-
-    /**
-     * Moves to the next line and shows text string, using the given values of the character and word spacing parameters.
-     *
-     * @param       wordSpacing     a parameter
-     * @param       charSpacing     a parameter
-     * @param text the text to write
-     */
-    public void newlineShowText(float wordSpacing, float charSpacing, String text) {
-        state.yTLM -= state.leading;
-        content.append(wordSpacing).append(' ').append(charSpacing);
-        showText2(text);
-        content.append("\"").append_i(separator);
-
-        // The " operator sets charSpace and wordSpace into graphics state
-        // (cfr PDF reference v1.6, table 5.6)
-        state.charSpace = charSpacing;
-        state.wordSpace = wordSpacing;
-    }
-
-    /**
      * Changes the text matrix.
      * <P>
      * Remark: this operation also initializes the current point position.</P>
@@ -1638,29 +1375,6 @@ public class PdfContentByte {
         state.xTLM += x;
         state.yTLM += y;
         content.append(x).append(' ').append(y).append(" Td").append_i(separator);
-    }
-
-    /**
-     * Moves to the start of the next line, offset from the start of the current line.
-     * <P>
-     * As a side effect, this sets the leading parameter in the text state.</P>
-     *
-     * @param       x           offset of the new current point
-     * @param       y           y-coordinate of the new current point
-     */
-    public void moveTextWithLeading(float x, float y) {
-        state.xTLM += x;
-        state.yTLM += y;
-        state.leading = -y;
-        content.append(x).append(' ').append(y).append(" TD").append_i(separator);
-    }
-
-    /**
-     * Moves to the start of the next line.
-     */
-    public void newlineText() {
-        state.yTLM -= state.leading;
-        content.append("T*").append_i(separator);
     }
 
     /**
@@ -1721,16 +1435,6 @@ public class PdfContentByte {
         content.append(")");
     }
 
-    /**
-     * Adds a named outline to the document.
-     *
-     * @param outline the outline
-     * @param name the name for the local destination
-     */
-    public void addOutline(PdfOutline outline, String name) {
-        checkWriter();
-        pdf.addOutline(outline, name);
-    }
     /**
      * Gets the root outline.
      *
@@ -1836,18 +1540,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Shows text kerned right, left or center aligned with rotation.
-     * @param alignment the alignment can be ALIGN_CENTER, ALIGN_RIGHT or ALIGN_LEFT
-     * @param text the text to show
-     * @param x the x pivot position
-     * @param y the y pivot position
-     * @param rotation the rotation to be applied in degrees counterclockwise
-     */
-    public void showTextAlignedKerned(int alignment, String text, float x, float y, float rotation) {
-        showTextAligned(alignment, text, x, y, rotation, true);
-    }
-
-    /**
      * Concatenate a matrix to the current transformation matrix.
      * @param a an element of the transformation matrix
      * @param b an element of the transformation matrix
@@ -1859,258 +1551,6 @@ public class PdfContentByte {
     public void concatCTM(float a, float b, float c, float d, float e, float f) {
         content.append(a).append(' ').append(b).append(' ').append(c).append(' ');
         content.append(d).append(' ').append(e).append(' ').append(f).append(" cm").append_i(separator);
-    }
-
-    /**
-     * Generates an array of bezier curves to draw an arc.
-     * <P>
-     * (x1, y1) and (x2, y2) are the corners of the enclosing rectangle.
-     * Angles, measured in degrees, start with 0 to the right (the positive X
-     * axis) and increase counter-clockwise.  The arc extends from startAng
-     * to startAng+extent.  I.e. startAng=0 and extent=180 yields an openside-down
-     * semi-circle.
-     * <P>
-     * The resulting coordinates are of the form float[]{x1,y1,x2,y2,x3,y3, x4,y4}
-     * such that the curve goes from (x1, y1) to (x4, y4) with (x2, y2) and
-     * (x3, y3) as their respective Bezier control points.
-     * <P>
-     * Note: this code was taken from ReportLab (www.reportlab.org), an excellent
-     * PDF generator for Python (BSD license: http://www.reportlab.org/devfaq.html#1.3 ).
-     *
-     * @param x1 a corner of the enclosing rectangle
-     * @param y1 a corner of the enclosing rectangle
-     * @param x2 a corner of the enclosing rectangle
-     * @param y2 a corner of the enclosing rectangle
-     * @param startAng starting angle in degrees
-     * @param extent angle extent in degrees
-     * @return a list of float[] with the bezier curves
-     */
-    public static List<float[]> bezierArc(float x1, float y1, float x2, float y2, float startAng, float extent) {
-        float tmp;
-        if (x1 > x2) {
-            tmp = x1;
-            x1 = x2;
-            x2 = tmp;
-        }
-        if (y2 > y1) {
-            tmp = y1;
-            y1 = y2;
-            y2 = tmp;
-        }
-
-        float fragAngle;
-        int Nfrag;
-        if (Math.abs(extent) <= 90f) {
-            fragAngle = extent;
-            Nfrag = 1;
-        }
-        else {
-            Nfrag = (int)(Math.ceil(Math.abs(extent)/90f));
-            fragAngle = extent / Nfrag;
-        }
-        float x_cen = (x1+x2)/2f;
-        float y_cen = (y1+y2)/2f;
-        float rx = (x2-x1)/2f;
-        float ry = (y2-y1)/2f;
-        float halfAng = (float)(fragAngle * Math.PI / 360.);
-        float kappa = (float)(Math.abs(4. / 3. * (1. - Math.cos(halfAng)) / Math.sin(halfAng)));
-        List<float[]> pointList = new ArrayList<>();
-        for (int i = 0; i < Nfrag; ++i) {
-            float theta0 = (float)((startAng + i*fragAngle) * Math.PI / 180.);
-            float theta1 = (float)((startAng + (i+1)*fragAngle) * Math.PI / 180.);
-            float cos0 = (float)Math.cos(theta0);
-            float cos1 = (float)Math.cos(theta1);
-            float sin0 = (float)Math.sin(theta0);
-            float sin1 = (float)Math.sin(theta1);
-            if (fragAngle > 0f) {
-                pointList.add(new float[]{x_cen + rx * cos0,
-                        y_cen - ry * sin0,
-                        x_cen + rx * (cos0 - kappa * sin0),
-                        y_cen - ry * (sin0 + kappa * cos0),
-                        x_cen + rx * (cos1 + kappa * sin1),
-                        y_cen - ry * (sin1 - kappa * cos1),
-                        x_cen + rx * cos1,
-                        y_cen - ry * sin1});
-            }
-            else {
-                pointList.add(new float[]{x_cen + rx * cos0,
-                        y_cen - ry * sin0,
-                        x_cen + rx * (cos0 + kappa * sin0),
-                        y_cen - ry * (sin0 - kappa * cos0),
-                        x_cen + rx * (cos1 - kappa * sin1),
-                        y_cen - ry * (sin1 + kappa * cos1),
-                        x_cen + rx * cos1,
-                        y_cen - ry * sin1});
-            }
-        }
-        return pointList;
-    }
-
-    /**
-     * Draws a partial ellipse inscribed within the rectangle x1,y1,x2,y2,
-     * starting at startAng degrees and covering extent degrees. Angles
-     * start with 0 to the right (+x) and increase counter-clockwise.
-     *
-     * @param x1 a corner of the enclosing rectangle
-     * @param y1 a corner of the enclosing rectangle
-     * @param x2 a corner of the enclosing rectangle
-     * @param y2 a corner of the enclosing rectangle
-     * @param startAng starting angle in degrees
-     * @param extent angle extent in degrees
-     */
-    public void arc(float x1, float y1, float x2, float y2, float startAng, float extent) {
-        List<float[]> ar = bezierArc(x1, y1, x2, y2, startAng, extent);
-        if (ar.isEmpty())
-            return;
-        float[] pt = ar.get(0);
-        moveTo(pt[0], pt[1]);
-        for (float[] anAr : ar) {
-            pt = anAr;
-            curveTo(pt[2], pt[3], pt[4], pt[5], pt[6], pt[7]);
-        }
-    }
-
-    /**
-     * Draws an ellipse inscribed within the rectangle x1,y1,x2,y2.
-     *
-     * @param x1 a corner of the enclosing rectangle
-     * @param y1 a corner of the enclosing rectangle
-     * @param x2 a corner of the enclosing rectangle
-     * @param y2 a corner of the enclosing rectangle
-     */
-    public void ellipse(float x1, float y1, float x2, float y2) {
-        arc(x1, y1, x2, y2, 0f, 360f);
-    }
-
-    /**
-     * Create a new colored tiling pattern.
-     *
-     * @param width the width of the pattern
-     * @param height the height of the pattern
-     * @param xstep the desired horizontal spacing between pattern cells.
-     * May be either positive or negative, but not zero.
-     * @param ystep the desired vertical spacing between pattern cells.
-     * May be either positive or negative, but not zero.
-     * @return the <CODE>PdfPatternPainter</CODE> where the pattern will be created
-     */
-    public PdfPatternPainter createPattern(float width, float height, float xstep, float ystep) {
-        checkWriter();
-        if ( xstep == 0.0f || ystep == 0.0f )
-            throw new RuntimeException(MessageLocalization.getComposedMessage("xstep.or.ystep.can.not.be.zero"));
-        PdfPatternPainter painter = new PdfPatternPainter(writer);
-        painter.setWidth(width);
-        painter.setHeight(height);
-        painter.setXStep(xstep);
-        painter.setYStep(ystep);
-        writer.addSimplePattern(painter);
-        return painter;
-    }
-
-    /**
-     * Create a new colored tiling pattern. Variables xstep and ystep are set to the same values
-     * of width and height.
-     * @param width the width of the pattern
-     * @param height the height of the pattern
-     * @return the <CODE>PdfPatternPainter</CODE> where the pattern will be created
-     */
-    public PdfPatternPainter createPattern(float width, float height) {
-        return createPattern(width, height, width, height);
-    }
-
-    /**
-     * Create a new uncolored tiling pattern.
-     *
-     * @param width the width of the pattern
-     * @param height the height of the pattern
-     * @param xstep the desired horizontal spacing between pattern cells.
-     * May be either positive or negative, but not zero.
-     * @param ystep the desired vertical spacing between pattern cells.
-     * May be either positive or negative, but not zero.
-     * @param color the default color. Can be <CODE>null</CODE>
-     * @return the <CODE>PdfPatternPainter</CODE> where the pattern will be created
-     */
-    public PdfPatternPainter createPattern(float width, float height, float xstep, float ystep, Color color) {
-        checkWriter();
-        if ( xstep == 0.0f || ystep == 0.0f )
-            throw new RuntimeException(MessageLocalization.getComposedMessage("xstep.or.ystep.can.not.be.zero"));
-        PdfPatternPainter painter = new PdfPatternPainter(writer, color);
-        painter.setWidth(width);
-        painter.setHeight(height);
-        painter.setXStep(xstep);
-        painter.setYStep(ystep);
-        writer.addSimplePattern(painter);
-        return painter;
-    }
-
-    /**
-     * Create a new uncolored tiling pattern.
-     * Variables xstep and ystep are set to the same values
-     * of width and height.
-     * @param width the width of the pattern
-     * @param height the height of the pattern
-     * @param color the default color. Can be <CODE>null</CODE>
-     * @return the <CODE>PdfPatternPainter</CODE> where the pattern will be created
-     */
-    public PdfPatternPainter createPattern(float width, float height, Color color) {
-        return createPattern(width, height, width, height, color);
-    }
-
-    /**
-     * Creates a new template.
-     * <P>
-     * Creates a new template that is nothing more than a form XObject. This template can be included
-     * in this <CODE>PdfContentByte</CODE> or in another template. Templates are only written
-     * to the output when the document is closed permitting things like showing text in the first page
-     * that is only defined in the last page.
-     *
-     * @param width the bounding box width
-     * @param height the bounding box height
-     * @return the created template
-     */
-    public PdfTemplate createTemplate(float width, float height) {
-        return createTemplate(width, height, null);
-    }
-
-    PdfTemplate createTemplate(float width, float height, PdfName forcedName) {
-        checkWriter();
-        PdfTemplate template = new PdfTemplate(writer);
-        template.setWidth(width);
-        template.setHeight(height);
-        writer.addDirectTemplateSimple(template, forcedName);
-        return template;
-    }
-
-    /**
-     * Creates a new appearance to be used with form fields.
-     *
-     * @param width the bounding box width
-     * @param height the bounding box height
-     * @return the appearance created
-     */
-    public PdfAppearance createAppearance(float width, float height) {
-        return createAppearance(width, height, null);
-    }
-
-    PdfAppearance createAppearance(float width, float height, PdfName forcedName) {
-        checkWriter();
-        PdfAppearance template = new PdfAppearance(writer);
-        template.setWidth(width);
-        template.setHeight(height);
-        writer.addDirectTemplateSimple(template, forcedName);
-        return template;
-    }
-
-    /**
-     * Adds a PostScript XObject to this content.
-     *
-     * @param psobject the object
-     */
-    public void addPSXObject(PdfPSXObject psobject) {
-        checkWriter();
-        PdfName name = writer.addDirectTemplateSimple(psobject, null);
-        PageResources prs = getPageResources();
-        name = prs.addXObject(name, psobject.getIndirectReference());
-        content.append(name.getBytes()).append(" Do").append_i(separator);
     }
 
     /**
@@ -2512,28 +1952,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Paints using a shading object.
-     * @param shading the shading object
-     */
-    public void paintShading(PdfShading shading) {
-        writer.addSimpleShading(shading);
-        PageResources prs = getPageResources();
-        PdfName name = prs.addShading(shading.getShadingName(), shading.getShadingReference());
-        content.append(name.getBytes()).append(" sh").append_i(separator);
-        ColorDetails details = shading.getColorDetails();
-        if (details != null)
-            prs.addColor(details.getColorName(), details.getIndirectReference());
-    }
-
-    /**
-     * Paints using a shading pattern.
-     * @param shading the shading pattern
-     */
-    public void paintShading(PdfShadingPattern shading) {
-        paintShading(shading.getShading());
-    }
-
-    /**
      * Sets the shading fill pattern.
      * @param shading the shading pattern
      */
@@ -2614,31 +2032,7 @@ public class PdfContentByte {
         return pdf;
     }
 
-    /**
-     * Implements a link to other part of the document. The jump will
-     * be made to a local destination with the same name, that must exist.
-     * @param name the name for this link
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    public void localGoto(String name, float llx, float lly, float urx, float ury) {
-        pdf.localGoto(name, llx, lly, urx, ury);
-    }
 
-    /**
-     * The local destination to where a local goto with the same
-     * name will jump.
-     * @param name the name of this local destination
-     * @param destination the <CODE>PdfDestination</CODE> with the jump coordinates
-     * @return <CODE>true</CODE> if the local destination was added,
-     * <CODE>false</CODE> if a local destination with the same name
-     * already exists
-     */
-    public boolean localDestination(String name, PdfDestination destination) {
-        return pdf.localDestination(name, destination);
-    }
 
     /**
      * Gets a duplicate of this <CODE>PdfContentByte</CODE>. All
@@ -2650,73 +2044,6 @@ public class PdfContentByte {
         return new PdfContentByte(writer);
     }
 
-    /**
-     * Implements a link to another document.
-     * @param filename the filename for the remote document
-     * @param name the name to jump to
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    public void remoteGoto(String filename, String name, float llx, float lly, float urx, float ury) {
-        pdf.remoteGoto(filename, name, llx, lly, urx, ury);
-    }
-
-    /**
-     * Implements a link to another document.
-     * @param filename the filename for the remote document
-     * @param page the page to jump to
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    public void remoteGoto(String filename, int page, float llx, float lly, float urx, float ury) {
-        pdf.remoteGoto(filename, page, llx, lly, urx, ury);
-    }
-    /**
-     * Adds a round rectangle to the current path.
-     *
-     * @param x x-coordinate of the starting point
-     * @param y y-coordinate of the starting point
-     * @param w width
-     * @param h height
-     * @param r radius of the arc corner
-     */
-    public void roundRectangle(float x, float y, float w, float h, float r) {
-        if (w < 0) {
-            x += w;
-            w = -w;
-        }
-        if (h < 0) {
-            y += h;
-            h = -h;
-        }
-        if (r < 0)
-            r = -r;
-        float b = 0.4477f;
-        moveTo(x + r, y);
-        lineTo(x + w - r, y);
-        curveTo(x + w - r * b, y, x + w, y + r * b, x + w, y + r);
-        lineTo(x + w, y + h - r);
-        curveTo(x + w, y + h - r * b, x + w - r * b, y + h, x + w - r, y + h);
-        lineTo(x + r, y + h);
-        curveTo(x + r * b, y + h, x, y + h - r * b, x, y + h - r);
-        lineTo(x, y + r);
-        curveTo(x, y + r * b, x + r * b, y, x + r, y);
-    }
-
-    /** Implements an action in an area.
-     * @param action the <CODE>PdfAction</CODE>
-     * @param llx the lower left x corner of the activation area
-     * @param lly the lower left y corner of the activation area
-     * @param urx the upper right x corner of the activation area
-     * @param ury the upper right y corner of the activation area
-     */
-    public void setAction(PdfAction action, float llx, float lly, float urx, float ury) {
-        pdf.setAction(action, llx, lly, urx, ury);
-    }
 
     /** Outputs a <CODE>String</CODE> directly to the content.
      * @param s the <CODE>String</CODE>
@@ -2747,289 +2074,6 @@ public class PdfContentByte {
             throw new RuntimeException(MessageLocalization.getComposedMessage("invalid.use.of.a.pattern.a.template.was.expected"));
     }
 
-    /**
-     * Draws a TextField.
-     * @param llx
-     * @param lly
-     * @param urx
-     * @param ury
-     * @param on
-     */
-    public void drawRadioField(float llx, float lly, float urx, float ury, boolean on) {
-        if (llx > urx) { float x = llx; llx = urx; urx = x; }
-        if (lly > ury) { float y = lly; lly = ury; ury = y; }
-        // silver circle
-        saveState();
-        setLineWidth(1);
-        setLineCap(1);
-        setColorStroke(new Color(0xC0, 0xC0, 0xC0));
-        arc(llx + 1f, lly + 1f, urx - 1f, ury - 1f, 0f, 360f);
-        stroke();
-        // gray circle-segment
-        setLineWidth(1);
-        setLineCap(1);
-        setColorStroke(new Color(0xA0, 0xA0, 0xA0));
-        arc(llx + 0.5f, lly + 0.5f, urx - 0.5f, ury - 0.5f, 45, 180);
-        stroke();
-        // black circle-segment
-        setLineWidth(1);
-        setLineCap(1);
-        setColorStroke(new Color(0x00, 0x00, 0x00));
-        arc(llx + 1.5f, lly + 1.5f, urx - 1.5f, ury - 1.5f, 45, 180);
-        stroke();
-        if (on) {
-            // gray circle
-            setLineWidth(1);
-            setLineCap(1);
-            setColorFill(new Color(0x00, 0x00, 0x00));
-            arc(llx + 4f, lly + 4f, urx - 4f, ury - 4f, 0, 360);
-            fill();
-        }
-        restoreState();
-    }
-
-    /**
-     * Draws a TextField.
-     * @param llx
-     * @param lly
-     * @param urx
-     * @param ury
-     */
-    public void drawTextField(float llx, float lly, float urx, float ury) {
-        if (llx > urx) { float x = llx; llx = urx; urx = x; }
-        if (lly > ury) { float y = lly; lly = ury; ury = y; }
-        // silver rectangle not filled
-        saveState();
-        setColorStroke(new Color(0xC0, 0xC0, 0xC0));
-        setLineWidth(1);
-        setLineCap(0);
-        rectangle(llx, lly, urx - llx, ury - lly);
-        stroke();
-        // white rectangle filled
-        setLineWidth(1);
-        setLineCap(0);
-        setColorFill(new Color(MAX_COLOR_VALUE, MAX_COLOR_VALUE, MAX_COLOR_VALUE));
-        rectangle(llx + 0.5f, lly + 0.5f, urx - llx - 1f, ury -lly - 1f);
-        fill();
-        // silver lines
-        setColorStroke(new Color(0xC0, 0xC0, 0xC0));
-        setLineWidth(1);
-        setLineCap(0);
-        moveTo(llx + 1f, lly + 1.5f);
-        lineTo(urx - 1.5f, lly + 1.5f);
-        lineTo(urx - 1.5f, ury - 1f);
-        stroke();
-        // gray lines
-        setColorStroke(new Color(0xA0, 0xA0, 0xA0));
-        setLineWidth(1);
-        setLineCap(0);
-        moveTo(llx + 1f, lly + 1);
-        lineTo(llx + 1f, ury - 1f);
-        lineTo(urx - 1f, ury - 1f);
-        stroke();
-        // black lines
-        setColorStroke(new Color(0x00, 0x00, 0x00));
-        setLineWidth(1);
-        setLineCap(0);
-        moveTo(llx + 2f, lly + 2f);
-        lineTo(llx + 2f, ury - 2f);
-        lineTo(urx - 2f, ury - 2f);
-        stroke();
-        restoreState();
-    }
-
-    /**
-     * Draws a button.
-     * @param llx
-     * @param lly
-     * @param urx
-     * @param ury
-     * @param text
-     * @param bf
-     * @param size
-     */
-    public void drawButton(float llx, float lly, float urx, float ury, String text, BaseFont bf, float size) {
-        if (llx > urx) { float x = llx; llx = urx; urx = x; }
-        if (lly > ury) { float y = lly; lly = ury; ury = y; }
-        // black rectangle not filled
-        saveState();
-        setColorStroke(new Color(0x00, 0x00, 0x00));
-        setLineWidth(1);
-        setLineCap(0);
-        rectangle(llx, lly, urx - llx, ury - lly);
-        stroke();
-        // silver rectangle filled
-        setLineWidth(1);
-        setLineCap(0);
-        setColorFill(new Color(0xC0, 0xC0, 0xC0));
-        rectangle(llx + 0.5f, lly + 0.5f, urx - llx - 1f, ury -lly - 1f);
-        fill();
-        // white lines
-        setColorStroke(new Color(MAX_COLOR_VALUE, MAX_COLOR_VALUE, MAX_COLOR_VALUE));
-        setLineWidth(1);
-        setLineCap(0);
-        moveTo(llx + 1f, lly + 1f);
-        lineTo(llx + 1f, ury - 1f);
-        lineTo(urx - 1f, ury - 1f);
-        stroke();
-        // dark grey lines
-        setColorStroke(new Color(0xA0, 0xA0, 0xA0));
-        setLineWidth(1);
-        setLineCap(0);
-        moveTo(llx + 1f, lly + 1f);
-        lineTo(urx - 1f, lly + 1f);
-        lineTo(urx - 1f, ury - 1f);
-        stroke();
-        // text
-        resetRGBColorFill();
-        beginText();
-        setFontAndSize(bf, size);
-        showTextAligned(PdfContentByte.ALIGN_CENTER, text, llx + (urx - llx) / 2, lly + (ury - lly - size) / 2, 0);
-        endText();
-        restoreState();
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to write on. The graphics
-     * are translated to PDF commands as shapes. No PDF fonts will appear.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createGraphicsShapes(float width, float height) {
-        return new PdfGraphics2D(this, width, height, null, true, false, 0);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands as shapes. No PDF fonts will appear.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param printerJob a printer job
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createPrinterGraphicsShapes(float width, float height, PrinterJob printerJob) {
-        return new PdfPrinterGraphics2D(this, width, height, null, true, false, 0, printerJob);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to write on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createGraphics(float width, float height) {
-        return new PdfGraphics2D(this, width, height, null, false, false, 0);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param printerJob
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createPrinterGraphics(float width, float height, PrinterJob printerJob) {
-        return new PdfPrinterGraphics2D(this, width, height, null, false, false, 0, printerJob);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to write on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param convertImagesToJPEG
-     * @param quality
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createGraphics(float width, float height, boolean convertImagesToJPEG, float quality) {
-        return new PdfGraphics2D(this, width, height, null, false, convertImagesToJPEG, quality);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param convertImagesToJPEG
-     * @param quality
-     * @param printerJob
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createPrinterGraphics(float width, float height, boolean convertImagesToJPEG, float quality, PrinterJob printerJob) {
-        return new PdfPrinterGraphics2D(this, width, height, null, false, convertImagesToJPEG, quality, printerJob);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands.
-     * @param width
-     * @param height
-     * @param convertImagesToJPEG
-     * @param quality
-     * @return A Graphics2D object
-     */
-    public java.awt.Graphics2D createGraphicsShapes(float width, float height, boolean convertImagesToJPEG, float quality) {
-        return new PdfGraphics2D(this, width, height, null, true, convertImagesToJPEG, quality);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands.
-     * @param width
-     * @param height
-     * @param convertImagesToJPEG
-     * @param quality
-     * @param printerJob
-     * @return a Graphics2D object
-     */
-    public java.awt.Graphics2D createPrinterGraphicsShapes(float width, float height, boolean convertImagesToJPEG, float quality, PrinterJob printerJob) {
-        return new PdfPrinterGraphics2D(this, width, height, null, true, convertImagesToJPEG, quality, printerJob);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to write on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param fontMapper the mapping from awt fonts to <CODE>BaseFont</CODE>
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createGraphics(float width, float height, FontMapper fontMapper) {
-        return new PdfGraphics2D(this, width, height, fontMapper, false, false, 0);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param fontMapper the mapping from awt fonts to <CODE>BaseFont</CODE>
-     * @param printerJob a printer job
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createPrinterGraphics(float width, float height, FontMapper fontMapper, PrinterJob printerJob) {
-        return new PdfPrinterGraphics2D(this, width, height, fontMapper, false, false, 0, printerJob);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to write on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param fontMapper the mapping from awt fonts to <CODE>BaseFont</CODE>
-     * @param convertImagesToJPEG converts awt images to jpeg before inserting in pdf
-     * @param quality the quality of the jpeg
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createGraphics(float width, float height, FontMapper fontMapper, boolean convertImagesToJPEG, float quality) {
-        return new PdfGraphics2D(this, width, height, fontMapper, false, convertImagesToJPEG, quality);
-    }
-
-    /** Gets a <CODE>Graphics2D</CODE> to print on. The graphics
-     * are translated to PDF commands.
-     * @param width the width of the panel
-     * @param height the height of the panel
-     * @param fontMapper the mapping from awt fonts to <CODE>BaseFont</CODE>
-     * @param convertImagesToJPEG converts awt images to jpeg before inserting in pdf
-     * @param quality the quality of the jpeg
-     * @param printerJob a printer job
-     * @return a <CODE>Graphics2D</CODE>
-     */
-    public java.awt.Graphics2D createPrinterGraphics(float width, float height, FontMapper fontMapper, boolean convertImagesToJPEG, float quality, PrinterJob printerJob) {
-        return new PdfPrinterGraphics2D(this, width, height, fontMapper, false, convertImagesToJPEG, quality, printerJob);
-    }
 
     PageResources getPageResources() {
         return pdf.getPageResources();
@@ -3107,10 +2151,6 @@ public class PdfContentByte {
         af.getMatrix(arr);
         content.append(arr[0]).append(' ').append(arr[1]).append(' ').append(arr[2]).append(' ');
         content.append(arr[3]).append(' ').append(arr[4]).append(' ').append(arr[5]).append(" cm").append_i(separator);
-    }
-
-    void addAnnotation(PdfAnnotation annot) {
-        writer.addAnnotation(annot);
     }
 
     /**

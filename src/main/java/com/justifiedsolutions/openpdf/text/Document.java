@@ -84,8 +84,6 @@ import java.util.Properties;
  * <PRE>// creation of the document with a certain size and certain margins
  * <STRONG>Document document = new Document(PageSize.A4, 50, 50, 50, 50);
  * </STRONG> try { 
- *   // creation of the different writers 
- *   HtmlWriter.getInstance(<STRONG>document </STRONG>, System.out);
  *   PdfWriter.getInstance(<STRONG>document </STRONG>, new FileOutputStream("text.pdf"));
  *   // we add some meta information to the document
  *   <STRONG>document.addAuthor("Bruno Lowagie"); </STRONG>
@@ -145,7 +143,7 @@ public class Document implements AutoCloseable, DocListener {
     public static float wmfFontCorrection = 0.86f;
     
     /** The DocListener. */
-    private List<DocListener> listeners = new ArrayList<>();
+    private final List<DocListener> listeners = new ArrayList<>();
     
     /** Is the document open or not? */
     protected boolean open;
@@ -159,16 +157,16 @@ public class Document implements AutoCloseable, DocListener {
     protected Rectangle pageSize;
     
     /** margin in x direction starting from the left */
-    protected float marginLeft = 0;
+    protected float marginLeft;
     
     /** margin in x direction starting from the right */
-    protected float marginRight = 0;
+    protected float marginRight;
     
     /** margin in y direction starting from the top */
-    protected float marginTop = 0;
+    protected float marginTop;
     
     /** margin in y direction starting from the bottom */
-    protected float marginBottom = 0;
+    protected float marginBottom;
     
     /** mirroring of the left/right margins */
     protected boolean marginMirroring = false;
@@ -178,29 +176,9 @@ public class Document implements AutoCloseable, DocListener {
      * @since    2.1.6
      */
     protected boolean marginMirroringTopBottom = false;
-    
-    /** Content of JavaScript onLoad function */
-    protected String javaScript_onLoad = null;
 
-    /** Content of JavaScript onUnLoad function */
-    protected String javaScript_onUnLoad = null;
-
-    /** Style class in HTML body tag */
-    protected String htmlStyleClass = null;
-
-    // headers, footers
-    
     /** Current pagenumber */
     protected int pageN = 0;
-    
-    /** This is the textual part of a Page; it can contain a header */
-    protected HeaderFooter header = null;
-    
-    /** This is the textual part of the footer */
-    protected HeaderFooter footer = null;
-    
-    /** This is a chapter number in case ChapterAutoNumber is used. */
-    protected int chapternumber = 0;
     
     // constructor
 
@@ -286,9 +264,6 @@ public class Document implements AutoCloseable, DocListener {
             throw new DocumentException(MessageLocalization.getComposedMessage("the.document.is.not.open.yet.you.can.only.add.meta.information"));
         }
         boolean success = false;
-        if (element instanceof ChapterAutoNumber) {
-            chapternumber = ((ChapterAutoNumber)element).setAutomaticNumber(chapternumber);
-        }
         for (DocListener listener : listeners) {
             success |= listener.add(element);
         }
@@ -375,52 +350,6 @@ public class Document implements AutoCloseable, DocListener {
         }
         return true;
     }
-    
-    /**
- * Changes the header of this document.
- *
-     * @param header
-     *            the new header
- */
-    public void setHeader(HeaderFooter header) {
-        this.header = header;
-        for (DocListener listener : listeners) {
-            listener.setHeader(header);
-        }
-    }
-    
-    /**
- * Resets the header of this document.
- */
-    public void resetHeader() {
-        this.header = null;
-        for (DocListener listener : listeners) {
-            listener.resetHeader();
-        }
-    }
-    
-    /**
- * Changes the footer of this document.
- *
-     * @param footer
-     *            the new footer
- */
-    public void setFooter(HeaderFooter footer) {
-        this.footer = footer;
-        for (DocListener listener : listeners) {
-            listener.setFooter(footer);
-        }
-    }
-
-    /**
-     * Resets the footer of this document.
-     */
-    public void resetFooter() {
-        this.footer = null;
-        for (DocListener listener : listeners) {
-            listener.resetFooter();
-        }
-    }
 
     /**
      * Sets the page number to 0.
@@ -471,142 +400,7 @@ public class Document implements AutoCloseable, DocListener {
     }
 
     // methods concerning the header or some meta information
-    
-    /**
- * Adds a user defined header to the document.
- *
-     * @param name
-     *            the name of the header
-     * @param content
-     *            the content of the header
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addHeader(String name, String content) {
-        try {
-            return add(new Header(name, content));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the title to a Document.
- *
-     * @param title
-     *            the title
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addTitle(String title) {
-        try {
-            return add(new Meta(Element.TITLE, title));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the subject to a Document.
- *
-     * @param subject
-     *            the subject
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addSubject(String subject) {
-        try {
-            return add(new Meta(Element.SUBJECT, subject));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the keywords to a Document.
- *
-     * @param keywords
-     *            adds the keywords to the document
- * @return <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addKeywords(String keywords) {
-        try {
-            return add(new Meta(Element.KEYWORDS, keywords));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the author to a Document.
- *
-     * @param author
-     *            the name of the author
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addAuthor(String author) {
-        try {
-            return add(new Meta(Element.AUTHOR, author));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the creator to a Document.
- *
-     * @param creator
-     *            the name of the creator
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addCreator(String creator) {
-        try {
-            return add(new Meta(Element.CREATOR, creator));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
-    /**
- * Adds the producer to a Document.
- *
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addProducer() {
-        return this.addProducer(getVersion());
-    }
 
-    /**
-     * Adds the provided value as the producer to a Document.
-     *
-     * @param producer new producer line value
-     * @return <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
-     */
-    public boolean addProducer(final String producer) {
-        return add(new Meta(Element.PRODUCER, producer));
-    }
-    
-    /**
- * Adds the current date and time to a Document.
- *
- * @return    <CODE>true</CODE> if successful, <CODE>false</CODE> otherwise
- */
-    
-    public boolean addCreationDate() {
-        try {
-            /* bugfix by 'taqua' (Thomas) */
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    "EEE MMM dd HH:mm:ss zzz yyyy");
-            return add(new Meta(Element.CREATIONDATE, sdf.format(new Date())));
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
-        }
-    }
-    
     // methods to get the layout of the document.
     
     /**
@@ -757,16 +551,6 @@ public class Document implements AutoCloseable, DocListener {
     }
 
     /**
-     * Gets the product name.
-     *
-     * @return the product name
-     * @since 2.1.6
-     */
-    public static String getProduct() {
-        return OPENPDF;
-    }
-
-    /**
      * Gets the release number.
      *
      * @return the product name
@@ -786,73 +570,9 @@ public class Document implements AutoCloseable, DocListener {
     }
 
     /**
- * Adds a JavaScript onLoad function to the HTML body tag
- *
-     * @param code
-     *            the JavaScript code to be executed on load of the HTML page
- */
-    
-    public void setJavaScript_onLoad(String code) {
-        this.javaScript_onLoad = code;
-    }
-
-    /**
- * Gets the JavaScript onLoad command.
-     * 
- * @return the JavaScript onLoad command
- */
-
-    public String getJavaScript_onLoad() {
-        return this.javaScript_onLoad;
-    }
-
-    /**
- * Adds a JavaScript onUnLoad function to the HTML body tag
- *
-     * @param code
-     *            the JavaScript code to be executed on unload of the HTML page
- */
-    
-    public void setJavaScript_onUnLoad(String code) {
-        this.javaScript_onUnLoad = code;
-    }
-
-    /**
- * Gets the JavaScript onUnLoad command.
-     * 
- * @return the JavaScript onUnLoad command
- */
-
-    public String getJavaScript_onUnLoad() {
-        return this.javaScript_onUnLoad;
-    }
-
-    /**
- * Adds a style class to the HTML body tag
- *
-     * @param htmlStyleClass
-     *            the style class for the HTML body tag
- */
-    
-    public void setHtmlStyleClass(String htmlStyleClass) {
-        this.htmlStyleClass = htmlStyleClass;
-    }
-
-    /**
- * Gets the style class of the HTML body tag
- *
- * @return        the style class of the HTML body tag
- */
-    
-    public String getHtmlStyleClass() {
-        return this.htmlStyleClass;
-    }
-    
-    /**
      * Set the margin mirroring. It will mirror right/left margins for odd/even pages.
      * <p>
-     * Note: it will not work with {@link Table}.
-     * 
+     *
      * @param marginMirroring
      *            <CODE>true</CODE> to mirror the margins
      * @return always <CODE>true</CODE>
@@ -868,8 +588,7 @@ public class Document implements AutoCloseable, DocListener {
     /**
      * Set the margin mirroring. It will mirror top/bottom margins for odd/even pages.
      * <p>
-     * Note: it will not work with {@link Table}.
-     * 
+     *
      * @param marginMirroringTopBottom
      *            <CODE>true</CODE> to mirror the margins
      * @return always <CODE>true</CODE>

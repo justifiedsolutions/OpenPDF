@@ -421,7 +421,7 @@ public class MultiColumnText implements Element {
      * @return    null
      */
 
-    public ArrayList<Element> getChunks() {
+    public List<Chunk> getChunks() {
         return null;
     }
     

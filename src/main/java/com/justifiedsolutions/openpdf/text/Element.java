@@ -49,7 +49,7 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Interface for a text element.
@@ -65,22 +65,6 @@ import java.util.ArrayList;
  * javax.swing.text classes, it will become very difficult to downgrade rugPdf.
  * </OL>
  * 
- * @see Anchor
- * @see Cell
- * @see Chapter
- * @see Chunk
- * @see Header
- * @see Image
- * @see Jpeg
- * @see List
- * @see ListItem
- * @see Meta
- * @see Paragraph
- * @see Phrase
- * @see Rectangle
- * @see Row
- * @see Section
- * @see Table
  */
 
 public interface Element {
@@ -343,10 +327,10 @@ public interface Element {
     /**
      * Gets all the chunks in this element.
      * 
-     * @return an <CODE>ArrayList</CODE>
+     * @return a <CODE>List</CODE>
      */
 
-    ArrayList<Element> getChunks();
+    List<Chunk> getChunks();
 
     /**
      * Gets the content of the text element.

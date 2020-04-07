@@ -187,15 +187,6 @@ public class MappedRandomAccessFile {
     }
     
     /**
-     * invokes the close method
-     * @see java.lang.Object#finalize()
-     */
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
-    }
-    
-    /**
      * invokes the clean method on the ByteBuffer's cleaner
      * @param buffer ByteBuffer
      * @return boolean true on success
@@ -237,9 +228,6 @@ public class MappedRandomAccessFile {
             try {
                 Method getCleanerMethod = buffer.getClass()
                         .getMethod("cleaner", (Class[]) null);
-                if (!getCleanerMethod.isAccessible()) {
-                    getCleanerMethod.setAccessible(true);
-                }
                 Object cleaner = getCleanerMethod.invoke(buffer, (Object[])null);
                 Method clean = cleaner.getClass().getMethod("clean", (Class[])null);
                 clean.invoke(cleaner, (Object[])null);

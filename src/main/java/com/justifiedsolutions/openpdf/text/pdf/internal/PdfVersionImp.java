@@ -117,14 +117,7 @@ public class PdfVersionImp implements PdfVersion {
             this.catalog_version = version;
         }
     }
-    
-    /**
-     * Sets the append mode.
-     */
-    public void setAppendmode(boolean appendmode) {
-        this.appendmode = appendmode;
-    }
-    
+
     /**
      * Writes the header to the OutputStreamCounter.
      * @throws IOException 
@@ -183,7 +176,6 @@ public class PdfVersionImp implements PdfVersion {
     }
 
     /**
-     * @see PdfVersion#addDeveloperExtension(PdfDeveloperExtension)
      * @since    2.1.6
      */
     public void addDeveloperExtension(PdfDeveloperExtension de) {

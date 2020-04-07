@@ -49,16 +49,21 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
+
+import com.justifiedsolutions.openpdf.pdf.content.Cell.Border;
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
+import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.events.PdfPCellEventForwarder;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A cell in a PdfPTable.
@@ -823,63 +828,6 @@ public class PdfPCell extends Rectangle {
         return cellEvent;
     }
 
-    /**
-     * Sets the cell event for this cell.
-     *
-     * @param cellEvent the cell event
-     */
-    public void setCellEvent(PdfPCellEvent cellEvent) {
-        if (cellEvent == null) {
-            this.cellEvent = null;
-        } else if (this.cellEvent == null) {
-            this.cellEvent = cellEvent;
-        } else if (this.cellEvent instanceof PdfPCellEventForwarder) {
-            ((PdfPCellEventForwarder) this.cellEvent).addCellEvent(cellEvent);
-        } else {
-            PdfPCellEventForwarder forward = new PdfPCellEventForwarder();
-            forward.addCellEvent(this.cellEvent);
-            forward.addCellEvent(cellEvent);
-            this.cellEvent = forward;
-        }
-    }
-
-    /**
-     * Gets the arabic shaping options.
-     *
-     * @return the arabic shaping options
-     */
-    public int getArabicOptions() {
-        return column.getArabicOptions();
-    }
-
-    /**
-     * Sets the arabic shaping options. The option can be AR_NOVOWEL, AR_COMPOSEDTASHKEEL and
-     * AR_LIG.
-     *
-     * @param arabicOptions the arabic shaping options
-     */
-    public void setArabicOptions(int arabicOptions) {
-        column.setArabicOptions(arabicOptions);
-    }
-
-    /**
-     * Gets state of first line height based on max ascender
-     *
-     * @return true if an ascender is to be used.
-     */
-    public boolean isUseAscender() {
-        return column.isUseAscender();
-    }
-
-    /**
-     * Enables/ Disables adjustment of first line height based on max ascender.
-     *
-     * @param useAscender adjust height if true
-     */
-    public void setUseAscender(boolean useAscender) {
-        column.setUseAscender(useAscender);
-    }
-
 
     /**
      * Getter for property useDescender.
@@ -891,31 +839,12 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Setter for property useDescender.
-     *
-     * @param useDescender New value of property useDescender.
-     */
-    public void setUseDescender(boolean useDescender) {
-        this.useDescender = useDescender;
-    }
-
-    /**
      * Gets the ColumnText with the content of the cell.
      *
      * @return a columntext object
      */
     public ColumnText getColumn() {
         return column;
-    }
-
-    /**
-     * Returns the list of composite elements of the column.
-     *
-     * @return a List object.
-     * @since 2.1.1
-     */
-    public List getCompositeElements() {
-        return getColumn().compositeElements;
     }
 
     /**
@@ -1037,5 +966,65 @@ public class PdfPCell extends Rectangle {
             height = getMinimumHeight();
         }
         return height;
+    }
+
+    public static PdfPCell getInstance(com.justifiedsolutions.openpdf.pdf.content.Cell cell) {
+        Objects.requireNonNull(cell);
+        PdfPCell result = new PdfPCell();
+        result.setBorder(convertBorder(cell.getBorders()));
+        result.setRowspan(cell.getRowSpan());
+        result.setColspan(cell.getColumnSpan());
+        result.setHorizontalAlignment(convertHorizontalAlignment(cell.getHorizontalAlignment()));
+        result.setVerticalAlignment(convertVerticalAlignment(cell.getVerticalAlignment()));
+        result.setMinimumHeight(cell.getMinimumHeight());
+        result.setPaddingTop(cell.getPaddingTop());
+        result.setPaddingBottom(cell.getPaddingBottom());
+        result.setPaddingLeft(cell.getPaddingLeft());
+        result.setPaddingRight(cell.getPaddingRight());
+        result.setGrayFill(cell.getGreyFill());
+        if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Paragraph) {
+            Paragraph paragraph = Paragraph.getInstance((com.justifiedsolutions.openpdf.pdf.content.Paragraph) cell.getContent());
+            if (paragraph.getAlignment() == ALIGN_UNDEFINED) {
+                paragraph.setAlignment(result.getHorizontalAlignment());
+            }
+            result.addElement(paragraph);
+        } else if (cell.getContent() instanceof com.justifiedsolutions.openpdf.pdf.content.Phrase) {
+            Phrase phrase = Phrase.getInstance((com.justifiedsolutions.openpdf.pdf.content.Phrase) cell.getContent());
+            Paragraph paragraph = new Paragraph(phrase);
+            paragraph.setAlignment(result.getHorizontalAlignment());
+            paragraph.setLeading(0, 1);
+            result.addElement(paragraph);
+        }
+
+        return result;
+    }
+
+    private static int convertBorder(List<Border> borders) {
+        int result = NO_BORDER;
+        if (borders != null) {
+            for (Border border : borders) {
+                switch (border) {
+                    case TOP:
+                        result |= TOP;
+                        break;
+                    case BOTTOM:
+                        result |= BOTTOM;
+                        break;
+                    case LEFT:
+                        result |= LEFT;
+                        break;
+                    case RIGHT:
+                        result |= RIGHT;
+                        break;
+                    case ALL:
+                        result = BOX;
+                        break;
+                }
+                if (result == BOX) {
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

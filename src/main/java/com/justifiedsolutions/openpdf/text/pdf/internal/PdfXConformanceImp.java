@@ -91,16 +91,10 @@ public class PdfXConformanceImp implements PdfXConformance {
      */
     protected int pdfxConformance = PdfWriter.PDFXNONE;
     
-    /**
-     * @see PdfXConformance#setPDFXConformance(int)
-     */
     public void setPDFXConformance(int pdfxConformance) {
         this.pdfxConformance = pdfxConformance;
     }
 
-    /**
-     * @see PdfXConformance#getPDFXConformance()
-     */
     public int getPDFXConformance() {
         return pdfxConformance;
     }
@@ -134,15 +128,7 @@ public class PdfXConformanceImp implements PdfXConformance {
     public boolean isPdfA1() {
         return pdfxConformance == PdfWriter.PDFA1A || pdfxConformance == PdfWriter.PDFA1B;
     }
-    
-    /**
-     * Checks if the PDF has to be in conformance with PDFA1A
-     * @return true of the PDF has to be in conformance with PDFA1A
-     */
-    public boolean isPdfA1A() {
-        return pdfxConformance == PdfWriter.PDFA1A;
-    }
-    
+
     public void completeInfoDictionary(PdfDictionary info) {
         if (isPdfX() && !isPdfA1()) {
             if (info.get(PdfName.GTS_PDFXVERSION) == null) {

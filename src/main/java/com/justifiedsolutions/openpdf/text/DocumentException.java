@@ -52,11 +52,6 @@ package com.justifiedsolutions.openpdf.text;
 
 /**
  * Signals that an error has occurred in a <CODE>Document</CODE>.
- *
- * @see        BadElementException
- * @see        Document
- * @see        DocWriter
- * @see        DocListener
  */
 
 public class DocumentException extends RuntimeException {

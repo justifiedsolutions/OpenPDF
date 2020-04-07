@@ -50,6 +50,7 @@
 
 package com.justifiedsolutions.openpdf.text;
 
+import com.justifiedsolutions.openpdf.pdf.font.PDFFont;
 import java.awt.Color;
 import java.util.Properties;
 import java.util.Set;
@@ -156,19 +157,6 @@ public final class FontFactory {
     
     public static Font getFont(String fontname, String encoding, boolean embedded, float size, int style, Color color, boolean cached) {
         return fontImp.getFont(fontname, encoding, embedded, size, style, color, cached);
-    }
-    
-/**
- * Constructs a <CODE>Font</CODE>-object.
- *
- * @param   attributes  the attributes of a <CODE>Font</CODE> object.
- * @return the Font constructed based on the attributes
- */
-    
-    public static Font getFont(Properties attributes) {
-        fontImp.defaultEmbedding = defaultEmbedding;
-        fontImp.defaultEncoding = defaultEncoding;
-        return fontImp.getFont(attributes);
     }
     
 /**
@@ -444,5 +432,13 @@ public static Set<String> getRegisteredFamilies() {
         if (fontImp == null)
             throw new NullPointerException(MessageLocalization.getComposedMessage("fontfactoryimp.cannot.be.null"));
         FontFactory.fontImp = fontImp;
+    }
+
+    public static Font getFont(com.justifiedsolutions.openpdf.pdf.font.Font font) {
+        if (font instanceof PDFFont) {
+            PDFFont pdfFont = (PDFFont) font;
+            return getFont(pdfFont.getName().getName(),pdfFont.getSize(),pdfFont.getColor());
+        }
+        return new Font();
     }
 }

@@ -51,14 +51,6 @@ package com.justifiedsolutions.openpdf.text;
 
 /**
  * Interface for a text element to which other objects can be added.
- *
- * @see        Phrase
- * @see        Paragraph
- * @see        Section
- * @see        ListItem
- * @see        Chapter
- * @see        Anchor
- * @see        Cell
  */
 
 public interface TextElementArray extends Element {

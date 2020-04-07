@@ -460,21 +460,6 @@ class CJKFont extends BaseFont {
     }
 
     /**
-     * Gets all the entries of the names-table. If it is a True Type font each
-     * array element will have {Name ID, Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be found
-     * in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"4", "", "", "",
-     * font name}.
-     * 
-     * @return the full name of the font
-     */
-    @Override
-    public String[][] getAllNameEntries() {
-        return new String[][] { { "4", "", "", "", fontName } };
-    }
-
-    /**
      * Gets the family name of the font. If it is a True Type font each array
      * element will have {Platform ID, Platform Encoding ID, Language ID, font
      * name}. The interpretation of this values can be found in the Open Type
@@ -733,43 +718,6 @@ class CJKFont extends BaseFont {
     @Override
     public boolean charExists(int c) {
         return translationMap[c] != 0;
-    }
-
-    /**
-     * Sets the character advance.
-     * 
-     * @param c
-     *            the character
-     * @param advance
-     *            the character advance normalized to 1000 units
-     * @return <CODE>true</CODE> if the advance was set, <CODE>false</CODE>
-     *         otherwise. Will always return <CODE>false</CODE>
-     */
-    @Override
-    public boolean setCharAdvance(int c, int advance) {
-        return false;
-    }
-
-    /**
-     * Sets the font name that will appear in the pdf font dictionary. Use with
-     * care as it can easily make a font unreadable if not embedded.
-     * 
-     * @param name
-     *            the new font name
-     */
-    @Override
-    public void setPostscriptFontName(String name) {
-        fontName = name;
-    }
-
-    @Override
-    public boolean setKerning(int char1, int char2, int kern) {
-        return false;
-    }
-
-    @Override
-    public int[] getCharBBox(int c) {
-        return null;
     }
 
     @Override

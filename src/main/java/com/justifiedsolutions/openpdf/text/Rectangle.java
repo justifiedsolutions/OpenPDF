@@ -52,6 +52,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import com.justifiedsolutions.openpdf.text.pdf.GrayColor;
+import java.util.List;
 
 /**
  * A <CODE>Rectangle</CODE> is the representation of a geometric figure.
@@ -61,11 +62,6 @@ import com.justifiedsolutions.openpdf.text.pdf.GrayColor;
  * borders that vary in width/color on each side using methods like
  * {@link #setBorderWidthLeft(float)}or
  * {@link #setBorderColorLeft(java.awt.Color)}.
- * 
- * @see Element
- * @see Table
- * @see Cell
- * @see HeaderFooter
  */
 public class Rectangle implements Element {
 
@@ -283,7 +279,7 @@ public class Rectangle implements Element {
    * @return an <CODE>ArrayList</CODE>
    */
   @Override
-  public ArrayList<Element> getChunks() {
+  public List<Chunk> getChunks() {
     return new ArrayList<>();
   }
 

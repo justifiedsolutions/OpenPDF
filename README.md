@@ -2,11 +2,11 @@
 
 OpenPDF is a Java library for creating PDF files with a LGPL and MPL open source license. OpenPDF is the LGPL/MPL open source successor of iText, and is based on a fork of LibrePDF/OpenPDF. We welcome contributions from other developers. Please feel free to submit pull-requests and bugreports to this GitHub repository.
 
- [![Build Status](https://travis-ci.org/justifiedsolutions/OpenPDF.svg?branch=master)](https://travis-ci.org/justifiedsolutions/OpenPDF) 
- [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.justifiedsolutions/openpdf/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.justifiedsolutions/openpdf)
- [![javadoc](https://javadoc.io/badge2/com.justifiedsolutions/openpdf/javadoc.svg)](https://javadoc.io/doc/com.justifiedsolutions/openpdf)
- [![License (LGPL version 3.0)](https://img.shields.io/badge/license-GNU%20LGPL%20version%203.0-blue.svg?style=flat-square)](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) 
- [![License (MPL)](https://img.shields.io/badge/license-Mozilla%20Public%20License-yellow.svg?style=flat-square)](https://www.mozilla.org/en-US/MPL/2.0/)
+[![Build Status](https://travis-ci.org/justifiedsolutions/OpenPDF.svg?branch=master)](https://travis-ci.org/justifiedsolutions/OpenPDF)
+[![Maven Central](https://img.shields.io/maven-central/v/com.justifiedsolutions/openpdf?color=green)](https://maven-badges.herokuapp.com/maven-central/com.justifiedsolutions/openpdf)
+[![javadoc](https://javadoc.io/badge2/com.justifiedsolutions/openpdf/javadoc.svg)](https://javadoc.io/doc/com.justifiedsolutions/openpdf)
+[![License (LGPL version 3.0)](https://img.shields.io/badge/license-GNU%20LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) 
+[![License (MPL)](https://img.shields.io/badge/license-Mozilla%20Public%20License%20v2-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
 
 ## OpenPDF version 1.0.0 released 2020-03-28 ##
 Initial release of the "slimmed down" version of OpenPDF. 
@@ -19,17 +19,31 @@ Add this to your pom.xml file to use the latest version of OpenPDF:
             <artifactId>openpdf</artifactId>
             <version>1.0.0</version>
         </dependency>
+        
+## Project Goals ##
+### Goals ###
+ - Minimize functionality
+ - Easy to understand and use API
+ 
+### Non-Goals ###
+ - Compatibility with iText or LibrePDF/OpenPDF
+ - Supporting Forms
+ - Supporting Encryption
+ - Supporting Signing
+ - Supporting Parsing
 
 ## License ##
 
-All contributions to OpenPDF must be dual licensed as [LGPL v3](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) and [MPL v2](https://www.mozilla.org/en-US/MPL/2.0/).
+`SPDX-License-Identifier: LGPL-3.0-only OR MPL-2.0`
+
+All contributions to OpenPDF must be dual licensed as [LGPL v3](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) and [MPL v2](https://www.mozilla.org/en-US/MPL/2.0/). When using this library you can use either license.
 
 
 ## Background ##
 
 Justified Solutions OpenPDF is open source software with a LGPL and MPL license. It is a fork of LibrePDF which is a fork of iText version 4, more specifically iText svn tag 4.2.0, which was hosted publicly on sourceforge with LGPL and MPL license headers in the source code, and LGPL and MPL license documents in the SVN repository. Beginning with version 5.0 of iText, the developers have moved to the AGPL to improve their ability to sell commercial licenses. Justified Solutions OpenPDF was forked off of the LibrePDF version in March 2020. The goal of this version to provide a slimmed down version that focuses on the minimum requirements for creating a PDF document.
 
-### Coding Style ###
+## Coding Style ##
 - Code indentation style is 4 spaces.
 - A coding style configuraton for [IntelliJ](https://www.jetbrains.com/idea/) is included in the repository.
 - Generally try to preserve the coding style in the file you are modifying.
@@ -44,12 +58,6 @@ Justified Solutions OpenPDF is open source software with a LGPL and MPL license.
  - Hamcrest
  - Mockito
  - Apache Commons IO
-
-### Optional: ###
-- [BouncyCastle](https://www.bouncycastle.org/) (Used to sign PDF files)
-	- Provider
-	- PKIX/CMS
-
 
 ## Credits ##
 Significant [Contributors to OpenPDF](https://github.com/LibrePDF/OpenPDF/graphs/contributors) on GitHub:

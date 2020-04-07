@@ -1425,29 +1425,6 @@ class TrueTypeFont extends BaseFont {
         return fontName;
     }
 
-    /** Gets the code pages supported by the font.
-     * @return the code pages supported by the font
-     */
-    public String[] getCodePagesSupported() {
-        long cp = (((long)os_2.ulCodePageRange2) << 32) + (os_2.ulCodePageRange1 & 0xffffffffL);
-        int count = 0;
-        long bit = 1;
-        for (int k = 0; k < 64; ++k) {
-            if ((cp & bit) != 0 && codePages[k] != null)
-                ++count;
-            bit <<= 1;
-        }
-        String[] ret = new String[count];
-        count = 0;
-        bit = 1;
-        for (int k = 0; k < 64; ++k) {
-            if ((cp & bit) != 0 && codePages[k] != null)
-                ret[count++] = codePages[k];
-            bit <<= 1;
-        }
-        return ret;
-    }
-    
     /** Gets the full name of the font. If it is a True Type font
      * each array element will have {Platform ID, Platform Encoding ID,
      * Language ID, font name}. The interpretation of this values can be
@@ -1489,37 +1466,8 @@ class TrueTypeFont extends BaseFont {
      */    
     public boolean hasKernPairs() {
         return kerning.size() > 0;
-    }    
-    
-    /**
-     * Sets the font name that will appear in the pdf font dictionary.
-     * Use with care as it can easily make a font unreadable if not embedded.
-     * @param name the new font name
-     */    
-    public void setPostscriptFontName(String name) {
-        fontName = name;
     }
-    
-    /**
-     * Sets the kerning between two Unicode chars.
-     * @param char1 the first char
-     * @param char2 the second char
-     * @param kern the kerning to apply in normalized 1000 units
-     * @return <code>true</code> if the kerning was applied, <code>false</code> otherwise
-     */
-    public boolean setKerning(int char1, int char2, int kern) {
-        int[] metrics = getMetricsTT(char1);
-        if (metrics == null)
-            return false;
-        int c1 = metrics[0];
-        metrics = getMetricsTT(char2);
-        if (metrics == null)
-            return false;
-        int c2 = metrics[0];
-        kerning.put((c1 << 16) + c2, kern);
-        return true;
-    }
-    
+
     protected int[] getRawCharBBox(int c, String name) {
         Map<Integer, int[]> map;
         if (name == null || cmap31 == null)

@@ -80,21 +80,7 @@ class PdfReaderInstance {
     PdfReader getReader() {
         return reader;
     }
-    
-    PdfImportedPage getImportedPage(int pageNumber) {
-        if (!reader.isOpenedWithFullPermissions())
-            throw new IllegalArgumentException(MessageLocalization.getComposedMessage("pdfreader.not.opened.with.owner.password"));
-        if (pageNumber < 1 || pageNumber > reader.getNumberOfPages())
-            throw new IllegalArgumentException(MessageLocalization.getComposedMessage("invalid.page.number.1", pageNumber));
-        Integer i = pageNumber;
-        PdfImportedPage pageT = importedPages.get(i);
-        if (pageT == null) {
-            pageT = new PdfImportedPage(this, writer, pageNumber);
-            importedPages.put(i, pageT);
-        }
-        return pageT;
-    }
-    
+
     int getNewObjectNumber(int number, int generation) {
         if (myXref[number] == 0) {
             myXref[number] = writer.getIndirectReferenceNumber();
@@ -102,11 +88,7 @@ class PdfReaderInstance {
         }
         return myXref[number];
     }
-    
-    RandomAccessFileOrArray getReaderFile() {
-        return file;
-    }
-    
+
     PdfObject getResources(int pageNumber) {
         PdfObject obj = PdfReader.getPdfObjectRelease(reader.getPageNRelease(pageNumber).get(PdfName.RESOURCES));
         return obj;

@@ -788,51 +788,7 @@ class Type1Font extends BaseFont
     public boolean hasKernPairs() {
         return !KernPairs.isEmpty();
     }
-    
-    /**
-     * Sets the font name that will appear in the pdf font dictionary.
-     * Use with care as it can easily make a font unreadable if not embedded.
-     * @param name the new font name
-     */    
-    public void setPostscriptFontName(String name) {
-        FontName = name;
-    }
-    
-    /**
-     * Sets the kerning between two Unicode chars.
-     * @param char1 the first char
-     * @param char2 the second char
-     * @param kern the kerning to apply in normalized 1000 units
-     * @return <code>true</code> if the kerning was applied, <code>false</code> otherwise
-     */
-    public boolean setKerning(int char1, int char2, int kern) {
-        String first = GlyphList.unicodeToName(char1);
-        if (first == null)
-            return false;
-        String second = GlyphList.unicodeToName(char2);
-        if (second == null)
-            return false;
-        Object[] obj = KernPairs.get(first);
-        if (obj == null) {
-            obj = new Object[]{second, kern};
-            KernPairs.put(first, obj);
-            return true;
-        }
-        for (int k = 0; k < obj.length; k += 2) {
-            if (second.equals(obj[k]) && obj.length > k + 1) {
-                obj[k + 1] = kern;
-                return true;
-            }
-        }
-        int size = obj.length;
-        Object[] obj2 = new Object[size + 2];
-        System.arraycopy(obj, 0, obj2, 0, size);
-        obj2[size] = second;
-        obj2[size + 1] = kern;
-        KernPairs.put(first, obj2);
-        return true;
-    }
-    
+
     protected int[] getRawCharBBox(int c, String name) {
         Object[] metrics;
         if (name == null) { // font specific

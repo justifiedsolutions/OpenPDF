@@ -53,9 +53,6 @@ package com.justifiedsolutions.openpdf.text;
  * A class that implements <CODE>DocListener</CODE> will perform some
  * actions when some actions are performed on a <CODE>Document</CODE>.
  *
- * @see        ElementListener
- * @see        Document
- * @see        DocWriter
  */
 
 public interface DocListener extends ElementListener {
@@ -135,33 +132,4 @@ public interface DocListener extends ElementListener {
      */
 
     void resetPageCount(); // [L8]
-
-    /**
-     * Changes the header of this document.
-     *
-     * @param    header        the new header
-     */
-
-    void setHeader(HeaderFooter header); // [L9]
-    
-    /**
-     * Resets the header of this document.
-     */
-
-    void resetHeader(); // [L10]
-    
-    /**
-     * Changes the footer of this document.
-     *
-     * @param    footer        the new footer
-     */
-
-    void setFooter(HeaderFooter footer); // [L11]
-    
-    /**
-     * Resets the footer of this document.
-     */
-
-    void resetFooter(); // [L12]
-
 }
