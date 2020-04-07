@@ -56,52 +56,16 @@ import java.util.HashMap;
 public class DocumentFont extends BaseFont {
 
   // code, [glyph, width]
-  private HashMap<Integer, int[]> metrics = new HashMap<>();
+  private final HashMap<Integer, int[]> metrics = new HashMap<>();
   private String fontName;
   private PRIndirectReference refFont;
-  private IntHashtable uni2byte = new IntHashtable();
-  private float Ascender = 800;
-  private float CapHeight = 700;
-  private float Descender = -200;
-  private float ItalicAngle = 0;
-  private float llx = -50;
-  private float lly = -200;
-  private float urx = 100;
-  private float ury = 900;
-  private boolean isType0 = false;
+  private final IntHashtable uni2byte = new IntHashtable();
+  private final boolean isType0 = false;
 
   private BaseFont cjkMirror;
 
-  private static String[] cjkNames = {"HeiseiMin-W3", "HeiseiKakuGo-W5", "STSong-Light", "MHei-Medium",
-      "MSung-Light", "HYGoThic-Medium", "HYSMyeongJo-Medium", "MSungStd-Light", "STSongStd-Light",
-      "HYSMyeongJoStd-Medium", "KozMinPro-Regular"};
-
-  private static String[] cjkEncs = {"UniJIS-UCS2-H", "UniJIS-UCS2-H", "UniGB-UCS2-H", "UniCNS-UCS2-H",
-      "UniCNS-UCS2-H", "UniKS-UCS2-H", "UniKS-UCS2-H", "UniCNS-UCS2-H", "UniGB-UCS2-H",
-      "UniKS-UCS2-H", "UniJIS-UCS2-H"};
-
-  private static String[] cjkNames2 = {"MSungStd-Light", "STSongStd-Light", "HYSMyeongJoStd-Medium", "KozMinPro-Regular"};
-
-  private static String[] cjkEncs2 = {"UniCNS-UCS2-H", "UniGB-UCS2-H", "UniKS-UCS2-H", "UniJIS-UCS2-H",
-      "UniCNS-UTF16-H", "UniGB-UTF16-H", "UniKS-UTF16-H", "UniJIS-UTF16-H"};
-
-  private static final int[] stdEnc = {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      32, 33, 34, 35, 36, 37, 38, 8217, 40, 41, 42, 43, 44, 45, 46, 47,
-      48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
-      64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-      80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
-      8216, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-      112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 161, 162, 163, 8260, 165, 402, 167, 164, 39, 8220, 171, 8249, 8250, 64257, 64258,
-      0, 8211, 8224, 8225, 183, 0, 182, 8226, 8218, 8222, 8221, 187, 8230, 8240, 0, 191,
-      0, 96, 180, 710, 732, 175, 728, 729, 168, 0, 730, 184, 0, 733, 731, 711,
-      8212, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 198, 0, 170, 0, 0, 0, 0, 321, 216, 338, 186, 0, 0, 0, 0,
-      0, 230, 0, 0, 0, 305, 0, 0, 322, 248, 339, 223, 0, 0, 0, 0};
+  public DocumentFont() {
+  }
 
 
   /**
@@ -129,17 +93,25 @@ public class DocumentFont extends BaseFont {
     if (cjkMirror != null) {
       return cjkMirror.getFontDescriptor(key, fontSize);
     }
+    float ascender = 800;
+    float capHeight = 700;
+    float descender = -200;
+    float italicAngle = 0;
+    float llx = -50;
+    float lly = -200;
+    float urx = 100;
+    float ury = 900;
     switch (key) {
       case AWT_ASCENT:
       case ASCENT:
-        return Ascender * fontSize / 1000;
+        return ascender * fontSize / 1000;
       case CAPHEIGHT:
-        return CapHeight * fontSize / 1000;
+        return capHeight * fontSize / 1000;
       case AWT_DESCENT:
       case DESCENT:
-        return Descender * fontSize / 1000;
+        return descender * fontSize / 1000;
       case ITALICANGLE:
-        return ItalicAngle;
+        return italicAngle;
       case BBOXLLX:
         return llx * fontSize / 1000;
       case BBOXLLY:
@@ -165,18 +137,6 @@ public class DocumentFont extends BaseFont {
    */
   public String[][] getFullFontName() {
     return new String[][]{{"", "", "", fontName}};
-  }
-
-  /**
-   * Gets all the entries of the names-table. If it is a True Type font each array element will have {Name ID, Platform ID, Platform
-   * Encoding ID, Language ID, font name}. The interpretation of this values can be found in the Open Type specification, chapter 2, in the
-   * 'name' table.<br> For the other fonts the array has a single element with {"4", "", "", "", font name}.
-   *
-   * @return the full name of the font
-   * @since 2.0.8
-   */
-  public String[][] getAllNameEntries() {
-    return new String[][]{{"4", "", "", "", fontName}};
   }
 
   /**
@@ -360,13 +320,4 @@ public class DocumentFont extends BaseFont {
     return null;
   }
 
-  /**
-   * Exposes the unicode - > CID map that is constructed from the font's encoding
-   *
-   * @return the unicode to CID map
-   * @since 2.1.7
-   */
-  IntHashtable getUni2Byte() {
-    return uni2byte;
-  }
 }

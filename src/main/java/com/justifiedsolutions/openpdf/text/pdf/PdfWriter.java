@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.DocListener;
 import com.justifiedsolutions.openpdf.text.DocWriter;
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
@@ -59,8 +58,6 @@ import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPageEventForwarder;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfDocumentActions;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfPageActions;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfRunDirection;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfVersionImp;
@@ -92,9 +89,7 @@ import java.util.stream.Collectors;
 public class PdfWriter extends DocWriter implements
     PdfVersion,
     PdfDocumentActions,
-    PdfPageActions,
-    PdfXConformance,
-    PdfRunDirection {
+    PdfXConformance {
 
     /**
      * The highest generation number possible.
@@ -269,10 +264,6 @@ public class PdfWriter extends DocWriter implements
         }
 
         // methods
-
-        void setRefnum(int refnum) {
-            this.refnum = refnum;
-        }
 
         private PdfWriter.PdfBody.PdfCrossReference addToObjStm(PdfObject obj, int nObj) throws IOException {
             if (numObj >= OBJSINSTREAM)
@@ -583,26 +574,6 @@ public class PdfWriter extends DocWriter implements
     public static PdfWriter getInstance(Document document, OutputStream os)
     throws DocumentException {
         PdfDocument pdf = new PdfDocument();
-        document.addDocListener(pdf);
-        PdfWriter writer = new PdfWriter(pdf, os);
-        pdf.addWriter(writer);
-        return writer;
-    }
-
-    /**
-     * Use this method to get an instance of the <CODE>PdfWriter</CODE>.
-     *
-     * @return a new <CODE>PdfWriter</CODE>
-     * @param document The <CODE>Document</CODE> that has to be written
-     * @param os The <CODE>OutputStream</CODE> the writer has to write to.
-     * @param listener A <CODE>DocListener</CODE> to pass to the PdfDocument.
-     * @throws DocumentException on error
-     */
-
-    public static PdfWriter getInstance(Document document, OutputStream os, DocListener listener)
-    throws DocumentException {
-        PdfDocument pdf = new PdfDocument();
-        pdf.addDocListener(listener);
         document.addDocListener(pdf);
         PdfWriter writer = new PdfWriter(pdf, os);
         pdf.addWriter(writer);
@@ -971,12 +942,7 @@ public class PdfWriter extends DocWriter implements
             throw new ExceptionConverter(ioe);
         }
         page.add(object.getIndirectReference());
-        // [U5]
-        if (group != null) {
-            page.put(PdfName.GROUP, group);
-            group = null;
-        }
-        else if (rgbTransparencyBlending) {
+        if (rgbTransparencyBlending) {
             PdfDictionary pp = new PdfDictionary();
             pp.put(PdfName.TYPE, PdfName.GROUP);
             pp.put(PdfName.S, PdfName.TRANSPARENCY);
@@ -1107,8 +1073,6 @@ public class PdfWriter extends DocWriter implements
                     catalog.mergeDifferent(extraCatalog);
                 }
 
-                writeOutlines(catalog, false);
-
                 // add the Catalog to the body
                 PdfIndirectObject indirectCatalog = addToBody(catalog, false);
                 // add the info-object to the body
@@ -1202,22 +1166,7 @@ public class PdfWriter extends DocWriter implements
 
 //  [C1] Outlines (bookmarks)
 
-    protected List newBookmarks;
-
-    protected void writeOutlines(PdfDictionary catalog, boolean namedAsNames) throws IOException {
-        if (newBookmarks == null || newBookmarks.isEmpty())
-            return;
-        PdfDictionary top = new PdfDictionary();
-        PdfIndirectReference topRef = getPdfIndirectReference();
-        Object[] kids = SimpleBookmark.iterateOutlines(this, topRef, newBookmarks, namedAsNames);
-        top.put(PdfName.FIRST, (PdfIndirectReference)kids[0]);
-        top.put(PdfName.LAST, (PdfIndirectReference)kids[1]);
-        top.put(PdfName.COUNT, new PdfNumber((Integer) kids[2]));
-        addToBody(top, topRef);
-        catalog.put(PdfName.OUTLINES, topRef);
-    }
-
-//    [C2] PdfVersion interface
+    //    [C2] PdfVersion interface
      /** possible PDF version (header) */
      public static final char VERSION_1_2 = '2';
      /** possible PDF version (header) */
@@ -1263,7 +1212,6 @@ public class PdfWriter extends DocWriter implements
     }
 
     /**
-     * @see PdfVersion#addDeveloperExtension(PdfDeveloperExtension)
      * @since    2.1.6
      */
     public void addDeveloperExtension(PdfDeveloperExtension de) {
@@ -1277,86 +1225,8 @@ public class PdfWriter extends DocWriter implements
         return pdf_version;
     }
 
-    // page layout (section 13.1.1 of "iText in Action")
 
-    /** A viewer preference */
-    public static final int PageLayoutSinglePage = 1;
-    /** A viewer preference */
-    public static final int PageLayoutOneColumn = 2;
-    /** A viewer preference */
-    public static final int PageLayoutTwoColumnLeft = 4;
-    /** A viewer preference */
-    public static final int PageLayoutTwoColumnRight = 8;
-    /** A viewer preference */
-    public static final int PageLayoutTwoPageLeft = 16;
-    /** A viewer preference */
-    public static final int PageLayoutTwoPageRight = 32;
 
-    // page mode (section 13.1.2 of "iText in Action")
-
-    /** A viewer preference */
-    public static final int PageModeUseNone = 64;
-    /** A viewer preference */
-    public static final int PageModeUseOutlines = 128;
-    /** A viewer preference */
-    public static final int PageModeUseThumbs = 256;
-    /** A viewer preference */
-    public static final int PageModeFullScreen = 512;
-    /** A viewer preference */
-    public static final int PageModeUseOC = 1024;
-    /** A viewer preference */
-    public static final int PageModeUseAttachments = 2048;
-
-    // values for setting viewer preferences in iText versions older than 2.x
-
-    /** A viewer preference */
-    public static final int HideToolbar = 1 << 12;
-    /** A viewer preference */
-    public static final int HideMenubar = 1 << 13;
-    /** A viewer preference */
-    public static final int HideWindowUI = 1 << 14;
-    /** A viewer preference */
-    public static final int FitWindow = 1 << 15;
-    /** A viewer preference */
-    public static final int CenterWindow = 1 << 16;
-    /** A viewer preference */
-    public static final int DisplayDocTitle = 1 << 17;
-
-    /** A viewer preference */
-    public static final int NonFullScreenPageModeUseNone = 1 << 18;
-    /** A viewer preference */
-    public static final int NonFullScreenPageModeUseOutlines = 1 << 19;
-    /** A viewer preference */
-    public static final int NonFullScreenPageModeUseThumbs = 1 << 20;
-    /** A viewer preference */
-    public static final int NonFullScreenPageModeUseOC = 1 << 21;
-
-    /** A viewer preference */
-    public static final int DirectionL2R = 1 << 22;
-    /** A viewer preference */
-    public static final int DirectionR2L = 1 << 23;
-
-    /** A viewer preference */
-    public static final int PrintScalingNone = 1 << 24;
-
-//  [C4] Page labels
-
-    //  [C5] named objects: named destinations, javascript, embedded files
-
-    // [C6] Actions (open and additional)
-
-     /** action value */
-     public static final PdfName DOCUMENT_CLOSE = PdfName.WC;
-     /** action value */
-     public static final PdfName WILL_SAVE = PdfName.WS;
-     /** action value */
-     public static final PdfName DID_SAVE = PdfName.DS;
-     /** action value */
-     public static final PdfName WILL_PRINT = PdfName.WP;
-     /** action value */
-     public static final PdfName DID_PRINT = PdfName.DP;
-
-    /** @see PdfDocumentActions#setOpenAction(java.lang.String) */
     public void setOpenAction(String name) {
          pdf.setOpenAction(name);
      }
@@ -1372,27 +1242,12 @@ public class PdfWriter extends DocWriter implements
         pdf.setCollection(collection);
     }
 
-//  [C8] AcroForm
-
-    /** signature value */
-    public static final int SIGNATURE_EXISTS = 1;
-    /** signature value */
-    public static final int SIGNATURE_APPEND_ONLY = 2;
-
 
 
 //  [C9] Metadata
 
     /** XMP Metadata for the document. */
     protected byte[] xmpMetadata = null;
-
-    /**
-     * Use this method to set the XMP Metadata.
-     * @param xmpMetadata The xmpMetadata to set.
-     */
-    public void setXmpMetadata(byte[] xmpMetadata) {
-        this.xmpMetadata = xmpMetadata;
-    }
 
     //  [C10] PDFX Conformance
     /** A PDF/X level. */
@@ -1409,7 +1264,6 @@ public class PdfWriter extends DocWriter implements
     /** Stores the PDF/X level. */
     private PdfXConformanceImp pdfxConformance = new PdfXConformanceImp();
 
-    /** @see PdfXConformance#setPDFXConformance(int) */
     public void setPDFXConformance(int pdfx) {
         if (pdfxConformance.getPDFXConformance() == pdfx)
             return;
@@ -1422,89 +1276,15 @@ public class PdfWriter extends DocWriter implements
         pdfxConformance.setPDFXConformance(pdfx);
     }
 
-    /** @see PdfXConformance#getPDFXConformance() */
     public int getPDFXConformance() {
         return pdfxConformance.getPDFXConformance();
     }
 
-    /** @see PdfXConformance#isPdfX() */
     public boolean isPdfX() {
         return pdfxConformance.isPdfX();
     }
 
-//  [C11] Output intents
 
-    // PDF Objects that have an impact on the PDF body
-
-//  [F1] PdfEncryptionSettings interface
-
-    // types of encryption
-
-    /** Type of encryption */
-    public static final int STANDARD_ENCRYPTION_40 = 0;
-    /** Type of encryption */
-    public static final int STANDARD_ENCRYPTION_128 = 1;
-    /** Type of encryption */
-    public static final int ENCRYPTION_AES_128 = 2;
-    /** Mask to separate the encryption type from the encryption mode. */
-    static final int ENCRYPTION_MASK = 7;
-    /** Add this to the mode to keep the metadata in clear text */
-    public static final int DO_NOT_ENCRYPT_METADATA = 8;
-    /**
-     * Add this to the mode to keep encrypt only the embedded files.
-     * @since 2.1.3
-     */
-    public static final int EMBEDDED_FILES_ONLY = 24;
-
-    // permissions
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_PRINTING = 4 + 2048;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_MODIFY_CONTENTS = 8;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_COPY = 16;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_MODIFY_ANNOTATIONS = 32;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_FILL_IN = 256;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_SCREENREADERS = 512;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_ASSEMBLY = 1024;
-
-    /** The operation permitted when the document is opened with the user password
-     *
-     * @since 2.0.7
-     */
-    public static final int ALLOW_DEGRADED_PRINTING = 4;
 
     //  [F2] compression
 
@@ -1890,66 +1670,6 @@ public class PdfWriter extends DocWriter implements
             throw new IllegalArgumentException(MessageLocalization.getComposedMessage("only.pdflayer.is.accepted"));
     }
 
-//  User methods to change aspects of the page
-
-//  [U1] page size
-
-    //  [U2] take care of empty pages
-
-    //  [U3] page actions (open and close)
-
-    /** action value */
-    public static final PdfName PAGE_OPEN = PdfName.O;
-    /** action value */
-    public static final PdfName PAGE_CLOSE = PdfName.C;
-
-    /** @see PdfPageActions#setDuration(int) */
-    public void setDuration(int seconds) {
-         pdf.setDuration(seconds);
-     }
-
-    /** @see PdfPageActions#setTransition(PdfTransition) */
-    public void setTransition(PdfTransition transition) {
-         pdf.setTransition(transition);
-     }
-
-//  [U4] Thumbnail image
-
-    /**
-     * Use this method to set the thumbnail image for the current page.
-     * @param image the image
-     * @throws PdfException on error
-     * @throws DocumentException or error
-     */
-    public void setThumbnail(Image image) throws DocumentException {
-        pdf.setThumbnail(image);
-    }
-
-//  [U5] Transparency groups
-
-    /**
-     * A group attributes dictionary specifying the attributes
-     * of the page's page group for use in the transparent
-     * imaging model
-     */
-    protected PdfDictionary group;
-
-    /**
-     * Use this method to get the group dictionary.
-     * @return Value of property group.
-     */
-    public PdfDictionary getGroup() {
-        return this.group;
-    }
-
-    /**
-     * Use this method to set the group dictionary.
-     * @param group New value of property group.
-     */
-    public void setGroup(PdfDictionary group) {
-        this.group = group;
-    }
-
 //  [U6] space char ratio
 
     /** The default space-char ratio. */
@@ -1958,18 +1678,16 @@ public class PdfWriter extends DocWriter implements
     public static final float NO_SPACE_CHAR_RATIO = 10000000f;
 
     /**
-     * The ratio between the extra word spacing and the extra character spacing.
-     * Extra word spacing will grow <CODE>ratio</CODE> times more than extra character spacing.
-     */
-    private float spaceCharRatio = SPACE_CHAR_RATIO_DEFAULT;
-
-    /**
      * Use this method to gets the space/character extra spacing ratio
      * for fully justified text.
      * @return the space/character extra spacing ratio
      */
     public float getSpaceCharRatio() {
-        return spaceCharRatio;
+        /**
+         * The ratio between the extra word spacing and the extra character spacing.
+         * Extra word spacing will grow <CODE>ratio</CODE> times more than extra character spacing.
+         */
+        return SPACE_CHAR_RATIO_DEFAULT;
     }
 
     //  [U7] run direction (doesn't actually do anything)
@@ -1987,27 +1705,6 @@ public class PdfWriter extends DocWriter implements
      * preferential run direction.
      */
     public static final int RUN_DIRECTION_RTL = 3;
-
-    protected int runDirection = RUN_DIRECTION_NO_BIDI;
-
-    /**
-     * Use this method to set the run direction.
-     * This is only used as a placeholder as it does not affect anything.
-     * @param runDirection the run direction
-     */
-    public void setRunDirection(int runDirection) {
-        if (runDirection < RUN_DIRECTION_NO_BIDI || runDirection > RUN_DIRECTION_RTL)
-            throw new RuntimeException(MessageLocalization.getComposedMessage("invalid.run.direction.1", runDirection));
-        this.runDirection = runDirection;
-    }
-
-    /**
-     * Use this method to set the run direction.
-     * @return the run direction
-     */
-    public int getRunDirection() {
-        return runDirection;
-    }
 
 //  [U8] user units
 

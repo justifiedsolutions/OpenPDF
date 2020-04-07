@@ -231,13 +231,8 @@ public abstract class BaseFont {
     /** A possible encoding. */
     public static final String MACROMAN = "MacRoman";
 
-    /** if the font has to be embedded */
-    public static final boolean EMBEDDED = true;
-
     /** if the font doesn't have to be embedded */
     public static final boolean NOT_EMBEDDED = false;
-    /** if the font has to be cached */
-    public static final boolean CACHED = true;
 
     /** The path to the font resources. */
     public static final String RESOURCE_PATH = "com/justifiedsolutions/openpdf/text/pdf/fonts/";

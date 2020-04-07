@@ -99,8 +99,6 @@ class PdfStamperImp extends PdfWriter {
         markUsed(pages);
         closed = true;
         addSharedObjectsToBody();
-        setOutlines();
-        setJavaScript();
         addFileAttachments();
         if (pdf.pageLabels != null)
             catalog.put(PdfName.PAGELABELS, pdf.pageLabels.getDictionary(this));
@@ -193,6 +191,7 @@ class PdfStamperImp extends PdfWriter {
               markUsed(catalog);
             }        
         }
+
         try {
             file.reOpen();
             alterContents();
@@ -483,14 +482,6 @@ class PdfStamperImp extends PdfWriter {
         return ps.over;
     }
 
-    private static void moveRectangle(PdfDictionary dic2, PdfReader r, int pageImported, PdfName key, String name) {
-        Rectangle m = r.getBoxSize(pageImported, name);
-        if (m == null)
-            dic2.remove(key);
-        else
-            dic2.put(key, new PdfRectangle(m));
-    }
-
     /** Getter for property rotateContents.
      * @return Value of property rotateContents.
      *
@@ -509,26 +500,6 @@ class PdfStamperImp extends PdfWriter {
 
     boolean isContentWritten() {
         return body.size() > 1;
-    }
-
-    void eliminateAcroformObjects() {
-        PdfObject acro = reader.getCatalog().get(PdfName.ACROFORM);
-        if (acro == null)
-            return;
-        PdfDictionary acrodic = (PdfDictionary)PdfReader.getPdfObject(acro);
-        reader.killXref(acrodic.get(PdfName.XFA));
-        acrodic.remove(PdfName.XFA);
-        PdfObject iFields = acrodic.get(PdfName.FIELDS);
-        if (iFields != null) {
-            PdfDictionary kids = new PdfDictionary();
-            kids.put(PdfName.KIDS, iFields);
-            sweepKids(kids);
-            PdfReader.killIndirect(iFields);
-            acrodic.put(PdfName.FIELDS, new PdfArray());
-        }
-        acrodic.remove(PdfName.SIGFLAGS);
-//        PdfReader.killIndirect(acro);
-//        reader.getCatalog().remove(PdfName.ACROFORM);
     }
 
     void sweepKids(PdfObject obj) {
@@ -579,21 +550,6 @@ class PdfStamperImp extends PdfWriter {
         markUsed(catalog);
     }
 
-    void setJavaScript() throws IOException {
-        Map<String, PdfIndirectReference> djs = pdf.getDocumentLevelJS();
-        if (djs.isEmpty())
-            return;
-        PdfDictionary catalog = reader.getCatalog();
-        PdfDictionary names = (PdfDictionary)PdfReader.getPdfObject(catalog.get(PdfName.NAMES), catalog);
-        if (names == null) {
-            names = new PdfDictionary();
-            catalog.put(PdfName.NAMES, names);
-            markUsed(catalog);
-        }
-        markUsed(names);
-        PdfDictionary tree = PdfNameTree.writeTree(djs, this);
-        names.put(PdfName.JAVASCRIPT, addToBody(tree).getIndirectReference());
-    }
 
     void addFileAttachments() throws IOException {
         Map<String, PdfIndirectReference> fs = pdf.getDocumentFileAttachment();
@@ -636,18 +592,6 @@ class PdfStamperImp extends PdfWriter {
     void makePackage( PdfCollection collection ) {
         PdfDictionary catalog = reader.getCatalog();
            catalog.put( PdfName.COLLECTION, collection );
-    }
-
-    void setOutlines() throws IOException {
-        if (newBookmarks == null)
-            return;
-        deleteOutlines();
-        if (newBookmarks.isEmpty())
-            return;
-        PdfDictionary catalog = reader.getCatalog();
-        boolean namedAsNames = (catalog.get(PdfName.DESTS) != null);
-        writeOutlines(catalog, namedAsNames);
-        markUsed(catalog);
     }
 
     /**
@@ -734,21 +678,6 @@ class PdfStamperImp extends PdfWriter {
      */
     public void setOpenAction(String name) {
         throw new UnsupportedOperationException(MessageLocalization.getComposedMessage("open.actions.by.name.are.not.supported"));
-    }
-
-    /**
-     * @see PdfWriter#setThumbnail(Image)
-     */
-    public void setThumbnail(Image image) {
-        throw new UnsupportedOperationException(MessageLocalization.getComposedMessage("use.pdfstamper.setthumbnail"));
-    }
-
-    void setThumbnail(Image image, int page) throws DocumentException {
-        PdfIndirectReference thumb = getImageReference(addDirectImageSimple(image));
-        reader.resetReleasePage();
-        PdfDictionary dic = reader.getPageN(page);
-        dic.put(PdfName.THUMB, thumb);
-        reader.resetReleasePage();
     }
 
     public PdfContentByte getDirectContentUnder() {
