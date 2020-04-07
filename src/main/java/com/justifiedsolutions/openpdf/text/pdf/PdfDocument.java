@@ -178,11 +178,6 @@ public class PdfDocument extends Document {
             put(PdfName.MODDATE, date);
         }
 
-        void addkey(String key, String value) {
-            if (key.equals("Producer") || key.equals("CreationDate"))
-                return;
-            put(new PdfName(key), new PdfString(value, PdfObject.TEXT_UNICODE));
-        }
     }
 
     /**
@@ -311,15 +306,6 @@ public class PdfDocument extends Document {
      */
     public float getLeading() {
         return leading;
-    }
-
-    /**
-     * Setter for the current leading.
-     * @param    leading the current leading
-     * @since    2.1.6
-     */
-    void setLeading(float leading) {
-        this.leading = leading;
     }
 
     /** This represents the current alignment of the PDF Elements. */
@@ -486,8 +472,7 @@ public class PdfDocument extends Document {
                         while (currentOutline.level() >= section.getDepth()) {
                             currentOutline = currentOutline.parent();
                         }
-                        PdfOutline outline = new PdfOutline(currentOutline, destination, section.getBookmarkTitle(), section.isBookmarkOpen());
-                        currentOutline = outline;
+                        currentOutline = new PdfOutline(currentOutline, destination, section.getBookmarkTitle(), section.isBookmarkOpen());
                     }
 
                     // some values are set
@@ -1536,10 +1521,6 @@ public class PdfDocument extends Document {
         // [C2] version
         writer.getPdfVersion().addToCatalog(catalog);
 
-        // [C4] pagelabels
-        if (pageLabels != null) {
-            catalog.put(PdfName.PAGELABELS, pageLabels.getDictionary(writer));
-        }
 
         // [C5] named objects
         catalog.addNames(localDestinations, getDocumentLevelJS(), documentFileAttachment, writer);
@@ -1641,17 +1622,6 @@ public class PdfDocument extends Document {
         }
     }
 
-//    [C4] Page labels
-
-    protected PdfPageLabels pageLabels;
-    /**
-     * Sets the page labels
-     * @param pageLabels the page labels
-     */
-    void setPageLabels(PdfPageLabels pageLabels) {
-        this.pageLabels = pageLabels;
-    }
-
 //    [C5] named objects: local destinations, javascript, embedded files
 
     /**
@@ -1742,17 +1712,6 @@ public class PdfDocument extends Document {
      * the next page. */
     protected HashMap<String, PdfRectangle> boxSize = new HashMap<>();
 
-    void setCropBoxSize(Rectangle crop) {
-        setBoxSize("crop", crop);
-    }
-
-    void setBoxSize(String boxName, Rectangle size) {
-        if (size == null)
-            boxSize.remove(boxName);
-        else
-            boxSize.put(boxName, new PdfRectangle(size));
-    }
-
     protected void setNewPageSizeAndMargins() {
         pageSize = nextPageSize;
         if (marginMirroring && (getPageNumber() & 1) == 0) {
@@ -1773,24 +1732,10 @@ public class PdfDocument extends Document {
         }
     }
 
-    /**
-     * Gives the size of a trim, art, crop or bleed box, or null if not defined.
-     * @param boxName crop, trim, art or bleed
-     */
-    Rectangle getBoxSize(String boxName) {
-        PdfRectangle r = thisBoxSize.get(boxName);
-        if (r != null) return r.getRectangle();
-        return null;
-    }
-
-//    [U2] empty pages
+    //    [U2] empty pages
 
     /** This checks if the page is empty. */
     private boolean pageEmpty = true;
-
-    void setPageEmpty(boolean pageEmpty) {
-        this.pageEmpty = pageEmpty;
-    }
 
     boolean isPageEmpty() {
         return writer == null || (writer.getDirectContent().size() == 0 && writer.getDirectContentUnder().size() == 0 && (pageEmpty || writer.isPaused()));
@@ -1804,33 +1749,11 @@ public class PdfDocument extends Document {
     /** The page transition */
     protected PdfTransition transition=null;
 
-    /**
-     * Sets the display duration for the page (for presentations)
-     * @param seconds   the number of seconds to display the page
-     */
-    void setDuration(int seconds) {
-        if (seconds > 0)
-            this.duration=seconds;
-        else
-            this.duration=-1;
-    }
-
-    /**
-     * Sets the transition for the page
-     * @param transition   the PdfTransition object
-     */
-    void setTransition(PdfTransition transition) {
-        this.transition=transition;
-    }
-
     protected PdfDictionary pageAA = null;
 
 //    [U8] thumbnail images
 
     protected PdfIndirectReference thumb;
-    void setThumbnail(Image image) throws DocumentException {
-        thumb = writer.getImageReference(writer.addDirectImageSimple(image));
-    }
 
 //    [M0] Page resources contain references to fonts, extgstate, images,...
 
@@ -1846,38 +1769,8 @@ public class PdfDocument extends Document {
     /** Holds value of property strictImageSequence. */
     protected boolean strictImageSequence = false;
 
-    /** Getter for property strictImageSequence.
-     * @return Value of property strictImageSequence.
-     *
-     */
-    boolean isStrictImageSequence() {
-        return this.strictImageSequence;
-    }
-
-    /** Setter for property strictImageSequence.
-     * @param strictImageSequence New value of property strictImageSequence.
-     *
-     */
-    void setStrictImageSequence(boolean strictImageSequence) {
-        this.strictImageSequence = strictImageSequence;
-    }
-
     /** This is the position where the image ends. */
     protected float imageEnd = -1;
-
-    /**
-     * Method added by Pelikan Stephan
-     */
-    public void clearTextWrap() {
-        float tmpHeight = imageEnd - currentHeight;
-        if (line != null) {
-            tmpHeight += line.height();
-        }
-        if ((imageEnd > -1) && (tmpHeight > 0)) {
-            carriageReturn();
-            currentHeight += tmpHeight;
-        }
-    }
 
     /** This is the image that could not be shown on a previous page. */
     protected Image imageWait = null;

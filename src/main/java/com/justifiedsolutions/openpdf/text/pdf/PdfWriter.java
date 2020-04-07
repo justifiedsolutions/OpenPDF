@@ -57,7 +57,6 @@ import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPageEventForwarder;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfDocumentActions;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfVersionImp;
@@ -88,7 +87,6 @@ import java.util.stream.Collectors;
 
 public class PdfWriter extends DocWriter implements
     PdfVersion,
-    PdfDocumentActions,
     PdfXConformance {
 
     /**
@@ -1196,17 +1194,14 @@ public class PdfWriter extends DocWriter implements
     /** Stores the version information for the header and the catalog. */
     protected PdfVersionImp pdf_version = new PdfVersionImp();
 
-    /** @see PdfVersion#setPdfVersion(char) */
     public void setPdfVersion(char version) {
         pdf_version.setPdfVersion(version);
     }
 
-    /** @see PdfVersion#setAtLeastPdfVersion(char) */
     public void setAtLeastPdfVersion(char version) {
         pdf_version.setAtLeastPdfVersion(version);
     }
 
-    /** @see PdfVersion#setPdfVersion(PdfName) */
     public void setPdfVersion(PdfName version) {
         pdf_version.setPdfVersion(version);
     }
