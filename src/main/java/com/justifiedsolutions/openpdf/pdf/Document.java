@@ -9,7 +9,6 @@ package com.justifiedsolutions.openpdf.pdf;
 import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.internal.JSPDFWriter;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -153,6 +152,7 @@ public class Document {
      * Creates a {@link Chapter} and adds it to the Document.
      *
      * @param title the title for the Chapter
+     * @return the new chapter
      * @throws DocumentException    if other {@link Content} has already been added to the Document
      * @throws NullPointerException if title is <code>null</code>
      */
@@ -206,9 +206,8 @@ public class Document {
      * Writes the contents of the Document to the specified {@link OutputStream}.
      *
      * @param out the OutputStream to write the PDF to
-     * @throws IOException if there is an issue writing the stream
      */
-    public void write(OutputStream out) throws IOException {
+    public void write(OutputStream out) {
         JSPDFWriter writer = new JSPDFWriter(this, out);
         writer.write();
     }

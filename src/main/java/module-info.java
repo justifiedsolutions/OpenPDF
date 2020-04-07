@@ -7,9 +7,6 @@
 module com.justifiedsolutions.openpdf {
     requires java.desktop;
 
-    requires static org.bouncycastle.provider;
-    requires static org.bouncycastle.pkix;
-
     exports com.justifiedsolutions.openpdf.pdf;
     exports com.justifiedsolutions.openpdf.pdf.font;
     exports com.justifiedsolutions.openpdf.pdf.content;

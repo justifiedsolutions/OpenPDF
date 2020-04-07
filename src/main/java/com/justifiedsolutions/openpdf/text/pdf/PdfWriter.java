@@ -62,12 +62,10 @@ import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfDocumentActions;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfPageActions;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfRunDirection;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfViewerPreferences;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfVersionImp;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfXConformanceImp;
 import java.awt.Color;
-import java.awt.color.ICC_Profile;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -92,7 +90,6 @@ import java.util.stream.Collectors;
  */
 
 public class PdfWriter extends DocWriter implements
-    PdfViewerPreferences,
     PdfVersion,
     PdfDocumentActions,
     PdfPageActions,
@@ -1280,8 +1277,6 @@ public class PdfWriter extends DocWriter implements
         return pdf_version;
     }
 
-//  [C3] PdfViewerPreferences interface
-
     // page layout (section 13.1.1 of "iText in Action")
 
     /** A viewer preference */
@@ -1343,16 +1338,6 @@ public class PdfWriter extends DocWriter implements
 
     /** A viewer preference */
     public static final int PrintScalingNone = 1 << 24;
-
-    /** @see PdfViewerPreferences#setViewerPreferences(int) */
-    public void setViewerPreferences(int preferences) {
-        pdf.setViewerPreferences(preferences);
-    }
-
-    /** @see PdfViewerPreferences#addViewerPreference(PdfName, PdfObject) */
-    public void addViewerPreference(PdfName key, PdfObject value) {
-        pdf.addViewerPreference(key, value);
-    }
 
 //  [C4] Page labels
 
@@ -1642,42 +1627,6 @@ public class PdfWriter extends DocWriter implements
 
     protected HashMap<PdfReader, PdfReaderInstance> importedPages = new HashMap<>();
 
-    /**
-     * Use this method to get a page from other PDF document.
-     * The page can be used as any other PdfTemplate.
-     * Note that calling this method more than once with the same parameters
-     * will retrieve the same object.
-     * @param reader the PDF document where the page is
-     * @param pageNumber the page number. The first page is 1
-     * @return the template representing the imported page
-     */
-    public PdfImportedPage getImportedPage(PdfReader reader, int pageNumber) {
-        PdfReaderInstance inst = importedPages.get(reader);
-        if (inst == null) {
-            inst = reader.getPdfReaderInstance(this);
-            importedPages.put(reader, inst);
-        }
-        return inst.getImportedPage(pageNumber);
-    }
-
-    /**
-     * Use this method to writes the reader to the document
-     * and free the memory used by it.
-     * The main use is when concatenating multiple documents
-     * to keep the memory usage restricted to the current
-     * appending document.
-     * @param reader the <CODE>PdfReader</CODE> to free
-     * @throws IOException on error
-     */
-    public void freeReader(PdfReader reader) throws IOException {
-        currentPdfReaderInstance = importedPages.get(reader);
-        if (currentPdfReaderInstance == null)
-            return;
-        currentPdfReaderInstance.writeAllPages();
-        currentPdfReaderInstance = null;
-        importedPages.remove(reader);
-    }
-
     protected PdfReaderInstance currentPdfReaderInstance;
 
     protected int getNewObjectNumber(PdfReader reader, int number, int generation) {
@@ -1690,11 +1639,7 @@ public class PdfWriter extends DocWriter implements
         return n;
     }
 
-    RandomAccessFileOrArray getReaderFile(PdfReader reader) {
-        return currentPdfReaderInstance.getReaderFile();
-    }
-
-//  [F6] spot colors
+    //  [F6] spot colors
 
     /** The colors of this document */
     protected HashMap<PdfSpotColor, ColorDetails> documentColors = new HashMap<>();

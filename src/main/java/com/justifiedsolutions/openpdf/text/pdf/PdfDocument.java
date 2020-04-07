@@ -65,16 +65,12 @@ import com.justifiedsolutions.openpdf.text.Section;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfViewerPreferences;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfViewerPreferencesImp;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 
@@ -655,17 +651,6 @@ public class PdfDocument extends Document {
 //    [L3] DocListener interface
     protected int textEmptySize;
 
-    // [C9] Metadata for the page
-    /** XMP Metadata for the page. */
-    protected byte[] xmpMetadata = null;
-    /**
-     * Use this method to set the XMP Metadata.
-     * @param xmpMetadata The xmpMetadata to set.
-     */
-    public void setXmpMetadata(byte[] xmpMetadata) {
-        this.xmpMetadata = xmpMetadata;
-    }
-
     /**
      * Makes a new page and sends it to the <CODE>PdfWriter</CODE>.
      *
@@ -727,14 +712,6 @@ public class PdfDocument extends Document {
             page.put(PdfName.TABS, writer.getTabs());
 
             // we complete the page dictionary
-
-            // [C9] if there is XMP data to add: add it
-            if (xmpMetadata != null) {
-                PdfStream xmp = new PdfStream(xmpMetadata);
-                xmp.put(PdfName.TYPE, PdfName.METADATA);
-                xmp.put(PdfName.SUBTYPE, PdfName.XML);
-                page.put(PdfName.METADATA, writer.addToBody(xmp).getIndirectReference());
-            }
 
             // [U3] page actions: transition, duration, additional actions
             if (this.transition!=null) {
@@ -1559,9 +1536,6 @@ public class PdfDocument extends Document {
         // [C2] version
         writer.getPdfVersion().addToCatalog(catalog);
 
-        // [C3] preferences
-        viewerPreferences.addToCatalog(catalog);
-
         // [C4] pagelabels
         if (pageLabels != null) {
             catalog.put(PdfName.PAGELABELS, pageLabels.getDictionary(writer));
@@ -1665,20 +1639,6 @@ public class PdfDocument extends Document {
         for (PdfOutline kid : kids) {
             writer.addToBody(kid, kid.indirectReference());
         }
-    }
-
-//  [C3] PdfViewerPreferences interface
-
-    /** Contains the Viewer preferences of this PDF document. */
-    protected PdfViewerPreferencesImp viewerPreferences = new PdfViewerPreferencesImp();
-    /** @see PdfViewerPreferences#setViewerPreferences(int) */
-    void setViewerPreferences(int preferences) {
-        this.viewerPreferences.setViewerPreferences(preferences);
-    }
-
-    /** @see PdfViewerPreferences#addViewerPreference(PdfName, PdfObject) */
-    void addViewerPreference(PdfName key, PdfObject value) {
-        this.viewerPreferences.addViewerPreference(key, value);
     }
 
 //    [C4] Page labels

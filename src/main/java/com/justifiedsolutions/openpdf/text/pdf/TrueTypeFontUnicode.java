@@ -532,13 +532,5 @@ class TrueTypeFontUnicode extends TrueTypeFont implements Comparator{
         m[1] = advance;
         return true;
     }
-    
-    public int[] getCharBBox(int c) {
-        if (bboxes == null)
-            return null;
-        int[] m = getMetricsTT(c);
-        if (m == null)
-            return null;
-        return bboxes[m[0]];
-    }
+
 }

@@ -49,29 +49,18 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.bouncycastle.BouncyCastleHelper;
-import com.justifiedsolutions.openpdf.text.DocWriter;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.PageSize;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.exceptions.BadPasswordException;
 import com.justifiedsolutions.openpdf.text.exceptions.InvalidPdfException;
 import com.justifiedsolutions.openpdf.text.exceptions.UnsupportedPdfException;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfViewerPreferences;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfViewerPreferencesImp;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +73,7 @@ import java.util.zip.InflaterInputStream;
  * @author Paulo Soares (psoares@consiste.pt)
  * @author Kazuya Ujihara
  */
-public class PdfReader implements PdfViewerPreferences, Closeable {
+public class PdfReader implements Closeable {
 
   static final PdfName[] pageInhCandidates = {PdfName.MEDIABOX,
           PdfName.ROTATE, PdfName.RESOURCES, PdfName.CROPBOX};
@@ -114,17 +103,8 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   protected int eofPos;
   protected char pdfVersion;
   protected byte[] password = null; // added by ujihara for decryption
-  protected Key certificateKey = null; // added by Aiken Sam for certificate
-                                       // decryption
-  protected Certificate certificate = null; // added by Aiken Sam for
-                                            // certificate decryption
-  protected String certificateKeyProvider = null; // added by Aiken Sam for
-                                                  // certificate decryption
+  // certificate decryption
   private boolean ownerPasswordUsed;
-
-  // allow the PDF to be modified even if the owner password was not supplied
-  // if encrypted (non-encrypted documents may be modified regardless)
-  private boolean modificationAllowedWithoutOwnerPassword = true;
 
   protected List<PdfObject> strings = new ArrayList<>();
   protected boolean sharedStreams = true;
@@ -139,8 +119,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   private boolean partial;
 
   private PRIndirectReference cryptoRef;
-  private final PdfViewerPreferencesImp viewerPreferences = new PdfViewerPreferencesImp();
-  private boolean encryptionError;
 
   /**
    * Holds value of property appendable.
@@ -148,165 +126,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
   private boolean appendable;
 
   protected PdfReader() {
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param filename
-   *          the file name of the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(String filename) throws IOException {
-    this(filename, null);
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param filename
-   *          the file name of the document
-   * @param ownerPassword
-   *          the password to read the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(String filename, byte[] ownerPassword) throws IOException {
-    password = ownerPassword;
-    tokens = new PRTokeniser(filename);
-    readPdf();
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param pdfIn
-   *          the byte array with the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(byte[] pdfIn) throws IOException {
-    this(pdfIn, null);
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param pdfIn
-   *          the byte array with the document
-   * @param ownerPassword
-   *          the password to read the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(byte[] pdfIn, byte[] ownerPassword) throws IOException {
-    password = ownerPassword;
-    tokens = new PRTokeniser(pdfIn);
-    readPdf();
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param filename
-   *          the file name of the document
-   * @param certificate
-   *          the certificate to read the document
-   * @param certificateKey
-   *          the private key of the certificate
-   * @param certificateKeyProvider
-   *          the security provider for certificateKey
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(String filename, Certificate certificate,
-      Key certificateKey, String certificateKeyProvider) throws IOException {
-    this.certificate = certificate;
-    this.certificateKey = certificateKey;
-    this.certificateKeyProvider = certificateKeyProvider;
-    tokens = new PRTokeniser(filename);
-    readPdf();
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param url
-   *          the URL of the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(URL url) throws IOException {
-    this(url, null);
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param url
-   *          the URL of the document
-   * @param ownerPassword
-   *          the password to read the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(URL url, byte[] ownerPassword) throws IOException {
-    password = ownerPassword;
-    tokens = new PRTokeniser(new RandomAccessFileOrArray(url));
-    readPdf();
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param is
-   *          the <CODE>InputStream</CODE> containing the document. The stream
-   *          is read to the end but is not closed
-   * @param ownerPassword
-   *          the password to read the document
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(InputStream is, byte[] ownerPassword) throws IOException {
-    password = ownerPassword;
-    tokens = new PRTokeniser(new RandomAccessFileOrArray(is));
-    readPdf();
-  }
-
-  /**
-   * Reads and parses a PDF document.
-   * 
-   * @param is
-   *          the <CODE>InputStream</CODE> containing the document. The stream
-   *          is read to the end but is not closed
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(InputStream is) throws IOException {
-    this(is, null);
-  }
-
-  /**
-   * Reads and parses a pdf document. Contrary to the other constructors only
-   * the xref is read into memory. The reader is said to be working in "partial"
-   * mode as only parts of the pdf are read as needed. The pdf is left open but
-   * may be closed at any time with <CODE>PdfReader.close()</CODE>, reopen is
-   * automatic.
-   * 
-   * @param raf
-   *          the document location
-   * @param ownerPassword
-   *          the password or <CODE>null</CODE> for no password
-   * @throws IOException
-   *           on error
-   */
-  public PdfReader(RandomAccessFileOrArray raf, byte[] ownerPassword)
-      throws IOException {
-    password = ownerPassword;
-    partial = true;
-    tokens = new PRTokeniser(raf);
-    readPdfPartial();
   }
 
   /**
@@ -532,283 +351,7 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
         urx), Math.max(lly, ury));
   }
 
-  protected void readPdf() throws IOException {
-    try {
-      fileLength = tokens.getFile().length();
-      pdfVersion = tokens.checkPdfHeader();
-      try {
-        readXref();
-      } catch (Exception e) {
-        try {
-          rebuilt = true;
-          rebuildXref();
-          lastXref = -1;
-        } catch (Exception ne) {
-          throw new InvalidPdfException(MessageLocalization.getComposedMessage(
-              "rebuild.failed.1.original.message.2", ne.getMessage(),
-              e.getMessage()));
-        }
-      }
-      try {
-        readDocObj();
-      } catch (Exception e) {
-        if (e instanceof BadPasswordException)
-          throw new BadPasswordException(e.getMessage());
-        if (rebuilt || encryptionError)
-          throw new InvalidPdfException(e.getMessage());
-        rebuilt = true;
-        encrypted = false;
-        rebuildXref();
-        lastXref = -1;
-        readDocObj();
-      }
-
-      strings.clear();
-      readPages();
-      eliminateSharedStreams();
-      removeUnusedObjects();
-    } finally {
-      try {
-        tokens.close();
-      } catch (Exception e) {
-        // empty on purpose
-      }
-    }
-  }
-
-  protected void readPdfPartial() throws IOException {
-    try {
-      fileLength = tokens.getFile().length();
-      pdfVersion = tokens.checkPdfHeader();
-      try {
-        readXref();
-      } catch (Exception e) {
-        try {
-          rebuilt = true;
-          rebuildXref();
-          lastXref = -1;
-        } catch (Exception ne) {
-          throw new InvalidPdfException(MessageLocalization.getComposedMessage(
-              "rebuild.failed.1.original.message.2", ne.getMessage(),
-              e.getMessage()));
-        }
-      }
-      readDocObjPartial();
-      readPages();
-    } catch (IOException e) {
-      try {
-        tokens.close();
-      } catch (Exception ignored) {
-      }
-      throw e;
-    }
-  }
-
-  private boolean equalsArray(byte[] ar1, byte[] ar2, int size) {
-    for (int k = 0; k < size; ++k) {
-      if (ar1[k] != ar2[k])
-        return false;
-    }
-    return true;
-  }
-
   /**
-   */
-  private void readDecryptedDocObj() throws IOException {
-    if (encrypted)
-      return;
-    if (trailer == null) {
-      return;
-    }
-    PdfObject encDic = trailer.get(PdfName.ENCRYPT);
-    if (encDic == null || encDic.toString().equals("null"))
-      return;
-    encryptionError = true;
-    byte[] encryptionKey = null;
-    encrypted = true;
-    PdfDictionary enc = (PdfDictionary) getPdfObject(encDic);
-
-    String s;
-    PdfObject o;
-
-    PdfArray documentIDs = trailer.getAsArray(PdfName.ID);
-    byte[] documentID = null;
-    if (documentIDs != null) {
-      o = documentIDs.getPdfObject(0);
-      strings.remove(o);
-      s = o.toString();
-      documentID = DocWriter.getISOBytes(s);
-      if (documentIDs.size() > 1)
-        strings.remove(documentIDs.getPdfObject(1));
-    }
-    // just in case we have a broken producer
-    if (documentID == null)
-      documentID = new byte[0];
-    byte[] uValue = null;
-    byte[] oValue = null;
-    int cryptoMode = PdfWriter.STANDARD_ENCRYPTION_40;
-    int lengthValue = 0;
-
-    PdfObject filter = getPdfObjectRelease(enc.get(PdfName.FILTER));
-
-    if (filter.equals(PdfName.STANDARD)) {
-      s = enc.get(PdfName.U).toString();
-      strings.remove(enc.get(PdfName.U));
-      uValue = DocWriter.getISOBytes(s);
-      s = enc.get(PdfName.O).toString();
-      strings.remove(enc.get(PdfName.O));
-      oValue = DocWriter.getISOBytes(s);
-
-      o = enc.get(PdfName.P);
-      if (!o.isNumber())
-        throw new InvalidPdfException(
-            MessageLocalization.getComposedMessage("illegal.p.value"));
-      pValue = ((PdfNumber) o).intValue();
-
-      o = enc.get(PdfName.R);
-      if (!o.isNumber())
-        throw new InvalidPdfException(
-            MessageLocalization.getComposedMessage("illegal.r.value"));
-      rValue = ((PdfNumber) o).intValue();
-
-      switch (rValue) {
-      case 2:
-        cryptoMode = PdfWriter.STANDARD_ENCRYPTION_40;
-        break;
-      case 3:
-        o = enc.get(PdfName.LENGTH);
-        if (!o.isNumber())
-          throw new InvalidPdfException(
-              MessageLocalization.getComposedMessage("illegal.length.value"));
-        lengthValue = ((PdfNumber) o).intValue();
-        if (lengthValue > 128 || lengthValue < 40 || lengthValue % 8 != 0)
-          throw new InvalidPdfException(
-              MessageLocalization.getComposedMessage("illegal.length.value"));
-        cryptoMode = PdfWriter.STANDARD_ENCRYPTION_128;
-        break;
-      case 4:
-        PdfDictionary dic = (PdfDictionary) enc.get(PdfName.CF);
-        if (dic == null)
-          throw new InvalidPdfException(
-              MessageLocalization.getComposedMessage("cf.not.found.encryption"));
-        dic = (PdfDictionary) dic.get(PdfName.STDCF);
-        if (dic == null)
-          throw new InvalidPdfException(
-              MessageLocalization
-                  .getComposedMessage("stdcf.not.found.encryption"));
-        if (PdfName.V2.equals(dic.get(PdfName.CFM)))
-          cryptoMode = PdfWriter.STANDARD_ENCRYPTION_128;
-        else if (PdfName.AESV2.equals(dic.get(PdfName.CFM)))
-          cryptoMode = PdfWriter.ENCRYPTION_AES_128;
-        else
-          throw new UnsupportedPdfException(
-              MessageLocalization
-                  .getComposedMessage("no.compatible.encryption.found"));
-        PdfObject em = enc.get(PdfName.ENCRYPTMETADATA);
-        if (em != null && em.toString().equals("false"))
-          cryptoMode |= PdfWriter.DO_NOT_ENCRYPT_METADATA;
-        break;
-      default:
-        throw new UnsupportedPdfException(
-            MessageLocalization.getComposedMessage(
-                "unknown.encryption.type.r.eq.1", rValue));
-      }
-    } else if (filter.equals(PdfName.PUBSEC)) {
-      PdfArray recipients;
-
-      o = enc.get(PdfName.V);
-      if (!o.isNumber())
-        throw new InvalidPdfException(
-            MessageLocalization.getComposedMessage("illegal.v.value"));
-      int vValue = ((PdfNumber) o).intValue();
-      switch (vValue) {
-      case 1:
-        cryptoMode = PdfWriter.STANDARD_ENCRYPTION_40;
-        lengthValue = 40;
-        recipients = (PdfArray) enc.get(PdfName.RECIPIENTS);
-        break;
-      case 2:
-        o = enc.get(PdfName.LENGTH);
-        if (!o.isNumber())
-          throw new InvalidPdfException(
-              MessageLocalization.getComposedMessage("illegal.length.value"));
-        lengthValue = ((PdfNumber) o).intValue();
-        if (lengthValue > 128 || lengthValue < 40 || lengthValue % 8 != 0)
-          throw new InvalidPdfException(
-              MessageLocalization.getComposedMessage("illegal.length.value"));
-        cryptoMode = PdfWriter.STANDARD_ENCRYPTION_128;
-        recipients = (PdfArray) enc.get(PdfName.RECIPIENTS);
-        break;
-      case 4:
-        PdfDictionary dic = (PdfDictionary) enc.get(PdfName.CF);
-        if (dic == null)
-          throw new InvalidPdfException(
-              MessageLocalization.getComposedMessage("cf.not.found.encryption"));
-        dic = (PdfDictionary) dic.get(PdfName.DEFAULTCRYPTFILTER);
-        if (dic == null)
-          throw new InvalidPdfException(
-              MessageLocalization
-                  .getComposedMessage("defaultcryptfilter.not.found.encryption"));
-        if (PdfName.V2.equals(dic.get(PdfName.CFM))) {
-          cryptoMode = PdfWriter.STANDARD_ENCRYPTION_128;
-          lengthValue = 128;
-        } else if (PdfName.AESV2.equals(dic.get(PdfName.CFM))) {
-          cryptoMode = PdfWriter.ENCRYPTION_AES_128;
-          lengthValue = 128;
-        } else
-          throw new UnsupportedPdfException(
-              MessageLocalization
-                  .getComposedMessage("no.compatible.encryption.found"));
-        PdfObject em = dic.get(PdfName.ENCRYPTMETADATA);
-        if (em != null && em.toString().equals("false"))
-          cryptoMode |= PdfWriter.DO_NOT_ENCRYPT_METADATA;
-
-        recipients = (PdfArray) dic.get(PdfName.RECIPIENTS);
-        break;
-      default:
-        throw new UnsupportedPdfException(
-            MessageLocalization.getComposedMessage(
-                "unknown.encryption.type.v.eq.1", rValue));
-      }
-      BouncyCastleHelper.checkCertificateEncodingOrThrowException(certificate);
-      byte[] envelopedData = BouncyCastleHelper.getEnvelopedData(recipients, strings, certificate, certificateKey, certificateKeyProvider);
-
-      if (envelopedData == null) {
-        throw new UnsupportedPdfException(
-            MessageLocalization.getComposedMessage("bad.certificate.and.key"));
-      }
-
-      MessageDigest md;
-
-      try {
-        md = MessageDigest.getInstance("SHA-1");
-        md.update(envelopedData, 0, 20);
-        for (int i = 0; i < recipients.size(); i++) {
-          byte[] encodedRecipient = recipients.getPdfObject(i).getBytes();
-          md.update(encodedRecipient);
-        }
-        if ((cryptoMode & PdfWriter.DO_NOT_ENCRYPT_METADATA) != 0)
-          md.update(new byte[] { (byte) 255, (byte) 255, (byte) 255, (byte) 255 });
-        encryptionKey = md.digest();
-      } catch (Exception f) {
-        throw new ExceptionConverter(f);
-      }
-    }
-
-
-    for (Object string : strings) {
-      PdfString str = (PdfString) string;
-      str.decrypt(this);
-    }
-
-    if (encDic.isIndirect()) {
-      cryptoRef = (PRIndirectReference) encDic;
-      xrefObj.set(cryptoRef.getNumber(), null);
-    }
-    encryptionError = false;
-  }
-
-    /**
    * @return a PdfObject
    */
   public static PdfObject getPdfObjectRelease(PdfObject obj) {
@@ -962,25 +505,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     reader.lastXrefPartial = -1;
   }
 
-  protected void readPages() throws IOException {
-    catalog = trailer.getAsDict(PdfName.ROOT);
-    rootPages = catalog.getAsDict(PdfName.PAGES);
-    pageRefs = new PageRefs(this);
-  }
-
-  protected void readDocObjPartial() throws IOException {
-    xrefObj = new ArrayList<>(xref.length / 2);
-    xrefObj.addAll(Collections.nCopies(xref.length / 2, null));
-    readDecryptedDocObj();
-    if (objStmToOffset != null) {
-      int[] keys = objStmToOffset.getKeys();
-      for (int n : keys) {
-        objStmToOffset.put(n, xref[n * 2]);
-        xref[n * 2] = -1;
-      }
-    }
-  }
-
   protected PdfObject readSingleObject(int k) throws IOException {
     strings.clear();
     int k2 = k * 2;
@@ -1061,58 +585,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     } finally {
       tokens = saveTokens;
     }
-  }
-
-  protected void readDocObj() throws IOException {
-    List<PdfObject> streams = new ArrayList<>();
-    xrefObj = new ArrayList<>(xref.length / 2);
-    xrefObj.addAll(Collections.nCopies(xref.length / 2, null));
-    for (int k = 2; k < xref.length; k += 2) {
-      int pos = xref[k];
-      if (pos <= 0 || ((xref.length > k + 1) && (xref[k + 1] > 0))) {
-        continue;
-      }
-      tokens.seek(pos);
-      tokens.nextValidToken();
-      if (tokens.getTokenType() != PRTokeniser.TK_NUMBER)
-        tokens.throwError(MessageLocalization
-            .getComposedMessage("invalid.object.number"));
-      objNum = tokens.intValue();
-      tokens.nextValidToken();
-      if (tokens.getTokenType() != PRTokeniser.TK_NUMBER)
-        tokens.throwError(MessageLocalization
-            .getComposedMessage("invalid.generation.number"));
-      objGen = tokens.intValue();
-      tokens.nextValidToken();
-      if (!tokens.getStringValue().equals("obj"))
-        tokens.throwError(MessageLocalization
-            .getComposedMessage("token.obj.expected"));
-      PdfObject obj;
-      try {
-        obj = readPRObject();
-        if (obj.isStream()) {
-          streams.add(obj);
-        }
-      } catch (Exception e) {
-        obj = null;
-      }
-      xrefObj.set(k / 2, obj);
-    }
-    for (PdfObject stream : streams) {
-      checkPRStreamLength((PRStream) stream);
-    }
-    readDecryptedDocObj();
-    if (objStmMark != null) {
-      for (Object o : objStmMark.entrySet()) {
-        Map.Entry entry = (Map.Entry) o;
-        int n = (Integer) entry.getKey();
-        IntHashtable h = (IntHashtable) entry.getValue();
-        readObjStm((PRStream) xrefObj.get(n), h);
-        xrefObj.set(n, null);
-      }
-      objStmMark = null;
-    }
-    xref = null;
   }
 
   private void checkPRStreamLength(PRStream stream) throws IOException {
@@ -1238,42 +710,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
         System.arraycopy(xref, 0, xref2, 0, xref.length);
         xref = xref2;
       }
-    }
-  }
-
-  protected void readXref() throws IOException {
-    hybridXref = false;
-    newXrefType = false;
-    tokens.seek(tokens.getStartxref());
-    tokens.nextToken();
-    if (!tokens.getStringValue().equals("startxref"))
-      throw new InvalidPdfException(
-          MessageLocalization.getComposedMessage("startxref.not.found"));
-    tokens.nextToken();
-    if (tokens.getTokenType() != PRTokeniser.TK_NUMBER)
-      throw new InvalidPdfException(
-          MessageLocalization
-              .getComposedMessage("startxref.is.not.followed.by.a.number"));
-    int startxref = tokens.intValue();
-    lastXref = startxref;
-    eofPos = tokens.getFilePointer();
-    try {
-      if (readXRefStream(startxref)) {
-        newXrefType = true;
-        return;
-      }
-    } catch (Exception ignored) {
-    }
-    xref = null;
-    tokens.seek(startxref);
-    trailer = readXrefSection();
-    PdfDictionary trailer2 = trailer;
-    while (true) {
-      PdfNumber prev = (PdfNumber) trailer2.get(PdfName.PREV);
-      if (prev == null)
-        break;
-      tokens.seek(prev.intValue());
-      trailer2 = readXrefSection();
     }
   }
 
@@ -1459,61 +895,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     if (prev == -1)
       return true;
     return readXRefStream(prev);
-  }
-
-  protected void rebuildXref() throws IOException {
-    hybridXref = false;
-    newXrefType = false;
-    tokens.seek(0);
-    int[][] xr = new int[1024][];
-    int top = 0;
-    trailer = null;
-    byte[] line = new byte[64];
-    for (;;) {
-      int pos = tokens.getFilePointer();
-      if (!tokens.readLineSegment(line))
-        break;
-      if (line[0] == 't') {
-        if (!PdfEncodings.convertToString(line, null).startsWith("trailer"))
-          continue;
-        tokens.seek(pos);
-        tokens.nextToken();
-        pos = tokens.getFilePointer();
-        try {
-          PdfDictionary dic = (PdfDictionary) readPRObject();
-          if (dic.get(PdfName.ROOT) != null)
-            trailer = dic;
-          else
-            tokens.seek(pos);
-        } catch (Exception e) {
-          tokens.seek(pos);
-        }
-      } else if (line[0] >= '0' && line[0] <= '9') {
-        int[] obj = PRTokeniser.checkObjectStart(line);
-        if (obj == null)
-          continue;
-        int num = obj[0];
-        int gen = obj[1];
-        if (num >= xr.length) {
-          int newLength = num * 2;
-          int[][] xr2 = new int[newLength][];
-          System.arraycopy(xr, 0, xr2, 0, top);
-          xr = xr2;
-        }
-        if (num >= top)
-          top = num + 1;
-        if (xr[num] == null || gen >= xr[num][1]) {
-          obj[0] = pos;
-          xr[num] = obj;
-        }
-      }
-    }
-    xref = new int[top * 2];
-    for (int k = 0; k < top; ++k) {
-      int[] obj = xr[k];
-      if (obj != null)
-        xref[k * 2] = obj[0];
-    }
   }
 
   protected PdfDictionary readDictionary() throws IOException {
@@ -2170,54 +1551,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
     }
   }
 
-  /** Eliminates shared streams if they exist. */
-  public void eliminateSharedStreams() {
-    if (!sharedStreams)
-      return;
-    sharedStreams = false;
-    if (pageRefs.size() == 1)
-      return;
-    List<PdfObject> newRefs = new ArrayList<>();
-    List<PdfObject> newStreams = new ArrayList<>();
-    IntHashtable visited = new IntHashtable();
-    for (int k = 1; k <= pageRefs.size(); ++k) {
-      PdfDictionary page = pageRefs.getPageN(k);
-      if (page == null)
-        continue;
-      PdfObject contents = getPdfObject(page.get(PdfName.CONTENTS));
-      if (contents == null)
-        continue;
-      if (contents.isStream()) {
-        PRIndirectReference ref = (PRIndirectReference) page
-            .get(PdfName.CONTENTS);
-        if (visited.containsKey(ref.getNumber())) {
-          // need to duplicate
-          newRefs.add(ref);
-          newStreams.add(new PRStream((PRStream) contents, null));
-        } else
-          visited.put(ref.getNumber(), 1);
-      } else if (contents.isArray()) {
-        PdfArray array = (PdfArray) contents;
-        for (int j = 0; j < array.size(); ++j) {
-          PRIndirectReference ref = (PRIndirectReference) array.getPdfObject(j);
-          if (visited.containsKey(ref.getNumber())) {
-            // need to duplicate
-            newRefs.add(ref);
-            newStreams.add(new PRStream((PRStream) getPdfObject(ref), null));
-          } else
-            visited.put(ref.getNumber(), 1);
-        }
-      }
-    }
-    if (newStreams.isEmpty())
-      return;
-    for (int k = 0; k < newStreams.size(); ++k) {
-      xrefObj.add(newStreams.get(k));
-      PRIndirectReference ref = (PRIndirectReference) newRefs.get(k);
-      ref.setNumber(xrefObj.size() - 1, 0);
-    }
-  }
-
   /**
    * Checks if the document was changed.
    * 
@@ -2493,67 +1826,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
         }
       }
     }
-  }
-
-  /**
-   * Removes all the unreachable objects.
-   * 
-   * @return the number of indirect objects removed
-   */
-  public int removeUnusedObjects() {
-    boolean[] hits = new boolean[xrefObj.size()];
-    removeUnusedNode(trailer, hits);
-    int total = 0;
-    if (partial) {
-      for (int k = 1; k < hits.length; ++k) {
-        if (!hits[k]) {
-          xref[k * 2] = -1;
-          xref[k * 2 + 1] = 0;
-          xrefObj.set(k, null);
-          ++total;
-        }
-      }
-    } else {
-      for (int k = 1; k < hits.length; ++k) {
-        if (!hits[k]) {
-          xrefObj.set(k, null);
-          ++total;
-        }
-      }
-    }
-    return total;
-  }
-
-  /**
-   * Sets the viewer preferences as the sum of several constants.
-   * 
-   * @param preferences
-   *          the viewer preferences
-   * @see PdfViewerPreferences#setViewerPreferences
-   */
-  @Override
-  public void setViewerPreferences(int preferences) {
-    this.viewerPreferences.setViewerPreferences(preferences);
-    setViewerPreferences(this.viewerPreferences);
-  }
-
-  /**
-   * Adds a viewer preference
-   * 
-   * @param key
-   *          a key for a viewer preference
-   * @param value
-   *          a value for the viewer preference
-   * @see PdfViewerPreferences#addViewerPreference
-   */
-  @Override
-  public void addViewerPreference(PdfName key, PdfObject value) {
-    this.viewerPreferences.addViewerPreference(key, value);
-    setViewerPreferences(this.viewerPreferences);
-  }
-
-  void setViewerPreferences(PdfViewerPreferencesImp vp) {
-    vp.addToCatalog(catalog);
   }
 
   /**
@@ -2869,20 +2141,6 @@ public class PdfReader implements PdfViewerPreferences, Closeable {
       return null;
     return new PdfIndirectReference(0, cryptoRef.getNumber(),
         cryptoRef.getGeneration());
-  }
-
-
-  /**
-   * Checks if the document was opened with the owner password so that the end
-   * application can decide what level of access restrictions to apply. If the
-   * document is not encrypted it will return <CODE>true</CODE>.
-   *
-   * @return <CODE>true</CODE> if the document was opened with the owner password or if it's not
-   *         encrypted or the modificationAllowedWithoutOwnerPassword flag is set,
-   *         <CODE>false</CODE> otherwise.
-   */
-  public final boolean isOpenedWithFullPermissions() {
-    return !encrypted || ownerPasswordUsed || modificationAllowedWithoutOwnerPassword;
   }
 
 }

@@ -59,12 +59,6 @@ Justified Solutions OpenPDF is open source software with a LGPL and MPL license.
  - Mockito
  - Apache Commons IO
 
-### Optional: ###
-- [BouncyCastle](https://www.bouncycastle.org/) (Used to sign PDF files)
-	- Provider
-	- PKIX/CMS
-
-
 ## Credits ##
 Significant [Contributors to OpenPDF](https://github.com/LibrePDF/OpenPDF/graphs/contributors) on GitHub:
 

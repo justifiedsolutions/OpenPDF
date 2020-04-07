@@ -117,8 +117,6 @@
             </goals>
             <configuration>
               <quiet>true</quiet>
-              <!-- TODO Remove doclint option -->
-              <additionalJOptions>-Xdoclint:none</additionalJOptions>
             </configuration>
           </execution>
         </executions>
@@ -178,20 +176,6 @@
   </profiles>
 
   <dependencies>
-    <!-- Optional dependencies -->
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.64</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.64</version>
-      <optional>true</optional>
-    </dependency>
-
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
