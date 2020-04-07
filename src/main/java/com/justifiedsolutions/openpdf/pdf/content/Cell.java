@@ -15,7 +15,10 @@ import java.util.List;
 
 /**
  * A Cell represents a cell in a {@link Table}. A Cell is created by methods on the Table and must
- * be instantiated with the content embedded in the Cell.
+ * be instantiated with the content embedded in the Cell. When adding a {@link Phrase} to a Cell,
+ * the leading is ignored. The leading is honored when adding a {@link Paragraph} to a Cell. When
+ * adding a Paragraph to a Cell, if the Paragraph has a {@link HorizontalAlignment} set, it will
+ * override the HorizontalAlignment of the Cell.
  */
 public class Cell {
 
@@ -61,8 +64,8 @@ public class Cell {
     }
 
     /**
-     * Sets the content of the Cell. The {@link Content} must be a {@link Phrase}
-     * or a {@link Paragraph}.
+     * Sets the content of the Cell. The {@link Content} must be a {@link Phrase} or a {@link
+     * Paragraph}.
      *
      * @param content the cell content
      * @throws IllegalArgumentException if the content isn't the correct type.
