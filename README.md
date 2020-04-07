@@ -8,8 +8,12 @@ OpenPDF is a Java library for creating PDF files with a LGPL and MPL open source
 [![License (LGPL version 3.0)](https://img.shields.io/badge/license-GNU%20LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) 
 [![License (MPL)](https://img.shields.io/badge/license-Mozilla%20Public%20License%20v2-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
 
+## OpenPDF version 1.1.0 released 2020-04-07 ##
+ - Introduced new API (com.justifiedsolutions.sfspro.pdf.* packages)
+ - Removed many features and classes as well as hundreds of lines of unused code
+
 ## OpenPDF version 1.0.0 released 2020-03-28 ##
-Initial release of the "slimmed down" version of OpenPDF. 
+ - Initial release of the "slimmed down" version of OpenPDF. 
 
 ## Use OpenPDF as Maven dependency
 Add this to your pom.xml file to use the latest version of OpenPDF:
@@ -17,7 +21,7 @@ Add this to your pom.xml file to use the latest version of OpenPDF:
         <dependency>
             <groupId>com.justifiedsolutions</groupId>
             <artifactId>openpdf</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
         
 ## Project Goals ##
