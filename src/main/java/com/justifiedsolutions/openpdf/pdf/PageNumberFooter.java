@@ -10,8 +10,8 @@ import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.font.Font;
 
 /**
- * A convenience class that places "Page N" at the bottom right of a page (where N is the page
- * number).
+ * A convenience class that places "Page N" at the bottom of a page (where N is the page
+ * number). The page number can be aligned either to the left, center, or right of the page.
  */
 public class PageNumberFooter implements Footer {
 
