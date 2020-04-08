@@ -49,25 +49,20 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Font;
 import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.SplitCharacter;
 import com.justifiedsolutions.openpdf.text.Utilities;
+import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A <CODE>PdfChunk</CODE> is the PDF translation of a <CODE>Chunk</CODE>.
  * <P>
  * A <CODE>PdfChunk</CODE> is a <CODE>PdfString</CODE> in a certain
  * <CODE>PdfFont</CODE> and <CODE>Color</CODE>.
- *
- * @see        PdfString
- * @see        Chunk
- * @see        Font
  */
 
 public class PdfChunk {
@@ -106,10 +101,10 @@ public class PdfChunk {
     // membervariables
 
     /** The value of this object. */
-    protected String value = PdfObject.NOTHING;
+    protected String value;
     
     /** The encoding. */
-    protected String encoding = BaseFont.WINANSI;
+    protected String encoding;
     
     
 /** The font for this <CODE>PdfChunk</CODE>. */
@@ -317,9 +312,9 @@ public class PdfChunk {
         float lastSpaceWidth = 0;
         int length = value.length();
         char[] valueArray = value.toCharArray();
-        char character = 0;
+        char character;
         BaseFont ft = font.getFont();
-        boolean surrogate = false;
+        boolean surrogate;
         if (ft.getFontType() == BaseFont.FONT_TYPE_CJK && ft.getUnicodeEquivalent(' ') != ' ') {
             while (currentPosition < length) {
                 // the width of every character is added to the currentWidth
@@ -451,7 +446,6 @@ public class PdfChunk {
         // or until the totalWidth is reached
         int length = value.length();
         boolean surrogate = false;
-        char character;
         while (currentPosition < length) {
             // the width of every character is added to the currentWidth
             surrogate = Utilities.isSurrogatePair(value, currentPosition);
@@ -701,18 +695,8 @@ public class PdfChunk {
     {
         return image;
     }
-    
-/**
- * Sets the image offset in the x direction
- * @param  offsetX the image offset in the x direction
- */
-    
-    void setImageOffsetX(float offsetX)
-    {
-        this.offsetX = offsetX;
-    }
-    
-/**
+
+    /**
  * Gets the image offset in the x direction
  * @return the image offset in the x direction
  */
@@ -721,18 +705,8 @@ public class PdfChunk {
     {
         return offsetX;
     }
-    
-/**
- * Sets the image offset in the y direction
- * @param  offsetY the image offset in the y direction
- */
-    
-    void setImageOffsetY(float offsetY)
-    {
-        this.offsetY = offsetY;
-    }
-    
-/**
+
+    /**
  * Gets the image offset in the y direction
  * @return Gets the image offset in the y direction
  */
@@ -740,16 +714,6 @@ public class PdfChunk {
     float getImageOffsetY()
     {
         return offsetY;
-    }
-    
-/**
- * sets the value.
- * @param value content of the Chunk
- */
-    
-    void setValue(String value)
-    {
-        this.value = value;
     }
 
     /**
@@ -766,16 +730,6 @@ public class PdfChunk {
     
     boolean isSpecialEncoding() {
         return encoding.equals(CJKFont.CJK_ENCODING) || encoding.equals(BaseFont.IDENTITY_H);
-    }
-    
-    /**
-     * Gets the encoding of this string.
-     *
-     * @return        a <CODE>String</CODE>
-     */
-    
-    String getEncoding() {
-        return encoding;
     }
 
     int length() {
@@ -820,10 +774,6 @@ public class PdfChunk {
         return string;
     }
 
-    public boolean changeLeading() {
-        return changeLeading;
-    }
-    
     float getCharWidth(int c) {
         if (noPrint(c))
             return 0;

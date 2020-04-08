@@ -54,16 +54,12 @@ import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_FLOAT_CO
 import static com.justifiedsolutions.openpdf.text.pdf.ExtendedColor.MAX_INT_COLOR_VALUE;
 
 import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.exceptions.IllegalPdfSyntaxException;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfXConformanceImp;
 import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,28 +138,11 @@ public class PdfContentByte {
         }
     }
 
-    /** The alignment is center */
-    public static final int ALIGN_CENTER = Element.ALIGN_CENTER;
-
-    /** The alignment is left */
-    public static final int ALIGN_LEFT = Element.ALIGN_LEFT;
-
-    /** The alignment is right */
-    public static final int ALIGN_RIGHT = Element.ALIGN_RIGHT;
-
     /** A possible line cap value */
     public static final int LINE_CAP_BUTT = 0;
-    /** A possible line cap value */
-    public static final int LINE_CAP_ROUND = 1;
-    /** A possible line cap value */
-    public static final int LINE_CAP_PROJECTING_SQUARE = 2;
 
     /** A possible line join value */
     public static final int LINE_JOIN_MITER = 0;
-    /** A possible line join value */
-    public static final int LINE_JOIN_ROUND = 1;
-    /** A possible line join value */
-    public static final int LINE_JOIN_BEVEL = 2;
 
     /** A possible text rendering value */
     public static final int TEXT_RENDER_MODE_FILL = 0;
@@ -171,20 +150,9 @@ public class PdfContentByte {
     public static final int TEXT_RENDER_MODE_STROKE = 1;
     /** A possible text rendering value */
     public static final int TEXT_RENDER_MODE_FILL_STROKE = 2;
-    /** A possible text rendering value */
-    public static final int TEXT_RENDER_MODE_INVISIBLE = 3;
-    /** A possible text rendering value */
-    public static final int TEXT_RENDER_MODE_FILL_CLIP = 4;
-    /** A possible text rendering value */
-    public static final int TEXT_RENDER_MODE_STROKE_CLIP = 5;
-    /** A possible text rendering value */
-    public static final int TEXT_RENDER_MODE_FILL_STROKE_CLIP = 6;
-    /** A possible text rendering value */
-    public static final int TEXT_RENDER_MODE_CLIP = 7;
-    
+
     static final float MIN_FONT_SIZE = 0.0001f;
 
-    private static final float[] unitRect = {0, 0, 0, 1, 1, 0, 1, 1};
     // membervariables
 
     /** This is the actual content */
@@ -199,15 +167,14 @@ public class PdfContentByte {
     /** This is the GraphicState in use */
     protected GraphicState state = new GraphicState();
 
-    private static Map<PdfName, String> abrev = new HashMap<>();
+    private static final Map<PdfName, String> abrev = new HashMap<>();
     /** The list were we save/restore the state */
     protected List<GraphicState> stateList = new ArrayList<>();
 
     /** The separator between commands.
      */
     protected int separator = '\n';
-    
-    private int mcDepth = 0;
+
     private boolean inText = false;
     /** The list were we save/restore the layer depth */
     protected List<Integer> layerDepth;
@@ -262,11 +229,10 @@ public class PdfContentByte {
 
     /** Returns the PDF representation of this <CODE>PdfContentByte</CODE>-object.
      *
-     * @param writer the <CODE>PdfWriter</CODE>
      * @return a <CODE>byte</CODE> array with the representation
      */
 
-    public byte[] toPdf(PdfWriter writer) {
+    public byte[] toPdf() {
         sanityCheck();
         return content.toByteArray();
     }
@@ -335,39 +301,6 @@ public class PdfContentByte {
         if (style >= 0 && style <= 2) {
             content.append(style).append(" J").append_i(separator);
         }
-    }
-
-    /**
-     * Changes the value of the <VAR>line dash pattern</VAR>.
-     * <P>
-     * The line dash pattern controls the pattern of dashes and gaps used to stroke paths.
-     * It is specified by an <I>array</I> and a <I>phase</I>. The array specifies the length
-     * of the alternating dashes and gaps. The phase specifies the distance into the dash
-     * pattern to start the dash.<BR>
-     *
-     * @param       phase       the value of the phase
-     * @param       unitsOn     the number of units that must be 'on' (equals the number of units that must be 'off').
-     */
-
-    public void setLineDash(float unitsOn, float phase) {
-        content.append("[").append(unitsOn).append("] ").append(phase).append(" d").append_i(separator);
-    }
-
-    /**
-     * Changes the value of the <VAR>line dash pattern</VAR>.
-     * <P>
-     * The line dash pattern controls the pattern of dashes and gaps used to stroke paths.
-     * It is specified by an <I>array</I> and a <I>phase</I>. The array specifies the length
-     * of the alternating dashes and gaps. The phase specifies the distance into the dash
-     * pattern to start the dash.<BR>
-     *
-     * @param       phase       the value of the phase
-     * @param       unitsOn     the number of units that must be 'on'
-     * @param       unitsOff    the number of units that must be 'off'
-     */
-
-    public void setLineDash(float unitsOn, float unitsOff, float phase) {
-        content.append("[").append(unitsOn).append(' ').append(unitsOff).append("] ").append(phase).append(" d").append_i(separator);
     }
 
     /**
@@ -689,37 +622,6 @@ public class PdfContentByte {
     public void lineTo(float x, float y) {
         content.append(x).append(' ').append(y).append(" l").append_i(separator);
     }
-
-    /**
-     * Appends a B&#xea;zier curve to the path, starting from the current point.
-     *
-     * @param       x1      x-coordinate of the first control point
-     * @param       y1      y-coordinate of the first control point
-     * @param       x2      x-coordinate of the second control point
-     * @param       y2      y-coordinate of the second control point
-     * @param       x3      x-coordinate of the ending point (= new current point)
-     * @param       y3      y-coordinate of the ending point (= new current point)
-     */
-
-    public void curveTo(float x1, float y1, float x2, float y2, float x3, float y3) {
-        content.append(x1).append(' ').append(y1).append(' ').append(x2).append(' ').append(y2).append(' ').append(x3).append(' ').append(y3).append(" c").append_i(separator);
-    }
-
-    /** Draws a circle. The endpoint will (x+r, y).
-     *
-     * @param x x center of circle
-     * @param y y center of circle
-     * @param r radius of circle
-     */
-    public void circle(float x, float y, float r) {
-        float b = 0.5523f;
-        moveTo(x + r, y);
-        curveTo(x + r, y + r * b, x + r * b, y + r, x, y + r);
-        curveTo(x - r * b, y + r, x - r, y + r * b, x - r, y);
-        curveTo(x - r, y - r * b, x - r * b, y - r, x, y - r);
-        curveTo(x + r * b, y - r, x + r, y - r * b, x + r, y);
-    }
-
 
 
     /**
@@ -1289,51 +1191,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Constructs a kern array for a text in a certain font
-     * @param text the text
-     * @param font the font
-     * @return a PdfTextArray
-     */
-    public static PdfTextArray getKernArray(String text, BaseFont font) {
-        PdfTextArray pa = new PdfTextArray();
-        StringBuilder acc = new StringBuilder();
-        int len = text.length() - 1;
-        char[] c = text.toCharArray();
-        if (len >= 0)
-            acc.append(c, 0, 1);
-        for (int k = 0; k < len; ++k) {
-            char c2 = c[k + 1];
-            int kern = font.getKerning(c[k], c2);
-            if (kern == 0) {
-                acc.append(c2);
-            }
-            else {
-                pa.add(acc.toString());
-                acc.setLength(0);
-                acc.append(c, k + 1, 1);
-                pa.add(-kern);
-            }
-        }
-        pa.add(acc.toString());
-        return pa;
-    }
-
-    /**
-     * Shows the <CODE>text</CODE> kerned.
-     *
-     * @param text the text to write
-     */
-    public void showTextKerned(String text) {
-        if (state.fontDetails == null)
-            throw new NullPointerException(MessageLocalization.getComposedMessage("font.and.size.must.be.set.before.writing.any.text"));
-        BaseFont bf = state.fontDetails.getBaseFont();
-        if (bf.hasKernPairs())
-            showText(getKernArray(text, bf));
-        else
-            showText(text);
-    }
-
-    /**
      * Changes the text matrix.
      * <P>
      * Remark: this operation also initializes the current point position.</P>
@@ -1436,110 +1293,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Gets the root outline.
-     *
-     * @return the root outline
-     */
-    public PdfOutline getRootOutline() {
-        checkWriter();
-        return pdf.getRootOutline();
-    }
-
-    /**
-     * Computes the width of the given string taking in account
-     * the current values of "Character spacing", "Word Spacing"
-     * and "Horizontal Scaling".
-     * The additional spacing is not computed for the last character
-     * of the string.
-     * @param text the string to get width of
-     * @param kerned the kerning option
-     * @return the width
-     */
-
-    public float getEffectiveStringWidth(String text, boolean kerned) {
-        BaseFont bf = state.fontDetails.getBaseFont();
-
-        float w;
-        if (kerned)
-            w = bf.getWidthPointKerned(text, state.size);
-        else
-            w = bf.getWidthPoint(text, state.size);
-
-        if (state.charSpace != 0.0f && text.length() > 1) {
-            w += state.charSpace * (text.length() -1);
-        }
-
-        int ft = bf.getFontType();
-        if (state.wordSpace != 0.0f && (ft == BaseFont.FONT_TYPE_T1 || ft == BaseFont.FONT_TYPE_TT || ft == BaseFont.FONT_TYPE_T3)) {
-            for (int i = 0; i < (text.length() -1); i++) {
-                if (text.charAt(i) == ' ')
-                    w += state.wordSpace;
-            }
-        }
-        if (state.scale != 100.0)
-            w = (w * state.scale) / 100.0f;
-
-        //System.out.println("String width = " + Float.toString(w));
-        return w;
-    }
-
-    /**
-     * Shows text right, left or center aligned with rotation.
-     * @param alignment the alignment can be ALIGN_CENTER, ALIGN_RIGHT or ALIGN_LEFT
-     * @param text the text to show
-     * @param x the x pivot position
-     * @param y the y pivot position
-     * @param rotation the rotation to be applied in degrees counterclockwise
-     */
-    public void showTextAligned(int alignment, String text, float x, float y, float rotation) {
-        showTextAligned(alignment, text, x, y, rotation, false);
-    }
-
-    private void showTextAligned(int alignment, String text, float x, float y, float rotation, boolean kerned) {
-        if (state.fontDetails == null)
-            throw new NullPointerException(MessageLocalization.getComposedMessage("font.and.size.must.be.set.before.writing.any.text"));
-        if (rotation == 0) {
-            switch (alignment) {
-                case ALIGN_CENTER:
-                    x -= getEffectiveStringWidth(text, kerned) / 2;
-                    break;
-                case ALIGN_RIGHT:
-                    x -= getEffectiveStringWidth(text, kerned);
-                    break;
-            }
-            setTextMatrix(x, y);
-            if (kerned)
-                showTextKerned(text);
-            else
-                showText(text);
-        }
-        else {
-            double alpha = rotation * Math.PI / 180.0;
-            float cos = (float)Math.cos(alpha);
-            float sin = (float)Math.sin(alpha);
-            float len;
-            switch (alignment) {
-                case ALIGN_CENTER:
-                    len = getEffectiveStringWidth(text, kerned) / 2;
-                    x -=  len * cos;
-                    y -=  len * sin;
-                    break;
-                case ALIGN_RIGHT:
-                    len = getEffectiveStringWidth(text, kerned);
-                    x -=  len * cos;
-                    y -=  len * sin;
-                    break;
-            }
-            setTextMatrix(cos, sin, -sin, cos, x, y);
-            if (kerned)
-                showTextKerned(text);
-            else
-                showText(text);
-            setTextMatrix(0f, 0f);
-        }
-    }
-
-    /**
      * Concatenate a matrix to the current transformation matrix.
      * @param a an element of the transformation matrix
      * @param b an element of the transformation matrix
@@ -1578,31 +1331,6 @@ public class PdfContentByte {
         content.append(e).append(' ');
         content.append(f).append(" cm ");
         content.append(name.getBytes()).append(" Do Q").append_i(separator);
-    }
-
-    void addTemplateReference(PdfIndirectReference template, PdfName name, float a, float b, float c, float d, float e, float f) {
-        checkWriter();
-        PageResources prs = getPageResources();
-        name = prs.addXObject(name, template);
-        content.append("q ");
-        content.append(a).append(' ');
-        content.append(b).append(' ');
-        content.append(c).append(' ');
-        content.append(d).append(' ');
-        content.append(e).append(' ');
-        content.append(f).append(" cm ");
-        content.append(name.getBytes()).append(" Do Q").append_i(separator);
-    }
-
-    /**
-     * Adds a template to this content.
-     *
-     * @param template the template
-     * @param x the x location of this template
-     * @param y the y location of this template
-     */
-    public void addTemplate(PdfTemplate template, float x, float y) {
-        addTemplate(template, 1, 0, 0, 1, x, y);
     }
 
     /**
@@ -1999,7 +1727,7 @@ public class PdfContentByte {
         if (state.fontDetails == null)
             throw new NullPointerException(MessageLocalization.getComposedMessage("font.and.size.must.be.set.before.writing.any.text"));
         content.append("[");
-        List arrayList = text.getArrayList();
+        List<Object> arrayList = text.getArrayList();
         boolean lastWasNumber = false;
         for (Object obj : arrayList) {
             if (obj instanceof String) {
@@ -2045,27 +1773,6 @@ public class PdfContentByte {
     }
 
 
-    /** Outputs a <CODE>String</CODE> directly to the content.
-     * @param s the <CODE>String</CODE>
-     */
-    public void setLiteral(String s) {
-        content.append(s);
-    }
-
-    /** Outputs a <CODE>char</CODE> directly to the content.
-     * @param c the <CODE>char</CODE>
-     */
-    public void setLiteral(char c) {
-        content.append(c);
-    }
-
-    /** Outputs a <CODE>float</CODE> directly to the content.
-     * @param n the <CODE>float</CODE>
-     */
-    public void setLiteral(float n) {
-        content.append(n);
-    }
-
     /** Throws an error if it is a pattern.
      * @param t the object to check
      */
@@ -2106,18 +1813,18 @@ public class PdfContentByte {
         if (layer instanceof PdfLayerMembership) {
             layerDepth.add(1);
             beginLayer2(layer);
-            return;
-        }
-        int n = 0;
-        PdfLayer la = (PdfLayer)layer;
-        while (la != null) {
-            if (la.getTitle() == null) {
-                beginLayer2(la);
-                ++n;
+        } else if (layer instanceof PdfLayer) {
+            PdfLayer la = (PdfLayer) layer;
+            int n = 0;
+            while (la != null) {
+                if (la.getTitle() == null) {
+                    beginLayer2(la);
+                    ++n;
+                }
+                la = la.getParent();
             }
-            la = la.getParent();
+            layerDepth.add(n);
         }
-        layerDepth.add(n);
     }
 
     private void beginLayer2(PdfOCG layer) {
@@ -2131,7 +1838,7 @@ public class PdfContentByte {
      * Ends a layer controlled graphic block. It will end the most recent open block.
      */
     public void endLayer() {
-        int n = 1;
+        int n;
         if (layerDepth != null && !layerDepth.isEmpty()) {
             n = layerDepth.get(layerDepth.size() - 1);
             layerDepth.remove(layerDepth.size() - 1);
@@ -2142,134 +1849,6 @@ public class PdfContentByte {
             content.append("EMC").append_i(separator);
     }
 
-    /** Concatenates a transformation to the current transformation
-     * matrix.
-     * @param af the transformation
-     */
-    public void transform(AffineTransform af) {
-        double[] arr = new double[6];
-        af.getMatrix(arr);
-        content.append(arr[0]).append(' ').append(arr[1]).append(' ').append(arr[2]).append(' ');
-        content.append(arr[3]).append(' ').append(arr[4]).append(' ').append(arr[5]).append(" cm").append_i(separator);
-    }
-
-    /**
-     * Sets the default colorspace.
-     * @param name the name of the colorspace. It can be <CODE>PdfName.DEFAULTGRAY</CODE>, <CODE>PdfName.DEFAULTRGB</CODE>
-     * or <CODE>PdfName.DEFAULTCMYK</CODE>
-     * @param obj the colorspace. A <CODE>null</CODE> or <CODE>PdfNull</CODE> removes any colorspace with the same name
-     */
-    public void setDefaultColorspace(PdfName name, PdfObject obj) {
-        PageResources prs = getPageResources();
-        prs.addDefaultColor(name, obj);
-    }
-
-    /**
-     * Begins a marked content sequence. This sequence will be tagged with the structure <CODE>struc</CODE>.
-     * The same structure can be used several times to connect text that belongs to the same logical segment
-     * but is in a different location, like the same paragraph crossing to another page, for example.
-     * @param struc the tagging structure
-     */
-    public void beginMarkedContentSequence(PdfStructureElement struc) {
-        PdfDictionary dict = new PdfDictionary();
-        beginMarkedContentSequence(struc, dict);
-    }
-    
-    public void beginMarkedContentSequence(PdfStructureElement struc, PdfDictionary dict) {
-        PdfObject obj = struc.get(PdfName.K);
-        int mark = pdf.getMarkPoint();
-        if (obj != null) {
-            PdfArray ar = null;
-            if (obj.isNumber()) {
-                ar = new PdfArray();
-                ar.add(obj);
-                struc.put(PdfName.K, ar);
-            }
-            else if (obj.isArray()) {
-                ar = (PdfArray)obj;
-                if (!(ar.getPdfObject(0)).isNumber())
-                    throw new IllegalArgumentException(MessageLocalization.getComposedMessage("the.structure.has.kids"));
-            }
-            else
-                throw new IllegalArgumentException(MessageLocalization.getComposedMessage("unknown.object.at.k.1", obj.getClass().toString()));
-            PdfDictionary dic = new PdfDictionary(PdfName.MCR);
-            dic.put(PdfName.PG, writer.getCurrentPage());
-            dic.put(PdfName.MCID, new PdfNumber(mark));
-            ar.add(dic);
-            struc.setPageMark(writer.getPageNumber() - 1, -1);
-        }
-        else {
-            struc.setPageMark(writer.getPageNumber() - 1, mark);
-            struc.put(PdfName.PG, writer.getCurrentPage());
-        }
-        pdf.incMarkPoint();
-        mcDepth++;
-        dict.put(PdfName.MCID, new PdfNumber(mark));
-        content.append(struc.get(PdfName.S).getBytes()).append(" ");
-        try {
-            dict.toPdf(writer, content);
-        }
-        catch (IOException e) {
-            throw new ExceptionConverter(e);
-        }
-        content.append(" BDC").append_i(separator);
-    }
-
-    /**
-     * Ends a marked content sequence
-     */
-    public void endMarkedContentSequence() {
-        if (mcDepth == 0) {
-            throw new IllegalPdfSyntaxException(MessageLocalization.getComposedMessage("unbalanced.begin.end.marked.content.operators"));
-        }
-        --mcDepth;
-        content.append("EMC").append_i(separator);
-    }
-
-    /**
-     * Begins a marked content sequence. If property is <CODE>null</CODE> the mark will be of the type
-     * <CODE>BMC</CODE> otherwise it will be <CODE>BDC</CODE>.
-     * @param tag the tag
-     * @param property the property
-     * @param inline <CODE>true</CODE> to include the property in the content or <CODE>false</CODE>
-     * to include the property in the resource dictionary with the possibility of reusing
-     */
-    public void beginMarkedContentSequence(PdfName tag, PdfDictionary property, boolean inline) {
-        if (property == null) {
-            content.append(tag.getBytes()).append(" BMC").append_i(separator);
-            return;
-        }
-        content.append(tag.getBytes()).append(' ');
-        if (inline)
-            try {
-                property.toPdf(writer, content);
-            }
-            catch (Exception e) {
-                throw new ExceptionConverter(e);
-            }
-        else {
-            PdfObject[] objs;
-            if (writer.propertyExists(property))
-                objs = writer.addSimpleProperty(property, null);
-            else
-                objs = writer.addSimpleProperty(property, writer.getPdfIndirectReference());
-            PdfName name = (PdfName)objs[0];
-            PageResources prs = getPageResources();
-            name = prs.addProperty(name, (PdfIndirectReference)objs[1]);
-            content.append(name.getBytes());
-        }
-        content.append(" BDC").append_i(separator);
-        ++mcDepth;
-    }
-
-    /**
-     * This is just a shorthand to <CODE>beginMarkedContentSequence(tag, null, false)</CODE>.
-     * @param tag the tag
-     */
-    public void beginMarkedContentSequence(PdfName tag) {
-        beginMarkedContentSequence(tag, null, false);
-    }
-    
     /**
      * Checks for any dangling state: Mismatched save/restore state, begin/end text,
      * begin/end layer, or begin/end marked content sequence.
@@ -2282,9 +1861,6 @@ public class PdfContentByte {
      * @throws IllegalPdfSyntaxException (a runtime exception)
      */
     public void sanityCheck() {
-        if (mcDepth != 0) {
-            throw new IllegalPdfSyntaxException(MessageLocalization.getComposedMessage("unbalanced.marked.content.operators"));
-        }
         if (inText) {
             throw new IllegalPdfSyntaxException(MessageLocalization.getComposedMessage("unbalanced.begin.end.text.operators"));
         }

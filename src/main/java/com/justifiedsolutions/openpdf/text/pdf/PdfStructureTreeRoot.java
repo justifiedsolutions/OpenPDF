@@ -59,13 +59,13 @@ import java.util.Map;
  */
 public class PdfStructureTreeRoot extends PdfDictionary {
     
-    private Map<Integer,PdfArray> parentTree = new HashMap<>();
-    private PdfIndirectReference reference;
+    private final Map<Integer,PdfArray> parentTree = new HashMap<>();
+    private final PdfIndirectReference reference;
 
     /**
      * Holds value of property writer.
      */
-    private PdfWriter writer;
+    private final PdfWriter writer;
     
     /** Creates a new instance of PdfStructureTreeRoot */
     PdfStructureTreeRoot(PdfWriter writer) {
@@ -73,22 +73,7 @@ public class PdfStructureTreeRoot extends PdfDictionary {
         this.writer = writer;
         reference = writer.getPdfIndirectReference();
     }
-    
-    /**
-     * Maps the user tags to the standard tags. The mapping will allow a standard application to make some sense of the tagged
-     * document whatever the user tags may be.
-     * @param used the user tag
-     * @param standard the standard tag
-     */    
-    public void mapRole(PdfName used, PdfName standard) {
-        PdfDictionary rm = (PdfDictionary)get(PdfName.ROLEMAP);
-        if (rm == null) {
-            rm = new PdfDictionary();
-            put(PdfName.ROLEMAP, rm);
-        }
-        rm.put(used, standard);
-    }
-    
+
     /**
      * Gets the writer.
      * @return the writer

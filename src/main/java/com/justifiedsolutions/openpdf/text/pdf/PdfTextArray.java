@@ -63,7 +63,7 @@ import java.util.List;
  */
 
 public class PdfTextArray{
-    private List<Object> arrayList = new ArrayList<>();
+    private final List<Object> arrayList = new ArrayList<>();
     
     // To emit a more efficient array, we consolidate
     // repeated numbers or strings into single array entries.
@@ -81,15 +81,7 @@ public class PdfTextArray{
     public PdfTextArray() {
     }
     
-    /**
-     * Adds a <CODE>PdfNumber</CODE> to the <CODE>PdfArray</CODE>.
-     *
-     * @param  number   displacement of the string
-     */
-    public void add(PdfNumber number) {
-        add((float) number.doubleValue());
-    }
-    
+
     public void add(float number) {
         if (number != 0) {
             if (lastNum != null) {
@@ -123,7 +115,7 @@ public class PdfTextArray{
         // adding an empty string doesn't modify the TextArray at all
     }
 
-    List getArrayList() {
+    List<Object> getArrayList() {
         return arrayList;
     }
     

@@ -59,16 +59,6 @@ import java.io.OutputStream;
  * Objects may be labeled so that they can be referred to by other objects.<BR>
  * All these basic PDF objects are described in the 'Portable Document Format
  * Reference Manual version 1.3' Chapter 4 (pages 37-54).
- *
- * @see        PdfNull
- * @see        PdfBoolean
- * @see        PdfNumber
- * @see        PdfString
- * @see        PdfName
- * @see        PdfArray
- * @see        PdfDictionary
- * @see        PdfStream
- * @see        PdfIndirectReference
  */
 public abstract class PdfObject {
 
@@ -170,7 +160,7 @@ public abstract class PdfObject {
      * 
      * @param writer for backwards compatibility
      * @param os     The <CODE>OutputStream</CODE> to write the bytes to.
-     * @throws IOException
+     * @throws IOException if unable to write to the output stream
      */
     public void toPdf(PdfWriter writer, OutputStream os) throws IOException {
         if (bytes != null)
@@ -223,22 +213,6 @@ public abstract class PdfObject {
                 return false;
         }
     }
-
-    /**
-     * Returns the length of the PDF representation of the <CODE>PdfObject</CODE>.
-     * <P>
-     * In some cases, namely for <CODE>PdfString</CODE> and <CODE>PdfStream</CODE>,
-     * this method differs from the method <CODE>length</CODE> because <CODE>length</CODE>
-     * returns the length of the actual content of the <CODE>PdfObject</CODE>.</P>
-     * <P>
-     * Remark: the actual content of an object is in most cases identical to its representation.
-     * The following statement is always true: length() &gt;= pdfLength().</P>
-     *
-     * @return        a length
-     */
-//    public int pdfLength() {
-//        return toPdf(null).length;
-//    }
 
     /**
      * Returns the length of the actual content of the <CODE>PdfObject</CODE>.

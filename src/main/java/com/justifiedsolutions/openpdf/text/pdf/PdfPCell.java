@@ -184,15 +184,6 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Constructs a <CODE>PdfPCell</CODE> with an <CODE>Image</CODE>. The default padding is 0.
-     *
-     * @param image the <CODE>Image</CODE>
-     */
-    public PdfPCell(Image image) {
-        this(image, false);
-    }
-
-    /**
      * Constructs a <CODE>PdfPCell</CODE> with an <CODE>Image</CODE>. The default padding is 0.25
      * for a border width of 0.5.
      *
@@ -210,51 +201,6 @@ public class PdfPCell extends Rectangle {
         } else {
             column.addText(this.phrase = new Phrase(new Chunk(image, 0, 0)));
             column.setLeading(0, 1);
-            setPadding(0);
-        }
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with a <CODE>PdfPtable</CODE>. This constructor allows
-     * nested tables. The default padding is 0.
-     *
-     * @param table The <CODE>PdfPTable</CODE>
-     */
-    public PdfPCell(PdfPTable table) {
-        this(table, null);
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with a <CODE>PdfPtable</CODE>. This constructor allows
-     * nested tables.
-     *
-     * @param table The <CODE>PdfPTable</CODE>
-     * @param style The style to apply to the cell (you could use getDefaultCell())
-     * @since 2.1.0
-     */
-    public PdfPCell(PdfPTable table, PdfPCell style) {
-        super(0, 0, 0, 0);
-        borderWidth = 0.5f;
-        border = BOX;
-        column.setLeading(0, 1);
-        this.table = table;
-        table.setWidthPercentage(100);
-        table.setExtendLastRow(true);
-        column.addElement(table);
-        if (style != null) {
-            cloneNonPositionParameters(style);
-            verticalAlignment = style.verticalAlignment;
-            paddingLeft = style.paddingLeft;
-            paddingRight = style.paddingRight;
-            paddingTop = style.paddingTop;
-            paddingBottom = style.paddingBottom;
-            colspan = style.colspan;
-            rowspan = style.rowspan;
-            cellEvent = style.cellEvent;
-            useDescender = style.useDescender;
-            useBorderPadding = style.useBorderPadding;
-            rotation = style.rotation;
-        } else {
             setPadding(0);
         }
     }
@@ -511,15 +457,6 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Adjusts effective padding to include border widths.
-     *
-     * @param use adjust effective padding if true
-     */
-    public void setUseBorderPadding(boolean use) {
-        useBorderPadding = use;
-    }
-
-    /**
      * Sets the leading fixed and variable. The resultant leading will be:
      * fixedLeading+multipliedLeading*maxFontSize where maxFontSize is the size of the biggest font
      * in the line.
@@ -538,51 +475,6 @@ public class PdfPCell extends Rectangle {
      */
     public float getLeading() {
         return column.getLeading();
-    }
-
-    /**
-     * Gets the variable leading.
-     *
-     * @return the leading
-     */
-    public float getMultipliedLeading() {
-        return column.getMultipliedLeading();
-    }
-
-    /**
-     * Sets the first paragraph line indent.
-     *
-     * @param indent the indent
-     */
-    public void setIndent(float indent) {
-        column.setIndent(indent);
-    }
-
-    /**
-     * Gets the first paragraph line indent.
-     *
-     * @return the indent
-     */
-    public float getIndent() {
-        return column.getIndent();
-    }
-
-    /**
-     * Gets the extra space between paragraphs.
-     *
-     * @return the extra space between paragraphs
-     */
-    public float getExtraParagraphSpace() {
-        return column.getExtraParagraphSpace();
-    }
-
-    /**
-     * Sets the extra space between paragraphs.
-     *
-     * @param extraParagraphSpace the extra space between paragraphs
-     */
-    public void setExtraParagraphSpace(float extraParagraphSpace) {
-        column.setExtraParagraphSpace(extraParagraphSpace);
     }
 
     /**
@@ -634,31 +526,12 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Tells you whether the cell has a minimum height.
-     *
-     * @return true if a minimum height was set.
-     * @since 2.1.5
-     */
-    public boolean hasMinimumHeight() {
-        return getMinimumHeight() > 0;
-    }
-
-    /**
      * Getter for property noWrap.
      *
      * @return Value of property noWrap.
      */
     public boolean isNoWrap() {
         return noWrap;
-    }
-
-    /**
-     * Setter for property noWrap.
-     *
-     * @param noWrap New value of property noWrap.
-     */
-    public void setNoWrap(boolean noWrap) {
-        this.noWrap = noWrap;
     }
 
     /**
@@ -669,17 +542,6 @@ public class PdfPCell extends Rectangle {
      */
     public PdfPTable getTable() {
         return table;
-    }
-
-    void setTable(PdfPTable table) {
-        this.table = table;
-        column.setText(null);
-        image = null;
-        if (table != null) {
-            table.setExtendLastRow(verticalAlignment == Element.ALIGN_TOP);
-            column.addElement(table);
-            table.setWidthPercentage(100);
-        }
     }
 
     /**
@@ -718,64 +580,6 @@ public class PdfPCell extends Rectangle {
      */
     public void setRowspan(int rowspan) {
         this.rowspan = rowspan;
-    }
-
-    /**
-     * Sets the following paragraph lines indent.
-     *
-     * @param indent the indent
-     */
-    public void setFollowingIndent(float indent) {
-        column.setFollowingIndent(indent);
-    }
-
-    /**
-     * Gets the following paragraph lines indent.
-     *
-     * @return the indent
-     */
-    public float getFollowingIndent() {
-        return column.getFollowingIndent();
-    }
-
-    /**
-     * Sets the right paragraph lines indent.
-     *
-     * @param indent the indent
-     */
-    public void setRightIndent(float indent) {
-        column.setRightIndent(indent);
-    }
-
-    /**
-     * Gets the right paragraph lines indent.
-     *
-     * @return the indent
-     */
-    public float getRightIndent() {
-        return column.getRightIndent();
-    }
-
-    /**
-     * Gets the space/character extra spacing ratio for fully justified text.
-     *
-     * @return the space/character extra spacing ratio
-     */
-    public float getSpaceCharRatio() {
-        return column.getSpaceCharRatio();
-    }
-
-    /**
-     * Sets the ratio between the extra word spacing and the extra character spacing when the text
-     * is fully justified. Extra word spacing will grow <CODE>spaceCharRatio</CODE> times more than
-     * extra character spacing. If the ratio is <CODE>PdfWriter.NO_SPACE_CHAR_RATIO</CODE> then the
-     * extra character spacing will be zero.
-     *
-     * @param spaceCharRatio the ratio between the extra word spacing and the extra character
-     *                       spacing
-     */
-    public void setSpaceCharRatio(float spaceCharRatio) {
-        column.setSpaceCharRatio(spaceCharRatio);
     }
 
     /**

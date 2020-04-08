@@ -399,10 +399,6 @@ public class PdfReader implements Closeable {
     PdfObject obj;
     try {
       obj = readPRObject();
-      for (PdfObject string : strings) {
-        PdfString str = (PdfString) string;
-        str.decrypt(this);
-      }
       if (obj.isStream()) {
         checkPRStreamLength((PRStream) obj);
       }

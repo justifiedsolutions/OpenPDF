@@ -71,6 +71,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -102,10 +103,6 @@ public class PdfWriter extends DocWriter implements
      * This class covers the third section of Chapter 5 in the 'Portable Document Format
      * Reference Manual version 1.3' (page 55-60). It contains the body of a PDF document
      * (section 5.14) and it can also generate a Cross-reference Table (section 5.15).
-     *
-     * @see        PdfWriter
-     * @see        PdfObject
-     * @see        PdfIndirectObject
      */
 
     public static class PdfBody {
@@ -126,14 +123,14 @@ public class PdfWriter extends DocWriter implements
           private static final String CROSS_REFERENCE_ENTRY_FORMAT = "%010d %05d %c \n";
 
             // membervariables
-            private int type;
+            private final int type;
 
             /**    Byte offset in the PDF file. */
             private final long offset;
 
-            private int refnum;
+            private final int refnum;
             /**    generation of the object. */
-            private int generation;
+            private final int generation;
 
             // constructors
             /**
@@ -236,11 +233,11 @@ public class PdfWriter extends DocWriter implements
         // membervariables
 
         /** array containing the cross-reference table of the normal objects. */
-        private TreeSet<PdfCrossReference> xrefs;
+        private final TreeSet<PdfCrossReference> xrefs;
         private int refnum;
         /** the current byte position in the body. */
         private long position;
-        private PdfWriter writer;
+        private final PdfWriter writer;
         private ByteBuffer index;
         private ByteBuffer streamObjects;
         private int currentObjNum;
@@ -408,13 +405,14 @@ public class PdfWriter extends DocWriter implements
          * @param os
          * @param root
          * @param info
-         * @param encryption
          * @param fileID
          * @param prevxref
          * @throws IOException
          */
 
-        void writeCrossReferenceTable(OutputStream os, PdfIndirectReference root, PdfIndirectReference info, PdfIndirectReference encryption, PdfObject fileID, int prevxref) throws IOException {
+        void writeCrossReferenceTable(OutputStream os, PdfIndirectReference root,
+                PdfIndirectReference info, PdfObject fileID,
+                int prevxref) throws IOException {
             int refNumber = 0;
             // Old-style xref tables limit object offsets to 10 digits
             boolean useNewXrefFormat = writer.isFullCompression() || position > 9_999_999_999L;
@@ -440,7 +438,7 @@ public class PdfWriter extends DocWriter implements
             }
             sections.add(first);
             sections.add(len);
-            PdfTrailer trailer = new PdfTrailer(size(), root, info, encryption, fileID, prevxref);
+            PdfTrailer trailer = new PdfTrailer(size(), root, info, fileID, prevxref);
             if (useNewXrefFormat) {
                 int mid = 8 - (Long.numberOfLeadingZeros(position) >> 3);
                 ByteBuffer buf = new ByteBuffer();
@@ -499,19 +497,17 @@ public class PdfWriter extends DocWriter implements
          * @param        size        the number of entries in the <CODE>PdfCrossReferenceTable</CODE>
          * @param        root        an indirect reference to the root of the PDF document
          * @param        info        an indirect reference to the info object of the PDF document
-         * @param encryption
          * @param fileID
          * @param prevxref
          */
 
-        PdfTrailer(int size, PdfIndirectReference root, PdfIndirectReference info, PdfIndirectReference encryption, PdfObject fileID, int prevxref) {
+        PdfTrailer(int size, PdfIndirectReference root, PdfIndirectReference info,
+                PdfObject fileID, int prevxref) {
             put(PdfName.SIZE, new PdfNumber(size));
             put(PdfName.ROOT, root);
             if (info != null) {
                 put(PdfName.INFO, info);
             }
-            if (encryption != null)
-                put(PdfName.ENCRYPT, encryption);
             if (fileID != null)
                 put(PdfName.ID, fileID);
             if (prevxref > 0)
@@ -679,90 +675,82 @@ public class PdfWriter extends DocWriter implements
             PdfDestination destination = (PdfDestination) obj[2];
             if (obj[1] == null)
                 obj[1] = getPdfIndirectReference();
-            if (destination == null)
-                addToBody(new PdfString("invalid_" + name), (PdfIndirectReference) obj[1]);
-            else
-                addToBody(destination, (PdfIndirectReference) obj[1]);
+            addToBody(Objects.requireNonNullElseGet(destination,
+                    () -> new PdfString("invalid_" + name)), (PdfIndirectReference) obj[1]);
         }
     }
 
     /**
      * Use this method to add a PDF object to the PDF body.
      * Use this method only if you know what you're doing!
-     * @param object
+     * @param object object to add
      * @return a PdfIndirectObject
-     * @throws IOException
+     * @throws IOException if there is a problem adding it
      */
     public PdfIndirectObject addToBody(PdfObject object) throws IOException {
-        PdfIndirectObject iobj = body.add(object);
-        return iobj;
+        return body.add(object);
     }
 
     /**
      * Use this method to add a PDF object to the PDF body.
      * Use this method only if you know what you're doing!
-     * @param object
-     * @param inObjStm
+     * @param object object to add
+     * @param inObjStm true if adding to the object stream
      * @return a PdfIndirectObject
-     * @throws IOException
+     * @throws IOException if there is a problem adding it
      */
     public PdfIndirectObject addToBody(PdfObject object, boolean inObjStm) throws IOException {
-        PdfIndirectObject iobj = body.add(object, inObjStm);
-        return iobj;
+        return body.add(object, inObjStm);
     }
 
     /**
      * Use this method to add a PDF object to the PDF body.
      * Use this method only if you know what you're doing!
-     * @param object
-     * @param ref
+     * @param object object to add
+     * @param ref indirect reference
      * @return a PdfIndirectObject
-     * @throws IOException
+     * @throws IOException if there is a problem adding it
      */
     public PdfIndirectObject addToBody(PdfObject object, PdfIndirectReference ref) throws IOException {
-        PdfIndirectObject iobj = body.add(object, ref);
-        return iobj;
+        return body.add(object, ref);
     }
 
     /**
      * Use this method to add a PDF object to the PDF body.
      * Use this method only if you know what you're doing!
-     * @param object
-     * @param ref
-     * @param inObjStm
+     * @param object object to add
+     * @param ref indirect reference
+     * @param inObjStm true if adding to the object stream
      * @return a PdfIndirectObject
-     * @throws IOException
+     * @throws IOException if there is a problem adding it
      */
     public PdfIndirectObject addToBody(PdfObject object, PdfIndirectReference ref, boolean inObjStm) throws IOException {
-        PdfIndirectObject iobj = body.add(object, ref, inObjStm);
-        return iobj;
+        return body.add(object, ref, inObjStm);
     }
 
     /**
      * Use this method to add a PDF object to the PDF body.
      * Use this method only if you know what you're doing!
-     * @param object
-     * @param refNumber
+     * @param object object to add
+     * @param refNumber reference number
      * @return a PdfIndirectObject
-     * @throws IOException
+     * @throws IOException if there is a problem adding it
      */
     public PdfIndirectObject addToBody(PdfObject object, int refNumber) throws IOException {
-        PdfIndirectObject iobj = body.add(object, refNumber);
-        return iobj;
+        return body.add(object, refNumber);
     }
 
     /**
      * Use this method to add a PDF object to the PDF body.
      * Use this method only if you know what you're doing!
-     * @param object
-     * @param refNumber
-     * @param inObjStm
+     * @param object object to add
+     * @param refNumber the reference number
+     * @param inObjStm true if adding to the object stream
      * @return a PdfIndirectObject
-     * @throws IOException
+     * @throws IOException if there is a problem adding it
      */
     public PdfIndirectObject addToBody(PdfObject object, int refNumber, boolean inObjStm) throws IOException {
-        PdfIndirectObject iobj = body.add(object, refNumber, inObjStm);
-        return iobj;
+        return body.add(object, refNumber, inObjStm);
     }
 
     /**
@@ -817,7 +805,7 @@ public class PdfWriter extends DocWriter implements
         }
         // [F13] OCG
         if (!documentOCG.isEmpty()) {
-            fillOCProperties(false);
+            fillOCProperties();
             catalog.put(PdfName.OCPROPERTIES, OCProperties);
         }
         return catalog;
@@ -888,17 +876,6 @@ public class PdfWriter extends DocWriter implements
         return ref;
     }
 
-    /**
-     * Gets the pagenumber of this document.
-     * This number can be different from the real pagenumber,
-     * if you have (re)set the page number previously.
-     * @return a page number
-     */
-
-    public int getPageNumber() {
-        return pdf.getPageNumber();
-    }
-
     PdfIndirectReference getCurrentPage() {
         return getPageReference(currentPageNumber);
     }
@@ -921,13 +898,12 @@ public class PdfWriter extends DocWriter implements
      * The document has to be open before you can begin to add content
      * to the body of the document.
      *
-     * @return a <CODE>PdfIndirectReference</CODE>
      * @param page the <CODE>PdfPage</CODE> to add
      * @param contents the <CODE>PdfContents</CODE> of the page
      * @throws PdfException on error
      */
 
-    PdfIndirectReference add(PdfPage page, PdfContents contents) throws PdfException {
+    void add(PdfPage page, PdfContents contents) throws PdfException {
         if (!open) {
             throw new PdfException(MessageLocalization.getComposedMessage("the.document.is.not.open"));
         }
@@ -948,7 +924,6 @@ public class PdfWriter extends DocWriter implements
         }
         root.addPage(page);
         currentPageNumber++;
-        return null;
     }
 
 //    page events
@@ -1053,13 +1028,6 @@ public class PdfWriter extends DocWriter implements
                 PdfIndirectReference rootRef = root.writePageTree();
                 // make the catalog-object and add it to the body
                 PdfDictionary catalog = getCatalog(rootRef);
-                // [C9] if there is XMP data to add: add it
-                if (xmpMetadata != null) {
-                    PdfStream xmp = new PdfStream(xmpMetadata);
-                    xmp.put(PdfName.TYPE, PdfName.METADATA);
-                    xmp.put(PdfName.SUBTYPE, PdfName.XML);
-                    catalog.put(PdfName.METADATA, body.add(xmp).getIndirectReference());
-                }
                 // [C10] make pdfx conformant
                 if (isPdfX()) {
                     pdfxConformance.completeInfoDictionary(getInfo());
@@ -1075,9 +1043,7 @@ public class PdfWriter extends DocWriter implements
                 // add the info-object to the body
                 PdfIndirectObject infoObj = addToBody(getInfo(), false);
 
-                // [F1] encryption
-                PdfIndirectReference encryption = null;
-                PdfObject fileID = null;
+                PdfObject fileID;
                 body.flushObjStm();
                 if (getInfo().contains(PdfName.FILEID)) {
                     fileID = getInfo().get(PdfName.FILEID);
@@ -1087,7 +1053,7 @@ public class PdfWriter extends DocWriter implements
 
                 // write the cross-reference table of the body
                 body.writeCrossReferenceTable(os, indirectCatalog.getIndirectReference(),
-                    infoObj.getIndirectReference(), encryption,  fileID, prevxref);
+                    infoObj.getIndirectReference(), fileID, prevxref);
 
                 os.write(getISOBytes("startxref\n"));
                 os.write(getISOBytes(String.valueOf(body.offset())));
@@ -1219,14 +1185,6 @@ public class PdfWriter extends DocWriter implements
         return pdf_version;
     }
 
-    //  [C7] portable collections
-
-
-//  [C9] Metadata
-
-    /** XMP Metadata for the document. */
-    protected byte[] xmpMetadata = null;
-
     //  [C10] PDFX Conformance
     /** A PDF/X level. */
     public static final int PDFXNONE = 0;
@@ -1240,7 +1198,7 @@ public class PdfWriter extends DocWriter implements
     public static final int PDFA1B = 4;
 
     /** Stores the PDF/X level. */
-    private PdfXConformanceImp pdfxConformance = new PdfXConformanceImp();
+    private final PdfXConformanceImp pdfxConformance = new PdfXConformanceImp();
 
     public void setPDFXConformance(int pdfx) {
         if (pdfxConformance.getPDFXConformance() == pdfx)
@@ -1352,7 +1310,7 @@ public class PdfWriter extends DocWriter implements
     PdfName addDirectTemplateSimple(PdfTemplate template, PdfName forcedName) {
         PdfIndirectReference ref = template.getIndirectReference();
         Object[] obj = formXObjects.get(ref);
-        PdfName name = null;
+        PdfName name;
         try {
             if (obj == null) {
                 if (forcedName == null) {
@@ -1495,11 +1453,7 @@ public class PdfWriter extends DocWriter implements
         return documentProperties.get(prop);
     }
 
-    boolean propertyExists(Object prop) {
-        return documentProperties.containsKey(prop);
-    }
-
-//  [F12] tagged PDF
+    //  [F12] tagged PDF
 
     protected boolean tagged = false;
     protected PdfStructureTreeRoot structureTreeRoot;
@@ -1581,13 +1535,9 @@ public class PdfWriter extends DocWriter implements
     /**
      * @since 2.1.2
      */
-    protected void fillOCProperties(boolean erase) {
+    protected void fillOCProperties() {
         if (OCProperties == null)
             OCProperties = new PdfOCProperties();
-        if (erase) {
-            OCProperties.remove(PdfName.OCGS);
-            OCProperties.remove(PdfName.D);
-        }
         if (OCProperties.get(PdfName.OCGS) == null) {
             PdfArray gr = new PdfArray();
             for (PdfOCG o : documentOCG) {
@@ -1661,7 +1611,7 @@ public class PdfWriter extends DocWriter implements
      * @return the space/character extra spacing ratio
      */
     public float getSpaceCharRatio() {
-        /**
+        /*
          * The ratio between the extra word spacing and the extra character spacing.
          * Extra word spacing will grow <CODE>ratio</CODE> times more than extra character spacing.
          */
@@ -1793,7 +1743,7 @@ public class PdfWriter extends DocWriter implements
     protected PdfDictionary imageDictionary = new PdfDictionary();
 
     /** This is the list with all the images in the document. */
-    private HashMap<Long, PdfName> images = new HashMap<>();
+    private final HashMap<Long, PdfName> images = new HashMap<>();
 
     /**
      * Use this method to adds an image to the document

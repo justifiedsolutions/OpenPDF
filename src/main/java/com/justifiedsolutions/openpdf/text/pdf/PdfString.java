@@ -76,9 +76,7 @@ public class PdfString extends PdfObject {
     
     /** The value of this object. */
     protected String value = NOTHING;
-    
-    protected String originalValue = null;
-    
+
     /** The encoding. */
     protected String encoding = TEXT_PDFDOCENCODING;
     
@@ -206,49 +204,9 @@ public class PdfString extends PdfObject {
         this.objGen = objGen;
     }
     
-    /**
-     * Decrypt an encrypted <CODE>PdfString</CODE>
-     */
-    void decrypt(PdfReader reader) {
-    }
-    
-    /**
-     * @return The original bytes used to create this PDF string, or the bytes of our current value
-     *         if the original bytes are missing.
-     */
-    public byte[] getOriginalBytes() {
-        if (originalValue == null)
-            return getBytes();
-        return PdfEncodings.convertToBytes(originalValue, null);
-    }
-    
-    /**
-     * return the characters in our value without any translation. This allows
-     * a string to be built that holds 2-byte or one-byte character codes, as needed
-     * for processing by fonts when extracting text.
-     * 
-     * Intended for use when no encoding transformations are desired.
-     * @return The code points in this font as chars.
-     */
-    public char[] getOriginalChars() {
-        char[] chars;
-        if (encoding == null || encoding.length() == 0) {
-            byte [] bytes = getOriginalBytes();
-            chars = new char[bytes.length];
-            for (int i = 0; i<bytes.length; i++)
-                chars[i] = (char) (bytes[i]&0xff);
-        } else {
-            chars = new char[0];
-        }
-        return chars;
-    }
-    
     public PdfString setHexWriting(boolean hexWriting) {
         this.hexWriting = hexWriting;
         return this;
     }
-    
-    public boolean isHexWriting() {
-        return hexWriting;
-    }
+
 }

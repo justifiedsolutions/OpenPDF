@@ -95,7 +95,7 @@ class PdfStamperImp extends PdfWriter {
         addFileAttachments();
         // OCG
         if (!documentOCG.isEmpty()) {
-            fillOCProperties(false);
+            fillOCProperties();
             PdfDictionary ocdict = catalog.getAsDict(PdfName.OCPROPERTIES);
             if (ocdict == null) {
                 reader.getCatalog().put(PdfName.OCPROPERTIES, OCProperties);
@@ -138,9 +138,6 @@ class PdfStamperImp extends PdfWriter {
           altMetadata = PdfReader.getStreamBytesRaw((PRStream)xmpo);
           PdfReader.killIndirect(catalog.get(PdfName.METADATA));
         }
-        if (xmpMetadata != null) {
-          altMetadata = xmpMetadata;
-        }
         PdfDate date = new PdfDate();
 
         try {
@@ -179,7 +176,6 @@ class PdfStamperImp extends PdfWriter {
                 // empty on purpose
             }
         }
-        PdfIndirectReference encryption = null;
         PdfObject fileID = null;
         if (includeFileID) {
             if (overrideFileId != null) {
@@ -230,7 +226,7 @@ class PdfStamperImp extends PdfWriter {
             info = addToBody(newInfo, false).getIndirectReference();
         }
         // write the cross-reference table of the body
-        body.writeCrossReferenceTable(os, root, info, encryption, fileID, prevxref);
+        body.writeCrossReferenceTable(os, root, info, fileID, prevxref);
         os.write(getISOBytes("startxref\n"));
         os.write(getISOBytes(String.valueOf(body.offset())));
         os.write(getISOBytes("\n%%EOF\n"));

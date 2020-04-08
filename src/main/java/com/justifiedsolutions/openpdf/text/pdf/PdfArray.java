@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * <CODE>PdfArray</CODE> is the PDF Array object.
@@ -377,15 +376,6 @@ public class PdfArray extends PdfObject {
     }
 
     /**
-     * Returns the list iterator for the array.
-     * 
-     * @return a ListIterator
-     */
-    public ListIterator<PdfObject> listIterator() {
-        return arrayList.listIterator();
-    }
-
-    /**
      * Returns the <CODE>PdfObject</CODE> with the specified index.
      * 
      * A possible indirect references is not resolved, so the returned
@@ -420,28 +410,6 @@ public class PdfArray extends PdfObject {
     // @author Mark A Storer (2/17/06)
 
     /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfDictionary</CODE>,
-     * resolving indirect references.
-     * 
-     * The object corresponding to the specified index is retrieved and
-     * resolvedto a direct object. If it is a <CODE>PdfDictionary</CODE>, it is
-     * cast down and returned as such. Otherwise <CODE>null</CODE> is returned.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return the corresponding <CODE>PdfDictionary</CODE> object, or
-     *         <CODE>null</CODE>
-     */
-    public PdfDictionary getAsDict(int idx) {
-        PdfDictionary dict = null;
-        PdfObject orig = getDirectObject(idx);
-        if (orig != null && orig.isDictionary()) {
-            dict = (PdfDictionary) orig;
-        }
-        return dict;
-    }
-
-    /**
      * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfArray</CODE>, resolving
      * indirect references.
      * 
@@ -461,72 +429,6 @@ public class PdfArray extends PdfObject {
             array = (PdfArray) orig;
         }
         return array;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfStream</CODE>, resolving
-     * indirect references.
-     * 
-     * The object corresponding to the specified index is retrieved and resolved
-     * to a direct object. If it is a <CODE>PdfStream</CODE>, it is cast down
-     * and returned as such. Otherwise <CODE>null</CODE> is returned.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return the corresponding <CODE>PdfStream</CODE> object, or
-     *         <CODE>null</CODE>
-     */
-    public PdfStream getAsStream(int idx) {
-        PdfStream stream = null;
-        PdfObject orig = getDirectObject(idx);
-        if (orig != null && orig.isStream()) {
-            stream = (PdfStream) orig;
-        }
-        return stream;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfString</CODE>, resolving
-     * indirect references.
-     * 
-     * The object corresponding to the specified index is retrieved and resolved
-     * to a direct object. If it is a <CODE>PdfString</CODE>, it is cast down
-     * and returned as such. Otherwise <CODE>null</CODE> is returned.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return the corresponding <CODE>PdfString</CODE> object, or
-     *         <CODE>null</CODE>
-     */
-    public PdfString getAsString(int idx) {
-        PdfString string = null;
-        PdfObject orig = getDirectObject(idx);
-        if (orig != null && orig.isString()) {
-            string = (PdfString) orig;
-        }
-        return string;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfNumber</CODE>, resolving
-     * indirect references.
-     * 
-     * The object corresponding to the specified index is retrieved and resolved
-     * to a direct object. If it is a <CODE>PdfNumber</CODE>, it is cast down
-     * and returned as such. Otherwise <CODE>null</CODE> is returned.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return the corresponding <CODE>PdfNumber</CODE> object, or
-     *         <CODE>null</CODE>
-     */
-    public PdfNumber getAsNumber(int idx) {
-        PdfNumber number = null;
-        PdfObject orig = getDirectObject(idx);
-        if (orig != null && orig.isNumber()) {
-            number = (PdfNumber) orig;
-        }
-        return number;
     }
 
     /**
@@ -551,46 +453,4 @@ public class PdfArray extends PdfObject {
         return name;
     }
 
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfBoolean</CODE>, resolving
-     * indirect references.
-     * 
-     * The object corresponding to the specified index is retrieved and resolved
-     * to a direct object. If it is a <CODE>PdfBoolean</CODE>, it is cast down
-     * and returned as such. Otherwise <CODE>null</CODE> is returned.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return the corresponding <CODE>PdfBoolean</CODE> object, or
-     *         <CODE>null</CODE>
-     */
-    public PdfBoolean getAsBoolean(int idx) {
-        PdfBoolean bool = null;
-        PdfObject orig = getDirectObject(idx);
-        if (orig != null && orig.isBoolean()) {
-            bool = (PdfBoolean) orig;
-        }
-        return bool;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfIndirectReference</CODE>.
-     * 
-     * The object corresponding to the specified index is retrieved. If it is a
-     * <CODE>PdfIndirectReference</CODE>, it is cast down and returned as such.
-     * Otherwise <CODE>null</CODE> is returned.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return the corresponding <CODE>PdfIndirectReference</CODE> object, or
-     *         <CODE>null</CODE>
-     */
-    public PdfIndirectReference getAsIndirectObject(int idx) {
-        PdfIndirectReference ref = null;
-        PdfObject orig = getPdfObject(idx); // not getDirect this time.
-        if (orig != null && orig.isIndirect()) {
-            ref = (PdfIndirectReference) orig;
-        }
-        return ref;
-    }
 }

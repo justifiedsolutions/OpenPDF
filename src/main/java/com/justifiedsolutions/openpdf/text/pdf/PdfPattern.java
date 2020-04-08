@@ -89,7 +89,7 @@ public class PdfPattern extends PdfStream {
             put(PdfName.PAINTTYPE, one);
         put(PdfName.XSTEP, new PdfNumber(painter.getXStep()));
         put(PdfName.YSTEP, new PdfNumber(painter.getYStep()));
-        bytes = painter.toPdf(null);
+        bytes = painter.toPdf();
         put(PdfName.LENGTH, new PdfNumber(bytes.length));
         try {
             flateCompress(compressionLevel);

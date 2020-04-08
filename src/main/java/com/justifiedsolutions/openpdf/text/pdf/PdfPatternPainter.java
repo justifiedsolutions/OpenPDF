@@ -46,12 +46,11 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.awt.Color;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Rectangle;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.awt.Color;
 
 /**
  * Implements the pattern.
@@ -71,47 +70,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         super();
         type = TYPE_PATTERN;
     }
-    
-    /**
-     * Creates new PdfPattern
-     *
-     * @param wr the <CODE>PdfWriter</CODE>
-     */
-    
-    PdfPatternPainter(PdfWriter wr) {
-        super(wr);
-        type = TYPE_PATTERN;
-    }
-    
-    PdfPatternPainter(PdfWriter wr, Color defaultColor) {
-        this(wr);
-        stencil = true;
-        if (defaultColor == null)
-            this.defaultColor = Color.gray;
-        else
-            this.defaultColor = defaultColor;
-    }
-    
-    /**
-     * Sets the horizontal interval of this pattern.
-     *
-     * @param xstep the xstep in horizontal painting
-     */
-    
-    public void setXStep(float xstep) {
-        this.xstep = xstep;
-    }
-    
-    /**
-     * Sets the vertical interval of this pattern.
-     *
-     * @param ystep in vertical painting
-     */
-    
-    public void setYStep(float ystep) {
-        this.ystep = ystep;
-    }
-    
+
     /**
      * Returns the horizontal interval when repeating the pattern.
      * @return a value
@@ -135,27 +94,7 @@ public final class PdfPatternPainter extends PdfTemplate {
     public boolean isStencil() {
         return stencil;
     }
-    
-    /**
-     * Sets the transformation matrix for the pattern.
-     * @param a
-     * @param b
-     * @param c
-     * @param d
-     * @param e
-     * @param f
-     */
-    public void setPatternMatrix(float a, float b, float c, float d, float e, float f) {
-        setMatrix(a, b, c, d, e, f);
-    }
-    /**
-     * Gets the stream representing this pattern
-     * @return the stream representing this pattern
-     */
-    PdfPattern getPattern() {
-        return new PdfPattern(this);
-    }
-    
+
     /**
      * Gets the stream representing this pattern
      * @param    compressionLevel    the compression level of the stream
