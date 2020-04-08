@@ -47,20 +47,14 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.exceptions.BadPasswordException;
-import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.xml.sax.SAXException;
 
 class PdfStamperImp extends PdfWriter {
     HashMap<PdfReader, IntHashtable> readers2intrefs = new HashMap<>();
@@ -147,12 +141,7 @@ class PdfStamperImp extends PdfWriter {
         if (xmpMetadata != null) {
           altMetadata = xmpMetadata;
         }
-        PdfDate date = null;
-        if (modificationDate == null) {
-          date = new PdfDate();
-        } else {
-            date = new PdfDate(modificationDate);
-        }
+        PdfDate date = new PdfDate();
 
         try {
             file.reOpen();
@@ -548,15 +537,6 @@ class PdfStamperImp extends PdfWriter {
     }
 
     /**
-     * Adds or replaces the Collection Dictionary in the Catalog.
-     * @param    collection    the new collection dictionary.
-     */
-    void makePackage( PdfCollection collection ) {
-        PdfDictionary catalog = reader.getCatalog();
-           catalog.put( PdfName.COLLECTION, collection );
-    }
-
-    /**
      * Set the signature flags.
      * @param f the flags. This flags are ORed with current ones
      */
@@ -802,15 +782,4 @@ class PdfStamperImp extends PdfWriter {
     public void setOverrideFileId(PdfObject overrideFileId) {
         this.overrideFileId = overrideFileId;
     }
-    
-
-    public Calendar getModificationDate() {
-        return modificationDate;
-    }
-
-    public void setModificationDate(Calendar modificationDate) {
-        this.modificationDate = modificationDate;
-    }
-
-
 }

@@ -136,8 +136,11 @@ public class Meta implements Element {
     }
 
     private int getType(Metadata tag) {
-        int result;
+        int result = -1;
         switch (tag) {
+            case TITLE:
+                result = Element.TITLE;
+                break;
             case SUBJECT:
                 result = Element.SUBJECT;
                 break;
@@ -147,14 +150,15 @@ public class Meta implements Element {
             case AUTHOR:
                 result = Element.AUTHOR;
                 break;
-            case TITLE:
-                result = Element.TITLE;
+            case CREATOR:
+                result = Element.CREATOR;
+                break;
+            case PRODUCER:
+                result = Element.PRODUCER;
                 break;
             case CREATE_DATE:
                 result = Element.CREATIONDATE;
                 break;
-            default:
-                result = Element.HEADER;
         }
         return result;
     }

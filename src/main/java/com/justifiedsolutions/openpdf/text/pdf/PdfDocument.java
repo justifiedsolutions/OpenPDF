@@ -49,8 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.DocListener;
 import com.justifiedsolutions.openpdf.text.Chunk;
+import com.justifiedsolutions.openpdf.text.DocListener;
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
@@ -63,7 +63,6 @@ import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.Section;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 import java.awt.Color;
 import java.io.IOException;
@@ -165,7 +164,7 @@ public class PdfDocument extends Document {
          * Adds the name of the producer to the document.
          */
         void addProducer(final String producer) {
-            put(PdfName.PRODUCER, new PdfString(producer));
+            put(PdfName.PRODUCER, new PdfString(producer, PdfObject.TEXT_UNICODE));
         }
 
         /**
@@ -1233,11 +1232,6 @@ public class PdfDocument extends Document {
                         graphics.setLineWidth(1);
                     }
                     if (chunk.isAttribute(Chunk.LOCALDESTINATION)) {
-                        float subtract = lastBaseFactor;
-                        if (nextChunk != null && nextChunk.isAttribute(Chunk.LOCALDESTINATION))
-                            subtract = 0;
-                        if (nextChunk == null)
-                            subtract += hangingCorrection;
                         localDestination((String)chunk.getAttribute(Chunk.LOCALDESTINATION), new PdfDestination(PdfDestination.XYZ, xMarker, yMarker + chunk.font().size(), 0));
                     }
                     if (chunk.isAttribute(Chunk.GENERICTAG)) {
@@ -1525,11 +1519,6 @@ public class PdfDocument extends Document {
         // [C5] named objects
         catalog.addNames(localDestinations, getDocumentLevelJS(), documentFileAttachment, writer);
 
-        // [C7] portable collections
-        if (collection != null) {
-            catalog.put(PdfName.COLLECTION, collection);
-        }
-
         return catalog;
     }
 
@@ -1665,28 +1654,6 @@ public class PdfDocument extends Document {
     }
 
 //    [C6] document level actions
-
-    protected String openActionName;
-
-    void setOpenAction(String name) {
-        openActionName = name;
-    }
-
-    //    [C7] portable collections
-
-    protected PdfCollection collection;
-
-    /**
-     * Sets the collection dictionary.
-     * @param collection a dictionary of type PdfCollection
-     */
-    public void setCollection(PdfCollection collection) {
-        this.collection = collection;
-    }
-
-
-
-
 
 //    [F12] tagged PDF
 

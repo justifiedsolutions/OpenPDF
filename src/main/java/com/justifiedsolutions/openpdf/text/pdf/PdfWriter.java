@@ -55,7 +55,6 @@ import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.collection.PdfCollection;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPageEventForwarder;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
@@ -1221,16 +1220,6 @@ public class PdfWriter extends DocWriter implements
     }
 
     //  [C7] portable collections
-
-    /**
-     * Use this method to add the Collection dictionary.
-     * @param collection a dictionary of type PdfCollection
-     */
-    public void setCollection(PdfCollection collection) {
-        setAtLeastPdfVersion(VERSION_1_7);
-        pdf.setCollection(collection);
-    }
-
 
 
 //  [C9] Metadata
