@@ -50,86 +50,45 @@
 package com.justifiedsolutions.openpdf.text;
 
 /**
- * A class that implements <CODE>DocListener</CODE> will perform some
- * actions when some actions are performed on a <CODE>Document</CODE>.
- *
+ * A class that implements <CODE>DocListener</CODE> will perform some actions when some actions are
+ * performed on a <CODE>Document</CODE>.
  */
-
 public interface DocListener extends ElementListener {
-    
-    // methods
-    
+
     /**
      * Signals that the <CODE>Document</CODE> has been opened and that
      * <CODE>Elements</CODE> can be added.
      */
+    void open();
 
-    void open(); // [L1]
-    
     /**
      * Signals that the <CODE>Document</CODE> was closed and that no other
      * <CODE>Elements</CODE> will be added.
-     * <P>
+     * <p>
      * The outputstream of every writer implementing <CODE>DocListener</CODE> will be closed.
      */
+    void close();
 
-    void close(); // [L2]
-    
     /**
      * Signals that an new page has to be started.
-     *
-     * @return    <CODE>true</CODE> if the page was added, <CODE>false</CODE> if not.
      */
+    void newPage();
 
-    boolean newPage(); // [L3]
-    
     /**
      * Sets the pagesize.
      *
-     * @param    pageSize    the new pagesize
-     * @return    a <CODE>boolean</CODE>
+     * @param pageSize the new pagesize
      */
+    void setPageSize(Rectangle pageSize);
 
-    boolean setPageSize(Rectangle pageSize); // [L4]
-        
     /**
      * Sets the margins.
      *
-     * @param    marginLeft        the margin on the left
-     * @param    marginRight        the margin on the right
-     * @param    marginTop        the margin on the top
-     * @param    marginBottom    the margin on the bottom
-     * @return    a <CODE>boolean</CODE>
+     * @param marginLeft   the margin on the left
+     * @param marginRight  the margin on the right
+     * @param marginTop    the margin on the top
+     * @param marginBottom the margin on the bottom
      */
+    void setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom);
 
-    boolean setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom);  // [L5]
-        
-    /**
-     * Parameter that allows you to do left/right  margin mirroring (odd/even pages)
-     * @param marginMirroring
-     * @return true if successful
-     */
-    boolean setMarginMirroring(boolean marginMirroring); // [L6]
-    
-    /**
-     * Parameter that allows you to do top/bottom margin mirroring (odd/even pages)
-     * @param marginMirroringTopBottom
-     * @return true if successful
-     * @since    2.1.6
-     */
-    boolean setMarginMirroringTopBottom(boolean marginMirroringTopBottom); // [L6]
-        
-    /**
-     * Sets the page number.
-     *
-     * @param    pageN        the new page number
-     */
-
-    void setPageCount(int pageN); // [L7]
-    
-    /**
-     * Sets the page number to 0.
-     */
-
-    void resetPageCount(); // [L8]
 }

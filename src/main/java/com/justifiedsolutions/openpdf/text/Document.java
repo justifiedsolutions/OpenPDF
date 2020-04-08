@@ -50,28 +50,24 @@
 package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 
 /**
  * A generic Document class.
- * <P>
- * All kinds of Text-elements can be added to a <CODE>HTMLDocument</CODE>.
- * The <CODE>Document</CODE> signals all the listeners when an element has
- * been added.
- * <P>
+ * <p>
+ * All kinds of Text-elements can be added to a <CODE>HTMLDocument</CODE>. The <CODE>Document</CODE>
+ * signals all the listeners when an element has been added.
+ * <p>
  * Remark:
  * <OL>
- *     <LI>Once a document is created you can add some meta information.
- *     <LI>You can also set the headers/footers.
- *     <LI>You have to open the document before you can write content.
+ * <LI>Once a document is created you can add some meta information.
+ * <LI>You can also set the headers/footers.
+ * <LI>You have to open the document before you can write content.
  * <LI>You can only write content (no more meta-formation!) once a document is
  * opened.
  * <LI>When you change the header/footer on a certain page, this will be
@@ -83,35 +79,107 @@ import java.util.Properties;
  *
  * <PRE>// creation of the document with a certain size and certain margins
  * <STRONG>Document document = new Document(PageSize.A4, 50, 50, 50, 50);
- * </STRONG> try { 
- *   PdfWriter.getInstance(<STRONG>document </STRONG>, new FileOutputStream("text.pdf"));
- *   // we add some meta information to the document
- *   <STRONG>document.addAuthor("Bruno Lowagie"); </STRONG>
- *   <STRONG>document.addSubject("This is the result of a Test."); </STRONG>
- *   // we open the document for writing
- *   <STRONG>document.open(); </STRONG>
- *   <STRONG>document.add(new Paragraph("Hello world"));</STRONG>
- *  } catch(DocumentException de) {
- *   System.err.println(de.getMessage());
- *  }
- *  <STRONG>document.close();</STRONG>
+ * </STRONG> try {
+ * PdfWriter.getInstance(<STRONG>document </STRONG>, new FileOutputStream("text.pdf")); // we add
+ * some meta information to the document
+ * <STRONG>document.addAuthor("Bruno Lowagie"); </STRONG>
+ * <STRONG>document.addSubject("This is the result of a Test."); </STRONG>
+ * // we open the document for writing
+ * <STRONG>document.open(); </STRONG>
+ * <STRONG>document.add(new Paragraph("Hello world"));</STRONG>
+ * } catch(DocumentException de) { System.err.println(de.getMessage()); }
+ * <STRONG>document.close();</STRONG>
  * </PRE>
- * 
+ *
  * </BLOCKQUOTE>
  */
 
 public class Document implements AutoCloseable, DocListener {
-    
+
     // membervariables
     private static final String VERSION_PROPERTIES = "com/justifiedsolutions/openpdf/text/version.properties";
-    private static final String OPENPDF = "OpenPDF";
+    private static final String OPEN_PDF = "JSOpenPDF";
     private static final String RELEASE;
-    private static final String OPENPDF_VERSION;
+    private static final String OPEN_PDF_VERSION;
+    /**
+     * Allows the pdf documents to be produced without compression for debugging purposes.
+     */
+    public static boolean compress = true;
+    /**
+     * When true the file access is not done through a memory mapped file. Use it if the file is too
+     * big to be mapped in your address space.
+     */
+    public static boolean plainRandomAccess = false;
 
     static {
         RELEASE = getVersionNumber();
-        OPENPDF_VERSION = OPENPDF + " " + RELEASE;
+        OPEN_PDF_VERSION = OPEN_PDF + " " + RELEASE;
     }
+
+    /**
+     * The DocListener.
+     */
+    private final List<DocListener> listeners = new ArrayList<>();
+    /**
+     * Is the document open or not?
+     */
+    protected boolean open;
+    /**
+     * Has the document already been closed?
+     */
+    protected boolean close;
+    /**
+     * The size of the page.
+     */
+    protected Rectangle pageSize;
+
+    // membervariables concerning the layout
+    /**
+     * margin in x direction starting from the left
+     */
+    protected float marginLeft;
+    /**
+     * margin in x direction starting from the right
+     */
+    protected float marginRight;
+    /**
+     * margin in y direction starting from the top
+     */
+    protected float marginTop;
+    /**
+     * margin in y direction starting from the bottom
+     */
+    protected float marginBottom;
+    /**
+     * Current pagenumber
+     */
+    protected int pageN = 0;
+
+    /**
+     * Constructs a new <CODE>Document</CODE> -object.
+     */
+    public Document() {
+        this(PageSize.A4, 36, 36, 36, 36);
+    }
+
+    /**
+     * Constructs a new <CODE>Document</CODE> -object.
+     *
+     * @param pageSize     the pageSize
+     * @param marginLeft   the margin on the left
+     * @param marginRight  the margin on the right
+     * @param marginTop    the margin on the top
+     * @param marginBottom the margin on the bottom
+     */
+    public Document(Rectangle pageSize, float marginLeft, float marginRight,
+            float marginTop, float marginBottom) {
+        this.pageSize = pageSize;
+        this.marginLeft = marginLeft;
+        this.marginRight = marginRight;
+        this.marginTop = marginTop;
+        this.marginBottom = marginBottom;
+    }
+
     private static String getVersionNumber() {
         String releaseVersion = "UNKNOWN";
         try (InputStream input = Document.class.getClassLoader()
@@ -125,429 +193,6 @@ public class Document implements AutoCloseable, DocListener {
             // ignore this and leave the default
         }
         return releaseVersion;
-    }
-
-    /**
-     * Allows the pdf documents to be produced without compression for debugging
-     * purposes.
-     */
-    public static boolean compress = true; 
-    
-    /**
-     * When true the file access is not done through a memory mapped file. Use it if the file
-     * is too big to be mapped in your address space.
-     */
-    public static boolean plainRandomAccess = false; 
- 
-    /** Scales the WMF font size. The default value is 0.86. */
-    public static float wmfFontCorrection = 0.86f;
-    
-    /** The DocListener. */
-    private final List<DocListener> listeners = new ArrayList<>();
-    
-    /** Is the document open or not? */
-    protected boolean open;
-    
-    /** Has the document already been closed? */
-    protected boolean close;
-    
-    // membervariables concerning the layout
-    
-    /** The size of the page. */
-    protected Rectangle pageSize;
-    
-    /** margin in x direction starting from the left */
-    protected float marginLeft;
-    
-    /** margin in x direction starting from the right */
-    protected float marginRight;
-    
-    /** margin in y direction starting from the top */
-    protected float marginTop;
-    
-    /** margin in y direction starting from the bottom */
-    protected float marginBottom;
-    
-    /** mirroring of the left/right margins */
-    protected boolean marginMirroring = false;
-    
-    /**
-     * mirroring of the top/bottom margins
-     * @since    2.1.6
-     */
-    protected boolean marginMirroringTopBottom = false;
-
-    /** Current pagenumber */
-    protected int pageN = 0;
-    
-    // constructor
-
-    /**
-     * Constructs a new <CODE>Document</CODE> -object.
-     */
-    public Document() {
-        this(PageSize.A4);
-    }
-
-    /**
-     * Constructs a new <CODE>Document</CODE> -object.
-     *
-     * @param pageSize
-     *            the pageSize
-     */
-    public Document(Rectangle pageSize) {
-        this(pageSize, 36, 36, 36, 36);
-    }
-
-    /**
-     * Constructs a new <CODE>Document</CODE> -object.
-     *
-     * @param pageSize
-     *            the pageSize
-     * @param marginLeft
-     *            the margin on the left
-     * @param marginRight
-     *            the margin on the right
-     * @param marginTop
-     *            the margin on the top
-     * @param marginBottom
-     *            the margin on the bottom
-     */
-    public Document(Rectangle pageSize, float marginLeft, float marginRight,
-            float marginTop, float marginBottom) {
-        this.pageSize = pageSize;
-        this.marginLeft = marginLeft;
-        this.marginRight = marginRight;
-        this.marginTop = marginTop;
-        this.marginBottom = marginBottom;
-    }
-    
-    // listener methods
-
-    /**
-     * Adds a <CODE>DocListener</CODE> to the <CODE>Document</CODE>.
-     *
-     * @param listener
-     *            the new DocListener.
-     */
-    public void addDocListener(DocListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Removes a <CODE>DocListener</CODE> from the <CODE>Document</CODE>.
-     *
-     * @param listener
-     *            the DocListener that has to be removed.
-     */
-    public void removeDocListener(DocListener listener) {
-        listeners.remove(listener);
-    }
-    
-    // methods implementing the DocListener interface
-
-    /**
-     * Adds an <CODE>Element</CODE> to the <CODE>Document</CODE>.
-     *
-     * @param element
-     *            the <CODE>Element</CODE> to add
-     * @return <CODE>true</CODE> if the element was added, <CODE>false
-     *         </CODE> if not
-     * @throws DocumentException
-     *             when a document isn't open yet, or has been closed
-     */
-    public boolean add(Element element) throws DocumentException {
-        if (close) {
-            throw new DocumentException(MessageLocalization.getComposedMessage("the.document.has.been.closed.you.can.t.add.any.elements"));
-        }
-        if (!open && element.isContent()) {
-            throw new DocumentException(MessageLocalization.getComposedMessage("the.document.is.not.open.yet.you.can.only.add.meta.information"));
-        }
-        boolean success = false;
-        for (DocListener listener : listeners) {
-            success |= listener.add(element);
-        }
-        if (element instanceof LargeElement) {
-            LargeElement e = (LargeElement)element;
-            if (!e.isComplete())
-                e.flushContent();
-        }
-        return success;
-    }
-
-    /**
-     * Opens the document.
-     * <P>
-     * Once the document is opened, you can't write any Header- or
-     * Meta-information anymore. You have to open the document before you can
-     * begin to add content to the body of the document.
-     */
-    public void open() {
-        if (!close) {
-            open = true;
-        }
-        for (DocListener listener : listeners) {
-            listener.setPageSize(pageSize);
-            listener.setMargins(marginLeft, marginRight, marginTop,
-                    marginBottom);
-            listener.open();
-        }
-    }
-    
-    /**
- * Sets the pagesize.
- *
-     * @param pageSize
-     *            the new pagesize
- * @return    a <CODE>boolean</CODE>
- */
-    public boolean setPageSize(Rectangle pageSize) {
-        this.pageSize = pageSize;
-        for (DocListener listener : listeners) {
-            listener.setPageSize(pageSize);
-        }
-        return true;
-    }
-    
-    /**
- * Sets the margins.
- *
-     * @param marginLeft
-     *            the margin on the left
-     * @param marginRight
-     *            the margin on the right
-     * @param marginTop
-     *            the margin on the top
-     * @param marginBottom
-     *            the margin on the bottom
- * @return    a <CODE>boolean</CODE>
- */
-    public boolean setMargins(float marginLeft, float marginRight,
-            float marginTop, float marginBottom) {
-        this.marginLeft = marginLeft;
-        this.marginRight = marginRight;
-        this.marginTop = marginTop;
-        this.marginBottom = marginBottom;
-        for (DocListener listener : listeners) {
-            listener.setMargins(marginLeft, marginRight, marginTop,
-                    marginBottom);
-        }
-        return true;
-    }
-    
-    /**
- * Signals that an new page has to be started.
- *
-     * @return <CODE>true</CODE> if the page was added, <CODE>false</CODE>
-     *         if not.
- */
-    public boolean newPage() {
-        if (!open || close) {
-            return false;
-        }
-        for (DocListener listener : listeners) {
-            listener.newPage();
-        }
-        return true;
-    }
-
-    /**
-     * Sets the page number to 0.
-     */
-    public void resetPageCount() {
-        pageN = 0;
-        for (DocListener listener : listeners) {
-            listener.resetPageCount();
-        }
-    }
-
-    /**
-     * Sets the page number.
-     *
-     * @param pageN the new page number
-     */
-    public void setPageCount(int pageN) {
-        this.pageN = pageN;
-        for (DocListener listener : listeners) {
-            listener.setPageCount(pageN);
-        }
-    }
-
-    /**
-     * Returns the current page number.
-     *
-     * @return the current page number
-     */
-    public int getPageNumber() {
-        return this.pageN;
-    }
-
-    /**
-     * Closes the document.
-     * <p>
-     * Once all the content has been written in the body, you have to close the
-     * body. After that nothing can be written to the body anymore.
-     */
-    @Override
-    public void close() {
-        if (!close) {
-            open = false;
-            close = true;
-        }
-        for (DocListener listener : listeners) {
-            listener.close();
-        }
-    }
-
-    // methods concerning the header or some meta information
-
-    // methods to get the layout of the document.
-    
-    /**
- * Returns the left margin.
- *
- * @return    the left margin
- */
-    
-    public float leftMargin() {
-        return marginLeft;
-    }
-    
-    /**
- * Return the right margin.
- *
- * @return    the right margin
- */
-    
-    public float rightMargin() {
-        return marginRight;
-    }
-    
-    /**
- * Returns the top margin.
- *
- * @return    the top margin
- */
-    
-    public float topMargin() {
-        return marginTop;
-    }
-    
-    /**
- * Returns the bottom margin.
- *
- * @return    the bottom margin
- */
-    
-    public float bottomMargin() {
-        return marginBottom;
-    }
-    
-    /**
- * Returns the lower left x-coordinate.
- *
- * @return    the lower left x-coordinate
- */
-    
-    public float left() {
-        return pageSize.getLeft(marginLeft);
-    }
-    
-    /**
- * Returns the upper right x-coordinate.
- *
- * @return    the upper right x-coordinate
- */
-    
-    public float right() {
-        return pageSize.getRight(marginRight);
-    }
-    
-    /**
- * Returns the upper right y-coordinate.
- *
- * @return    the upper right y-coordinate
- */
-    
-    public float top() {
-        return pageSize.getTop(marginTop);
-    }
-    
-    /**
- * Returns the lower left y-coordinate.
- *
- * @return    the lower left y-coordinate
- */
-    
-    public float bottom() {
-        return pageSize.getBottom(marginBottom);
-    }
-    
-    /**
- * Returns the lower left x-coordinate considering a given margin.
- *
-     * @param margin
-     *            a margin
- * @return    the lower left x-coordinate
- */
-    
-    public float left(float margin) {
-        return pageSize.getLeft(marginLeft + margin);
-    }
-    
-    /**
- * Returns the upper right x-coordinate, considering a given margin.
- *
-     * @param margin
-     *            a margin
- * @return    the upper right x-coordinate
- */
-    
-    public float right(float margin) {
-        return pageSize.getRight(marginRight + margin);
-    }
-    
-    /**
- * Returns the upper right y-coordinate, considering a given margin.
- *
-     * @param margin
-     *            a margin
- * @return    the upper right y-coordinate
- */
-    
-    public float top(float margin) {
-        return pageSize.getTop(marginTop + margin);
-    }
-    
-    /**
- * Returns the lower left y-coordinate, considering a given margin.
- *
-     * @param margin
-     *            a margin
- * @return    the lower left y-coordinate
- */
-    
-    public float bottom(float margin) {
-        return pageSize.getBottom(marginBottom + margin);
-    }
-    
-    /**
- * Gets the pagesize.
-     * 
- * @return the page size
- */
-    
-    public Rectangle getPageSize() {
-        return this.pageSize;
-    }
-    
-    /**
-     * Checks if the document is open.
-     * 
-     * @return <CODE>true</CODE> if the document is open
-     */    
-    public boolean isOpen() {
-        return open;
     }
 
     /**
@@ -566,48 +211,235 @@ public class Document implements AutoCloseable, DocListener {
      * @return iText version
      */
     public static String getVersion() {
-        return OPENPDF_VERSION;
+        return OPEN_PDF_VERSION;
     }
 
     /**
-     * Set the margin mirroring. It will mirror right/left margins for odd/even pages.
-     * <p>
+     * Adds a <CODE>DocListener</CODE> to the <CODE>Document</CODE>.
      *
-     * @param marginMirroring
-     *            <CODE>true</CODE> to mirror the margins
-     * @return always <CODE>true</CODE>
-     */    
-    public boolean setMarginMirroring(boolean marginMirroring) {
-        this.marginMirroring = marginMirroring;
-        for (DocListener listener : listeners) {
-            listener.setMarginMirroring(marginMirroring);
-        }
-        return true;
+     * @param listener the new DocListener.
+     */
+    public void addDocListener(DocListener listener) {
+        listeners.add(listener);
     }
-    
+
     /**
-     * Set the margin mirroring. It will mirror top/bottom margins for odd/even pages.
-     * <p>
+     * Adds an <CODE>Element</CODE> to the <CODE>Document</CODE>.
      *
-     * @param marginMirroringTopBottom
-     *            <CODE>true</CODE> to mirror the margins
-     * @return always <CODE>true</CODE>
-     * @since    2.1.6
-     */    
-    public boolean setMarginMirroringTopBottom(boolean marginMirroringTopBottom) {
-        this.marginMirroringTopBottom = marginMirroringTopBottom;
-        for (DocListener listener : listeners) {
-            listener.setMarginMirroringTopBottom(marginMirroringTopBottom);
+     * @param element the <CODE>Element</CODE> to add
+     * @return <CODE>true</CODE> if the element was added, <CODE>false
+     * </CODE> if not
+     * @throws DocumentException when a document isn't open yet, or has been closed
+     */
+    public boolean add(Element element) throws DocumentException {
+        if (close) {
+            throw new DocumentException(MessageLocalization
+                    .getComposedMessage("the.document.has.been.closed.you.can.t.add.any.elements"));
         }
-        return true;
+        if (!open && element.isContent()) {
+            throw new DocumentException(MessageLocalization.getComposedMessage(
+                    "the.document.is.not.open.yet.you.can.only.add.meta.information"));
+        }
+        boolean success = false;
+        for (DocListener listener : listeners) {
+            success |= listener.add(element);
+        }
+        if (element instanceof LargeElement) {
+            LargeElement e = (LargeElement) element;
+            if (!e.isComplete()) {
+                e.flushContent();
+            }
+        }
+        return success;
     }
-    
+
     /**
-     * Gets the margin mirroring flag.
-     * 
-     * @return the margin mirroring flag
-     */    
-    public boolean isMarginMirroring() {
-        return marginMirroring;
+     * Opens the document.
+     * <p>
+     * Once the document is opened, you can't write any Header- or Meta-information anymore. You
+     * have to open the document before you can begin to add content to the body of the document.
+     */
+    public void open() {
+        if (!close) {
+            open = true;
+        }
+        for (DocListener listener : listeners) {
+            listener.setPageSize(pageSize);
+            listener.setMargins(marginLeft, marginRight, marginTop,
+                    marginBottom);
+            listener.open();
+        }
     }
+
+    /**
+     * Sets the margins.
+     *
+     * @param marginLeft   the margin on the left
+     * @param marginRight  the margin on the right
+     * @param marginTop    the margin on the top
+     * @param marginBottom the margin on the bottom
+     */
+    public void setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom) {
+        this.marginLeft = marginLeft;
+        this.marginRight = marginRight;
+        this.marginTop = marginTop;
+        this.marginBottom = marginBottom;
+        for (DocListener listener : listeners) {
+            listener.setMargins(marginLeft, marginRight, marginTop, marginBottom);
+        }
+    }
+
+    /**
+     * Signals that an new page has to be started.
+     */
+    public void newPage() {
+        if (!open || close) {
+            return;
+        }
+        for (DocListener listener : listeners) {
+            listener.newPage();
+        }
+    }
+
+    /**
+     * Returns the current page number.
+     *
+     * @return the current page number
+     */
+    public int getPageNumber() {
+        return this.pageN;
+    }
+
+    /**
+     * Closes the document.
+     * <p>
+     * Once all the content has been written in the body, you have to close the body. After that
+     * nothing can be written to the body anymore.
+     */
+    @Override
+    public void close() {
+        if (!close) {
+            open = false;
+            close = true;
+        }
+        for (DocListener listener : listeners) {
+            listener.close();
+        }
+    }
+
+    /**
+     * Returns the lower left x-coordinate.
+     *
+     * @return the lower left x-coordinate
+     */
+
+    public float left() {
+        return pageSize.getLeft(marginLeft);
+    }
+
+    /**
+     * Returns the upper right x-coordinate.
+     *
+     * @return the upper right x-coordinate
+     */
+
+    public float right() {
+        return pageSize.getRight(marginRight);
+    }
+
+    /**
+     * Returns the upper right y-coordinate.
+     *
+     * @return the upper right y-coordinate
+     */
+
+    public float top() {
+        return pageSize.getTop(marginTop);
+    }
+
+    /**
+     * Returns the lower left y-coordinate.
+     *
+     * @return the lower left y-coordinate
+     */
+
+    public float bottom() {
+        return pageSize.getBottom(marginBottom);
+    }
+
+    /**
+     * Returns the lower left x-coordinate considering a given margin.
+     *
+     * @param margin a margin
+     * @return the lower left x-coordinate
+     */
+
+    public float left(float margin) {
+        return pageSize.getLeft(marginLeft + margin);
+    }
+
+    /**
+     * Returns the upper right x-coordinate, considering a given margin.
+     *
+     * @param margin a margin
+     * @return the upper right x-coordinate
+     */
+
+    public float right(float margin) {
+        return pageSize.getRight(marginRight + margin);
+    }
+
+    /**
+     * Returns the upper right y-coordinate, considering a given margin.
+     *
+     * @param margin a margin
+     * @return the upper right y-coordinate
+     */
+
+    public float top(float margin) {
+        return pageSize.getTop(marginTop + margin);
+    }
+
+    /**
+     * Returns the lower left y-coordinate, considering a given margin.
+     *
+     * @param margin a margin
+     * @return the lower left y-coordinate
+     */
+
+    public float bottom(float margin) {
+        return pageSize.getBottom(marginBottom + margin);
+    }
+
+    /**
+     * Gets the pagesize.
+     *
+     * @return the page size
+     */
+
+    public Rectangle getPageSize() {
+        return this.pageSize;
+    }
+
+    /**
+     * Sets the pagesize.
+     *
+     * @param pageSize the new pagesize
+     */
+    public void setPageSize(Rectangle pageSize) {
+        this.pageSize = pageSize;
+        for (DocListener listener : listeners) {
+            listener.setPageSize(pageSize);
+        }
+    }
+
+    /**
+     * Checks if the document is open.
+     *
+     * @return <CODE>true</CODE> if the document is open
+     */
+    public boolean isOpen() {
+        return open;
+    }
+
 }

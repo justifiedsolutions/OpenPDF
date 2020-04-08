@@ -200,15 +200,7 @@ public class PdfOutline extends PdfDictionary {
         }
         return destination.addPage(pageReference);
     }
-    
-    /**
-     * Gets the destination for this outline.
-     * @return the destination
-     */
-    public PdfDestination getPdfDestination() {
-        return destination;
-    }
-    
+
     int getCount() {
         return count;
     }

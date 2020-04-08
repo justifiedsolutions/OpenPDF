@@ -333,9 +333,6 @@ public class PdfDocument extends Document {
      * @throws DocumentException when a document isn't open yet, or has been closed
      */
     public boolean add(Element element) throws DocumentException {
-        if (writer != null && writer.isPaused()) {
-            return false;
-        }
         try {
             switch(element.type()) {
                 // Information (headers)
@@ -638,13 +635,12 @@ public class PdfDocument extends Document {
     /**
      * Makes a new page and sends it to the <CODE>PdfWriter</CODE>.
      *
-     * @return a <CODE>boolean</CODE>
      */
-    public boolean newPage() {
+    public void newPage() {
         lastElementType = -1;
         if (isPageEmpty()) {
             setNewPageSizeAndMargins();
-            return false;
+            return;
         }
         if (!open || close) {
             throw new RuntimeException(MessageLocalization.getComposedMessage("the.document.is.not.open"));
@@ -740,7 +736,6 @@ public class PdfDocument extends Document {
             // maybe this never happens, but it's better to check.
             throw new ExceptionConverter(de);
         }
-        return true;
     }
 
 //    [L4] DocListener interface
@@ -749,14 +744,9 @@ public class PdfDocument extends Document {
      * Sets the pagesize.
      *
      * @param pageSize the new pagesize
-     * @return <CODE>true</CODE> if the page size was set
      */
-    public boolean setPageSize(Rectangle pageSize) {
-        if (writer != null && writer.isPaused()) {
-            return false;
-        }
+    public void setPageSize(Rectangle pageSize) {
         nextPageSize = new Rectangle(pageSize);
-        return true;
     }
 
 //    [L5] DocListener interface
@@ -780,68 +770,13 @@ public class PdfDocument extends Document {
      * @param    marginRight        the margin on the right
      * @param    marginTop        the margin on the top
      * @param    marginBottom    the margin on the bottom
-     * @return    a <CODE>boolean</CODE>
      */
-    public boolean setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom) {
-        if (writer != null && writer.isPaused()) {
-            return false;
-        }
+    public void setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom) {
         nextMarginLeft = marginLeft;
         nextMarginRight = marginRight;
         nextMarginTop = marginTop;
         nextMarginBottom = marginBottom;
-        return true;
     }
-
-//    [L6] DocListener interface
-
-    /**
-     * @see DocListener#setMarginMirroring(boolean)
-     */
-    public boolean setMarginMirroring(boolean MarginMirroring) {
-        if (writer != null && writer.isPaused()) {
-            return false;
-        }
-        return super.setMarginMirroring(MarginMirroring);
-    }
-
-    /**
-     * @see DocListener#setMarginMirroring(boolean)
-     * @since    2.1.6
-     */
-    public boolean setMarginMirroringTopBottom(boolean MarginMirroringTopBottom) {
-        if (writer != null && writer.isPaused()) {
-            return false;
-        }
-        return super.setMarginMirroringTopBottom(MarginMirroringTopBottom);
-    }
-
-//    [L7] DocListener interface
-
-    /**
-     * Sets the page number.
-     *
-     * @param    pageN        the new page number
-     */
-    public void setPageCount(int pageN) {
-        if (writer != null && writer.isPaused()) {
-            return;
-        }
-        super.setPageCount(pageN);
-    }
-
-//    [L8] DocListener interface
-
-    /**
-     * Sets the page number to 0.
-     */
-    public void resetPageCount() {
-        if (writer != null && writer.isPaused()) {
-            return;
-        }
-        super.resetPageCount();
-    }
-
 
 // DOCLISTENER METHODS END
 
@@ -1093,9 +1028,10 @@ public class PdfDocument extends Document {
             glueWidth = line.widthLeft() / separatorCount;
         }
         else if (isJustified) {
-            if (line.isNewlineSplit() && line.widthLeft() >= (lastBaseFactor * (ratio * numberOfSpaces + lineLen - 1))) {
+            final float calc = lastBaseFactor * (ratio * numberOfSpaces + lineLen - 1);
+            if (line.isNewlineSplit() && line.widthLeft() >= calc) {
                 if (line.isRTL()) {
-                    text.moveText(line.widthLeft() - lastBaseFactor * (ratio * numberOfSpaces + lineLen - 1), 0);
+                    text.moveText(line.widthLeft() - calc, 0);
                 }
                 baseWordSpacing = ratio * lastBaseFactor;
                 baseCharacterSpacing = lastBaseFactor;
@@ -1530,15 +1466,6 @@ public class PdfDocument extends Document {
     /** This is the current <CODE>PdfOutline</CODE> in the hierarchy of outlines. */
     protected PdfOutline currentOutline;
 
-    /**
-     * Gets the root outline. All the outlines must be created with a parent.
-     * The first level is created with this outline.
-     * @return the root outline
-     */
-    public PdfOutline getRootOutline() {
-        return rootOutline;
-    }
-
 
     /**
      * Updates the count in the outlines.
@@ -1659,15 +1586,7 @@ public class PdfDocument extends Document {
 
     protected int markPoint;
 
-    int getMarkPoint() {
-        return markPoint;
-    }
-
-    void incMarkPoint() {
-        ++markPoint;
-    }
-
-//    [U1] page sizes
+    //    [U1] page sizes
 
     /** This is the size of the next page. */
     protected Rectangle nextPageSize = null;
@@ -1681,22 +1600,10 @@ public class PdfDocument extends Document {
 
     protected void setNewPageSizeAndMargins() {
         pageSize = nextPageSize;
-        if (marginMirroring && (getPageNumber() & 1) == 0) {
-            marginRight = nextMarginLeft;
-            marginLeft = nextMarginRight;
-        }
-        else {
-            marginLeft = nextMarginLeft;
-            marginRight = nextMarginRight;
-        }
-        if (marginMirroringTopBottom && (getPageNumber() & 1) == 0) {
-            marginTop = nextMarginBottom;
-            marginBottom = nextMarginTop;
-        }
-        else {
-            marginTop = nextMarginTop;
-            marginBottom = nextMarginBottom;
-        }
+        marginLeft = nextMarginLeft;
+        marginRight = nextMarginRight;
+        marginTop = nextMarginTop;
+        marginBottom = nextMarginBottom;
     }
 
     //    [U2] empty pages
@@ -1705,7 +1612,7 @@ public class PdfDocument extends Document {
     private boolean pageEmpty = true;
 
     boolean isPageEmpty() {
-        return writer == null || (writer.getDirectContent().size() == 0 && writer.getDirectContentUnder().size() == 0 && (pageEmpty || writer.isPaused()));
+        return writer == null || (writer.getDirectContent().size() == 0 && writer.getDirectContentUnder().size() == 0 && pageEmpty);
     }
 
 //    [U3] page actions

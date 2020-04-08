@@ -52,8 +52,6 @@ package com.justifiedsolutions.openpdf.text;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.Properties;
 
 import com.justifiedsolutions.openpdf.text.pdf.OutputStreamCounter;
 
@@ -76,16 +74,7 @@ import com.justifiedsolutions.openpdf.text.pdf.OutputStreamCounter;
 
 public abstract class DocWriter implements DocListener {
 
-/** This is some byte that is often used. */
-    public static final byte NEWLINE = (byte)'\n';
-
-/** This is some byte that is often used. */
-    public static final byte TAB = (byte)'\t';
-
-/** This is some byte that is often used. */
-    public static final byte LT = (byte)'<';
-
-/** This is some byte that is often used. */
+    /** This is some byte that is often used. */
     public static final byte SPACE = (byte)' ';
 
 /** This is some byte that is often used. */
@@ -94,13 +83,7 @@ public abstract class DocWriter implements DocListener {
 /** This is some byte that is often used. */
     public static final byte QUOTE = (byte)'\"';
 
-/** This is some byte that is often used. */
-    public static final byte GT = (byte)'>';
-
-/** This is some byte that is often used. */
-    public static final byte FORWARD = (byte)'/';
-
-    // membervariables
+// membervariables
 
 /** The pageSize. */
     protected Rectangle pageSize;
@@ -114,10 +97,7 @@ public abstract class DocWriter implements DocListener {
 /** Is the writer open for writing? */
     protected boolean open = false;
 
-/** Do we have to pause all writing actions? */
-    protected boolean pause = false;
-    
-/** Closes the stream on document close */
+    /** Closes the stream on document close */
     protected boolean closeStream = true;
 
     // constructor
@@ -166,12 +146,10 @@ public abstract class DocWriter implements DocListener {
  * Sets the pagesize.
  *
  * @param pageSize  the new pagesize
- * @return  a <CODE>boolean</CODE>
  */
 
-    public boolean setPageSize(Rectangle pageSize) {
+    public void setPageSize(Rectangle pageSize) {
         this.pageSize = pageSize;
-        return true;
     }
 
 /**
@@ -183,11 +161,9 @@ public abstract class DocWriter implements DocListener {
  * @param marginRight   the margin on the right
  * @param marginTop   the margin on the top
  * @param marginBottom  the margin on the bottom
- * @return  <CODE>false</CODE>
  */
 
-    public boolean setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom) {
-        return false;
+    public void setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom) {
     }
 
 /**
@@ -195,38 +171,12 @@ public abstract class DocWriter implements DocListener {
  * <P>
  * This does nothing. Has to be overridden if needed.
  *
- * @return  <CODE>true</CODE> if the page was added, <CODE>false</CODE> if not.
  */
 
-    public boolean newPage() {
-        return open;
+    public void newPage() {
     }
 
-/**
- * Sets the page number to 0.
- * <P>
- * This method should be overridden in the specific <CODE>DocWriter<CODE> classes
- * derived from this abstract class if they actually support the use of
- * pagenumbers.
- */
-
-    public void resetPageCount() {
-    }
-
-/**
- * Sets the page number.
- * <P>
- * This method should be overridden in the specific <CODE>DocWriter<CODE> classes
- * derived from this abstract class if they actually support the use of
- * pagenumbers.
- *
- * @param pageN   the new page number
- */
-
-    public void setPageCount(int pageN) {
-    }
-
-/**
+    /**
  * Signals that the <CODE>Document</CODE> was closed and that no other
  * <CODE>Elements</CODE> will be added.
  */
@@ -254,7 +204,7 @@ public abstract class DocWriter implements DocListener {
  * @return the conversion result
  */
 
-    public static final byte[] getISOBytes(String text)
+    public static byte[] getISOBytes(String text)
     {
         if (text == null)
             return null;
@@ -265,46 +215,7 @@ public abstract class DocWriter implements DocListener {
         return b;
     }
 
-/**
- * Let the writer know that all writing has to be paused.
- */
-
-    public void pause() {
-        pause = true;
-    }
-    
     /**
-     * Checks if writing is paused.
-     *
-     * @return        <CODE>true</CODE> if writing temporarily has to be paused, <CODE>false</CODE> otherwise.
-     */
-    
-    public boolean isPaused() {
-        return pause;
-    }
-
-/**
- * Let the writer know that writing may be resumed.
- */
-
-    public void resume() {
-        pause = false;
-    }
-
-/**
- * Flushes the <CODE>BufferedOutputStream</CODE>.
- */
-
-    public void flush() {
-        try {
-            os.flush();
-        }
-        catch(IOException ioe) {
-            throw new ExceptionConverter(ioe);
-        }
-    }
-
-/**
  * Writes a <CODE>String</CODE> to the <CODE>OutputStream</CODE>.
  *
  * @param string    the <CODE>String</CODE> to write
@@ -315,21 +226,7 @@ public abstract class DocWriter implements DocListener {
         os.write(getISOBytes(string));
     }
 
-/**
- * Writes a number of tabs.
- *
- * @param   indent  the number of tabs to add
- * @throws IOException
- */
-
-    protected void addTabs(int indent) throws IOException {
-        os.write(NEWLINE);
-        for (int i = 0; i < indent; i++) {
-            os.write(TAB);
-        }
-    }
-
-/**
+    /**
  * Writes a key-value pair to the outputstream.
  *
  * @param   key     the name of an attribute
@@ -347,66 +244,6 @@ public abstract class DocWriter implements DocListener {
         os.write(QUOTE);
     }
 
-/**
- * Writes a starttag to the outputstream.
- *
- * @param   tag     the name of the tag
- * @throws IOException
- */
-
-    protected void writeStart(String tag)
-    throws IOException {
-        os.write(LT);
-        write(tag);
-    }
-
-/**
- * Writes an endtag to the outputstream.
- *
- * @param   tag     the name of the tag
- * @throws IOException
- */
-
-    protected void writeEnd(String tag)
-    throws IOException {
-        os.write(LT);
-        os.write(FORWARD);
-        write(tag);
-        os.write(GT);
-    }
-
-/**
- * Writes an endtag to the outputstream.
- * @throws IOException
- */
-
-    protected void writeEnd()
-    throws IOException {
-        os.write(SPACE);
-        os.write(FORWARD);
-        os.write(GT);
-    }
-
-/**
- * Writes the markup attributes of the specified <CODE>MarkupAttributes</CODE>
- * object to the <CODE>OutputStream</CODE>.
- * @param markup   a <CODE>Properties</CODE> collection to write.
- * @return true, if writing the markup attributes succeeded
- * @throws IOException
- */
-    protected boolean writeMarkupAttributes(Properties markup)
-    throws IOException {
-        if (markup == null) return false;
-        Iterator attributeIterator = markup.keySet().iterator();
-        String name;
-        while (attributeIterator.hasNext()) {
-            name = String.valueOf(attributeIterator.next());
-            write(name, markup.getProperty(name));
-        }
-        markup.clear();
-        return true;
-    }
-
     /** Checks if the stream is to be closed on document close
      * @return true if the stream is closed on document close
      *
@@ -414,28 +251,5 @@ public abstract class DocWriter implements DocListener {
     public boolean isCloseStream() {
         return closeStream;
     }
-    
-    /** Sets the close state of the stream after document close
-     * @param closeStream true if the stream is closed on document close
-     *
-     */
-    public void setCloseStream(boolean closeStream) {
-        this.closeStream = closeStream;
-    }
-    
-    /**
-     * @see DocListener#setMarginMirroring(boolean)
-     */
-    public boolean setMarginMirroring(boolean MarginMirroring) {
-        return false;
-    }
-    
-    /**
-     * @see DocListener#setMarginMirroring(boolean)
-     * @since    2.1.6
-     */
-    public boolean setMarginMirroringTopBottom(boolean MarginMirroring) {
-        return false;
-    }
-    
+
 }
