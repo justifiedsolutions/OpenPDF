@@ -54,7 +54,6 @@ import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.events.PdfPageEventForwarder;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfVersionImp;
