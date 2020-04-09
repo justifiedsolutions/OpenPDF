@@ -49,9 +49,9 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.io.IOException;
-import com.justifiedsolutions.openpdf.text.exceptions.InvalidPdfException;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.exceptions.InvalidPdfException;
+import java.io.IOException;
 /**
  *
  * @author  Paulo Soares (psoares@consiste.pt)
@@ -106,19 +106,11 @@ public class PRTokeniser {
     protected int reference;
     protected int generation;
     protected boolean hexString;
-       
-    public PRTokeniser(String filename) throws IOException {
-        file = new RandomAccessFileOrArray(filename);
-    }
 
     public PRTokeniser(byte[] pdfIn) {
         file = new RandomAccessFileOrArray(pdfIn);
     }
-    
-    public PRTokeniser(RandomAccessFileOrArray file) {
-        this.file = file;
-    }
-    
+
     public void seek(int pos) throws IOException {
         file.seek(pos);
     }
@@ -159,16 +151,8 @@ public class PRTokeniser {
         return buf.toString();
     }
 
-    public static final boolean isWhitespace(int ch) {
+    public static boolean isWhitespace(int ch) {
         return (ch == 0 || ch == 9 || ch == 10 || ch == 12 || ch == 13 || ch == 32);
-    }
-    
-    public static final boolean isDelimiter(int ch) {
-        return (ch == '(' || ch == ')' || ch == '<' || ch == '>' || ch == '[' || ch == ']' || ch == '/' || ch == '%');
-    }
-
-    public static final boolean isDelimiterWhitespace(int ch) {
-        return delims[ch + 1];
     }
 
     public int getTokenType() {
@@ -194,36 +178,6 @@ public class PRTokeniser {
     
     public void throwError(String error) throws IOException {
         throw new InvalidPdfException(MessageLocalization.getComposedMessage("1.at.file.pointer.2", error, String.valueOf(file.getFilePointer())));
-    }
-    
-    public char checkPdfHeader() throws IOException {
-        file.setStartOffset(0);
-        String str = readString(1024);
-        int idx = str.indexOf("%PDF-");
-        if (idx < 0)
-            throw new InvalidPdfException(MessageLocalization.getComposedMessage("pdf.header.not.found"));
-        file.setStartOffset(idx);
-        return str.charAt(idx + 7);
-    }
-    
-    public void checkFdfHeader() throws IOException {
-        file.setStartOffset(0);
-        String str = readString(1024);
-        int idx = str.indexOf("%FDF-1.2");
-        if (idx < 0)
-            throw new InvalidPdfException(MessageLocalization.getComposedMessage("fdf.header.not.found"));
-        file.setStartOffset(idx);
-    }
-
-    public int getStartxref() throws IOException {
-        int size = Math.min(1024, file.length());
-        int pos = file.length() - size;
-        file.seek(pos);
-        String str = readString(1024);
-        int idx = str.lastIndexOf("startxref");
-        if (idx < 0)
-            throw new InvalidPdfException(MessageLocalization.getComposedMessage("pdf.startxref.not.found"));
-        return pos + idx;
     }
 
     public static int getHex(int v) {
@@ -522,14 +476,14 @@ public class PRTokeniser {
         boolean eol = false;
         int ptr = 0;
         int len = input.length;
-    // ssteward, pdftk-1.10, 040922: 
-    // skip initial whitespace; added this because PdfReader.rebuildXref()
-    // assumes that line provided by readLineSegment does not have init. whitespace;
-    if ( ptr < len ) {
-        while ( isWhitespace( (c = read()) ) );
-    }
-    while ( !eol && ptr < len ) {
-        switch (c) {
+        // ssteward, pdftk-1.10, 040922:
+        // skip initial whitespace; added this because PdfReader.rebuildXref()
+        // assumes that line provided by readLineSegment does not have init. whitespace;
+        if (ptr < len) {
+            while (isWhitespace((c = read())));
+        }
+        while (ptr < len) {
+            switch (c) {
                 case -1:
                 case '\n':
                     eol = true;
@@ -542,17 +496,16 @@ public class PRTokeniser {
                     }
                     break;
                 default:
-                    input[ptr++] = (byte)c;
+                    input[ptr++] = (byte) c;
                     break;
             }
 
-        // break loop? do it before we read() again
-        if( eol || len <= ptr ) {
-        break;
-        }
-        else {
-        c = read();
-        }
+            // break loop? do it before we read() again
+            if (eol || len <= ptr) {
+                break;
+            } else {
+                c = read();
+            }
         }
         if (ptr >= len) {
             eol = false;
@@ -572,40 +525,17 @@ public class PRTokeniser {
                 }
             }
         }
-        
+
         if ((c == -1) && (ptr == 0)) {
             return false;
         }
         if (ptr + 2 <= len) {
-            input[ptr++] = (byte)' ';
-            input[ptr] = (byte)'X';
+            input[ptr++] = (byte) ' ';
+            input[ptr] = (byte) 'X';
         }
         return true;
     }
-    
-    public static int[] checkObjectStart(byte[] line) {
-        try {
-            PRTokeniser tk = new PRTokeniser(line);
-            int num = 0;
-            int gen = 0;
-            if (!tk.nextToken() || tk.getTokenType() != TK_NUMBER)
-                return null;
-            num = tk.intValue();
-            if (!tk.nextToken() || tk.getTokenType() != TK_NUMBER)
-                return null;
-            gen = tk.intValue();
-            if (!tk.nextToken())
-                return null;
-            if (!tk.getStringValue().equals("obj"))
-                return null;
-            return new int[]{num, gen};
-        }
-        catch (Exception ioe) {
-            // empty on purpose
-        }
-        return null;
-    }
-    
+
     public boolean isHexString() {
         return this.hexString;
     }
