@@ -49,16 +49,13 @@
 
 package com.justifiedsolutions.openpdf.text.pdf.internal;
 
-import java.awt.Color;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
 import com.justifiedsolutions.openpdf.text.pdf.ExtendedColor;
 import com.justifiedsolutions.openpdf.text.pdf.PatternColor;
 import com.justifiedsolutions.openpdf.text.pdf.PdfArray;
 import com.justifiedsolutions.openpdf.text.pdf.PdfDictionary;
 import com.justifiedsolutions.openpdf.text.pdf.PdfGState;
-import com.justifiedsolutions.openpdf.text.pdf.PdfImage;
 import com.justifiedsolutions.openpdf.text.pdf.PdfName;
 import com.justifiedsolutions.openpdf.text.pdf.PdfNumber;
 import com.justifiedsolutions.openpdf.text.pdf.PdfObject;
@@ -68,6 +65,7 @@ import com.justifiedsolutions.openpdf.text.pdf.PdfXConformanceException;
 import com.justifiedsolutions.openpdf.text.pdf.ShadingColor;
 import com.justifiedsolutions.openpdf.text.pdf.SpotColor;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
+import java.awt.Color;
 
 public class PdfXConformanceImp implements PdfXConformance {
 
@@ -215,26 +213,6 @@ public class PdfXConformanceImp implements PdfXConformance {
             case PDFXKEY_FONT:
                 if (!((BaseFont)obj1).isEmbedded())
                     throw new PdfXConformanceException(MessageLocalization.getComposedMessage("all.the.fonts.must.be.embedded.this.one.isn.t.1", ((BaseFont)obj1).getPostscriptFontName()));
-                break;
-            case PDFXKEY_IMAGE:
-                PdfImage image = (PdfImage)obj1;
-                if (image.get(PdfName.SMASK) != null)
-                    throw new PdfXConformanceException(MessageLocalization.getComposedMessage("the.smask.key.is.not.allowed.in.images"));
-                switch (conf) {
-                    case PdfWriter.PDFX1A2001:
-                        PdfObject cs = image.get(PdfName.COLORSPACE);
-                        if (cs == null)
-                            return;
-                        if (cs.isName()) {
-                            if (PdfName.DEVICERGB.equals(cs))
-                                throw new PdfXConformanceException(MessageLocalization.getComposedMessage("colorspace.rgb.is.not.allowed"));
-                        }
-                        else if (cs.isArray()) {
-                            if (PdfName.CALRGB.equals(((PdfArray)cs).getPdfObject(0)))
-                                throw new PdfXConformanceException(MessageLocalization.getComposedMessage("colorspace.calrgb.is.not.allowed"));
-                        }
-                        break;
-                }
                 break;
             case PDFXKEY_GSTATE:
                 PdfDictionary gs = (PdfDictionary)obj1;

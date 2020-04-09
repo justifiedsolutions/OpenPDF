@@ -48,12 +48,11 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Chunk;
+import com.justifiedsolutions.openpdf.text.Utilities;
 import java.text.Bidi;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.Utilities;
 
 /** Does all the line bidirectional processing with PdfChunk assembly.
  *
@@ -480,7 +479,7 @@ public class BidiLine {
             ck = detailChunks[idx];
             if (PdfChunk.noPrint(ck.getUnicodeEquivalent(c)))
                 continue;
-            if (ck.isImage() || ck.isSeparator() || ck.isTab()) {
+            if (ck.isSeparator() || ck.isTab()) {
                 if (buf.length() > 0) {
                     ar.add(new PdfChunk(buf.toString(), refCk));
                     buf = new StringBuffer();
@@ -495,7 +494,7 @@ public class BidiLine {
                     ar.add(new PdfChunk(buf.toString(), refCk));
                     buf = new StringBuffer();
                 }
-                if (!ck.isImage() && !ck.isSeparator() && !ck.isTab())
+                if (!ck.isSeparator() && !ck.isTab())
                     buf.append(c);
                 refCk = ck;
             }

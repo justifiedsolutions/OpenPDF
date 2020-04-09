@@ -53,11 +53,9 @@ import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHori
 import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
 
 import com.justifiedsolutions.openpdf.pdf.content.Cell.Border;
-import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
@@ -131,11 +129,6 @@ public class PdfPCell extends Rectangle {
     private int rowspan = 1;
 
     /**
-     * Holds value of property image.
-     */
-    private Image image;
-
-    /**
      * Holds value of property cellEvent.
      */
     private PdfPCellEvent cellEvent;
@@ -184,28 +177,6 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Constructs a <CODE>PdfPCell</CODE> with an <CODE>Image</CODE>. The default padding is 0.25
-     * for a border width of 0.5.
-     *
-     * @param image the <CODE>Image</CODE>
-     * @param fit   <CODE>true</CODE> to fit the image to the cell
-     */
-    public PdfPCell(Image image, boolean fit) {
-        super(0, 0, 0, 0);
-        borderWidth = 0.5f;
-        border = BOX;
-        if (fit) {
-            this.image = image;
-            column.setLeading(0, 1);
-            setPadding(borderWidth / 2);
-        } else {
-            column.addText(this.phrase = new Phrase(new Chunk(image, 0, 0)));
-            column.setLeading(0, 1);
-            setPadding(0);
-        }
-    }
-
-    /**
      * Constructs a deep copy of a <CODE>PdfPCell</CODE>.
      *
      * @param cell the <CODE>PdfPCell</CODE> to duplicate
@@ -227,7 +198,6 @@ public class PdfPCell extends Rectangle {
         if (cell.table != null) {
             table = new PdfPTable(cell.table);
         }
-        image = Image.getInstance(cell.image);
         cellEvent = cell.cellEvent;
         useDescender = cell.useDescender;
         column = ColumnText.duplicate(cell.column);
@@ -264,7 +234,6 @@ public class PdfPCell extends Rectangle {
      */
     public void setPhrase(Phrase phrase) {
         table = null;
-        image = null;
         column.setText(this.phrase = phrase);
     }
 
@@ -603,25 +572,6 @@ public class PdfPCell extends Rectangle {
         return column.getRunDirection();
     }
 
-    /**
-     * Getter for property image.
-     *
-     * @return Value of property image.
-     */
-    public Image getImage() {
-        return image;
-    }
-
-    /**
-     * Setter for property image.
-     *
-     * @param image New value of property image.
-     */
-    public void setImage(Image image) {
-        column.setText(null);
-        table = null;
-        this.image = image;
-    }
 
     /**
      * Gets the cell event for this cell.
@@ -716,17 +666,6 @@ public class PdfPCell extends Rectangle {
      */
     public float getMaxHeight() {
         boolean pivoted = (getRotation() == 90 || getRotation() == 270);
-        Image img = getImage();
-        if (img != null) {
-            img.scalePercent(100);
-            float refWidth = pivoted ? img.getScaledHeight() : img.getScaledWidth();
-            float scale = (getRight() - getEffectivePaddingRight()
-                    - getEffectivePaddingLeft() - getLeft()) / refWidth;
-            img.scalePercent(scale * 100);
-            float refHeight = pivoted ? img.getScaledWidth() : img.getScaledHeight();
-            setBottom(
-                    getTop() - getEffectivePaddingTop() - getEffectivePaddingBottom() - refHeight);
-        } else {
             if ((pivoted && hasFixedHeight()) || getColumn() == null) {
                 setBottom(getTop() - getFixedHeight());
             } else {
@@ -762,7 +701,7 @@ public class PdfPCell extends Rectangle {
                     setBottom(yLine - getEffectivePaddingBottom());
                 }
             }
-        }
+
         float height = getHeight();
         if (hasFixedHeight()) {
             height = getFixedHeight();

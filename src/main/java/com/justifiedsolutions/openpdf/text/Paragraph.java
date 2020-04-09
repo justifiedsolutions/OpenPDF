@@ -277,7 +277,7 @@ public class Paragraph extends Phrase {
             super.add(o);
             List<Chunk> chunks = getChunks();
             if (!chunks.isEmpty()) {
-                Chunk tmp = ((Chunk) chunks.get(chunks.size() - 1));
+                Chunk tmp = chunks.get(chunks.size() - 1);
                 super.add(new Chunk("\n", tmp.getFont()));
             } else {
                 super.add(Chunk.NEWLINE);
@@ -352,17 +352,6 @@ public class Paragraph extends Phrase {
      */
     public float getMultipliedLeading() {
         return multipliedLeading;
-    }
-
-    /**
-     * Sets the variable leading. The resultant leading will be multipliedLeading*maxFontSize where
-     * maxFontSize is the size of the biggest font in the line.
-     *
-     * @param multipliedLeading the variable leading
-     */
-    public void setMultipliedLeading(float multipliedLeading) {
-        this.leading = 0;
-        this.multipliedLeading = multipliedLeading;
     }
 
     /**

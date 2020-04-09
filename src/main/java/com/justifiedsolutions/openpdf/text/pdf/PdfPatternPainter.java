@@ -46,8 +46,6 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.awt.Color;
@@ -228,15 +226,6 @@ public final class PdfPatternPainter extends PdfTemplate {
     public void resetCMYKColorStroke() {
         checkNoColor();
         super.resetCMYKColorStroke();
-    }
-    
-    /**
-     * @see PdfContentByte#addImage(Image, float, float, float, float, float, float)
-     */
-    public void addImage(Image image, float a, float b, float c, float d, float e, float f) throws DocumentException {
-        if (stencil && !image.isMask())
-            checkNoColor();
-        super.addImage(image, a, b, c, d, e, f);
     }
     
     /**

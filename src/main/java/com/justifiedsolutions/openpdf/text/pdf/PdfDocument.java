@@ -50,13 +50,11 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.DocListener;
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Font;
-import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Meta;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
@@ -69,9 +67,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-
 
 /**
  * <CODE>PdfDocument</CODE> is the class that is used by <CODE>PdfWriter</CODE>
@@ -81,9 +76,6 @@ import java.util.TreeMap;
  * and adds the Pdf representation of every <CODE>Element</CODE> that is
  * added to the <CODE>Document</CODE>.
  *
- * @see        Document
- * @see        DocListener
- * @see        PdfWriter
  * @since    2.0.8 (class was package-private before)
  */
 
@@ -209,50 +201,6 @@ public class PdfDocument extends Document {
             super(CATALOG);
             this.writer = writer;
             put(PdfName.PAGES, pages);
-        }
-
-        /**
-         * Adds the names of the named destinations to the catalog.
-         * @param localDestinations the local destinations
-         * @param documentLevelJS the javascript used in the document
-         * @param documentFileAttachment    the attached files
-         * @param writer the writer the catalog applies to
-         */
-        void addNames(TreeMap<String, Object[]> localDestinations, Map<String, PdfIndirectReference> documentLevelJS, Map<String, PdfIndirectReference> documentFileAttachment, PdfWriter writer) {
-            if (localDestinations.isEmpty() && documentLevelJS.isEmpty() && documentFileAttachment.isEmpty())
-                return;
-            try {
-                PdfDictionary names = new PdfDictionary();
-                if (!localDestinations.isEmpty()) {
-                    PdfArray ar = new PdfArray();
-                    for (Map.Entry<String, Object[]> entry : localDestinations.entrySet()) {
-                        String name = entry.getKey();
-                        Object[] obj = entry.getValue();
-                        if (obj[2] == null) //no destination
-                            continue;
-                        PdfIndirectReference ref = (PdfIndirectReference) obj[1];
-                        ar.add(new PdfString(name, null));
-                        ar.add(ref);
-                    }
-                    if (ar.size() > 0) {
-                        PdfDictionary dests = new PdfDictionary();
-                        dests.put(PdfName.NAMES, ar);
-                        names.put(PdfName.DESTS, writer.addToBody(dests).getIndirectReference());
-                    }
-                }
-                if (!documentLevelJS.isEmpty()) {
-                    PdfDictionary tree = PdfNameTree.writeTree(documentLevelJS, writer);
-                    names.put(PdfName.JAVASCRIPT, writer.addToBody(tree).getIndirectReference());
-                }
-                if (!documentFileAttachment.isEmpty()) {
-                    names.put(PdfName.EMBEDDEDFILES, writer.addToBody(PdfNameTree.writeTree(documentFileAttachment, writer)).getIndirectReference());
-                }
-                if (names.size() > 0)
-                    put(PdfName.NAMES, writer.addToBody(names).getIndirectReference());
-            }
-            catch (IOException e) {
-                throw new ExceptionConverter(e);
-            }
         }
 
 
@@ -534,21 +482,6 @@ public class PdfDocument extends Document {
                     pageEmpty = false;
                     break;
                 }
-                case Element.JPEG:
-                case Element.JPEG2000:
-                case Element.JBIG2:
-                case Element.IMGRAW:
-                case Element.IMGTEMPLATE: {
-                    //carriageReturn(); suggestion by Marc Campforts
-                    add((Image) element);
-                    break;
-                }
-                case Element.YMARK: {
-                    DrawInterface zh = (DrawInterface)element;
-                    zh.draw(graphics, indentLeft(), indentBottom(), indentRight(), indentTop(), indentTop() - currentHeight - (leadingCount > 0 ? leading : 0));
-                    pageEmpty = false;
-                    break;
-                }
                 default:
                     return false;
             }
@@ -610,15 +543,12 @@ public class PdfDocument extends Document {
             return;
         }
         try {
-            boolean wasImage = (imageWait != null);
             newPage();
-            if (imageWait != null || wasImage) newPage();
             PdfPageEvent pageEvent = writer.getPageEvent();
             if (pageEvent != null)
                 pageEvent.onCloseDocument(writer, this);
             super.close();
 
-            writer.addLocalDestinations(localDestinations);
             calculateOutlineCount();
             writeOutlines();
         }
@@ -825,16 +755,6 @@ public class PdfDocument extends Document {
         // we move to the left/top position of the page
         text.moveText(left(), top());
         pageEmpty = true;
-        // if there is an image waiting to be drawn, draw it
-        try {
-            if (imageWait != null) {
-                add(imageWait);
-                imageWait = null;
-            }
-        }
-        catch(Exception e) {
-            throw new ExceptionConverter(e);
-        }
         leading = oldleading;
         alignment = oldAlignment;
         carriageReturn();
@@ -1167,9 +1087,6 @@ public class PdfDocument extends Document {
                         }
                         graphics.setLineWidth(1);
                     }
-                    if (chunk.isAttribute(Chunk.LOCALDESTINATION)) {
-                        localDestination((String)chunk.getAttribute(Chunk.LOCALDESTINATION), new PdfDestination(PdfDestination.XYZ, xMarker, yMarker + chunk.font().size(), 0));
-                    }
                     if (chunk.isAttribute(Chunk.GENERICTAG)) {
                         float subtract = lastBaseFactor;
                         if (nextChunk != null && nextChunk.isAttribute(Chunk.GENERICTAG))
@@ -1196,14 +1113,6 @@ public class PdfDocument extends Document {
                     if (chunk.isAttribute(Chunk.CHAR_SPACING)) {
                         Float cs = (Float) chunk.getAttribute(Chunk.CHAR_SPACING);
                         text.setCharacterSpacing(cs);
-                    }
-                    if (chunk.isImage()) {
-                        Image image = chunk.getImage();
-                        float[] matrix = image.matrix();
-                        matrix[Image.CX] = xMarker + chunk.getImageOffsetX() - matrix[Image.CX];
-                        matrix[Image.CY] = yMarker + chunk.getImageOffsetY() - matrix[Image.CY];
-                        graphics.addImage(image, matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-                        text.moveText(xMarker + lastBaseFactor + image.getScaledWidth() - text.getXTLM(), 0);
                     }
                 }
                 xMarker += width;
@@ -1241,9 +1150,6 @@ public class PdfDocument extends Document {
                 text.setColorFill(color);
             if (rise != 0)
                 text.setTextRise(rise);
-            if (chunk.isImage()) {
-                adjustMatrix = true;
-            }
             else if (chunk.isHorizontalSeparator()) {
                 PdfTextArray array = new PdfTextArray();
                 array.add(-glueWidth * 1000f / chunk.font.size() / hScale);
@@ -1451,10 +1357,6 @@ public class PdfDocument extends Document {
         // [C2] version
         writer.getPdfVersion().addToCatalog(catalog);
 
-
-        // [C5] named objects
-        catalog.addNames(localDestinations, getDocumentLevelJS(), documentFileAttachment, writer);
-
         return catalog;
     }
 
@@ -1538,49 +1440,7 @@ public class PdfDocument extends Document {
         }
     }
 
-//    [C5] named objects: local destinations, javascript, embedded files
 
-    /**
-     * Stores the destinations keyed by name. Value is
-     * <CODE>Object[]{PdfAction,PdfIndirectReference,PdfDestintion}</CODE>.
-     */
-    protected TreeMap<String, Object[]> localDestinations = new TreeMap<>();
-
-    /**
-     * The local destination to where a local goto with the same
-     * name will jump to.
-     * @param name the name of this local destination
-     * @param destination the <CODE>PdfDestination</CODE> with the jump coordinates
-     * @return <CODE>true</CODE> if the local destination was added,
-     * <CODE>false</CODE> if a local destination with the same name
-     * already existed
-     */
-    boolean localDestination(String name, PdfDestination destination) {
-        Object[] obj = localDestinations.get(name);
-        if (obj == null)
-            obj = new Object[3];
-        if (obj[2] != null)
-            return false;
-        obj[2] = destination;
-        localDestinations.put(name, obj);
-        if (!destination.hasPage())
-            destination.addPage(writer.getCurrentPage());
-        return true;
-    }
-
-    protected HashMap<String, PdfIndirectReference> documentLevelJS = new HashMap<>();
-
-    HashMap<String, PdfIndirectReference> getDocumentLevelJS() {
-        return documentLevelJS;
-    }
-
-    protected HashMap<String, PdfIndirectReference> documentFileAttachment = new HashMap<>();
-
-    HashMap<String, PdfIndirectReference> getDocumentFileAttachment() {
-        return documentFileAttachment;
-    }
-
-//    [C6] document level actions
 
 //    [F12] tagged PDF
 
@@ -1646,81 +1506,7 @@ public class PdfDocument extends Document {
     /** This is the position where the image ends. */
     protected float imageEnd = -1;
 
-    /** This is the image that could not be shown on a previous page. */
-    protected Image imageWait = null;
-
-    /**
-     * Adds an image to the document.
-     * @param image the <CODE>Image</CODE> to add
-     * @throws PdfException on error
-     * @throws DocumentException on error
-     */
-
-    protected void add(Image image) throws DocumentException {
-
-        if (image.hasAbsoluteY()) {
-            graphics.addImage(image);
-            pageEmpty = false;
-            return;
-        }
-
-        // if there isn't enough room for the image on this page, save it for the next page
-        if (currentHeight != 0 && indentTop() - currentHeight - image.getScaledHeight() < indentBottom()) {
-            if (!strictImageSequence && imageWait == null) {
-                imageWait = image;
-                return;
-            }
-            newPage();
-            if (currentHeight != 0 && indentTop() - currentHeight - image.getScaledHeight() < indentBottom()) {
-                imageWait = image;
-                return;
-            }
-        }
-        pageEmpty = false;
-        // avoid endless loops
-        if (image == imageWait)
-            imageWait = null;
-        boolean textwrap = (image.getAlignment() & Image.TEXTWRAP) == Image.TEXTWRAP
-        && !((image.getAlignment() & Image.MIDDLE) == Image.MIDDLE);
-        boolean underlying = (image.getAlignment() & Image.UNDERLYING) == Image.UNDERLYING;
-        float diff = leading / 2;
-        if (textwrap) {
-            diff += leading;
-        }
-        float lowerleft = indentTop() - currentHeight - image.getScaledHeight() -diff;
-        float[] mt = image.matrix();
-        float startPosition = indentLeft() - mt[4];
-        if ((image.getAlignment() & Image.RIGHT) == Image.RIGHT) startPosition = indentRight() - image.getScaledWidth() - mt[4];
-        if ((image.getAlignment() & Image.MIDDLE) == Image.MIDDLE) startPosition = indentLeft() + ((indentRight() - indentLeft() - image.getScaledWidth()) / 2) - mt[4];
-        if (image.hasAbsoluteX()) startPosition = image.getAbsoluteX();
-        if (textwrap) {
-            if (imageEnd < 0 || imageEnd < currentHeight + image.getScaledHeight() + diff) {
-                imageEnd = currentHeight + image.getScaledHeight() + diff;
-            }
-            if ((image.getAlignment() & Image.RIGHT) == Image.RIGHT) {
-                // indentation suggested by Pelikan Stephan
-                indentation.imageIndentRight += image.getScaledWidth() + image.getIndentationLeft();
-            }
-            else {
-                // indentation suggested by Pelikan Stephan
-                indentation.imageIndentLeft += image.getScaledWidth() + image.getIndentationRight();
-            }
-        }
-        else {
-            if ((image.getAlignment() & Image.RIGHT) == Image.RIGHT) startPosition -= image.getIndentationRight();
-            else if ((image.getAlignment() & Image.MIDDLE) == Image.MIDDLE) startPosition += image.getIndentationLeft() - image.getIndentationRight();
-            else startPosition += image.getIndentationLeft();
-        }
-        graphics.addImage(image, mt[0], mt[1], mt[2], mt[3], startPosition, lowerleft - mt[5]);
-        if (!(textwrap || underlying)) {
-            currentHeight += image.getScaledHeight() + diff;
-            flushLines();
-            text.moveText(0, - (image.getScaledHeight() + diff));
-            newLine();
-        }
-    }
-
-//    [M4] Adding a PdfPTable
+    //    [M4] Adding a PdfPTable
 
     /** Adds a <CODE>PdfPTable</CODE> to the document.
      * @param ptable the <CODE>PdfPTable</CODE> to be added to the document.

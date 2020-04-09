@@ -53,12 +53,9 @@ import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -363,45 +360,13 @@ public class ColumnText {
     public void addElement(Element element) {
         if (element == null)
             return;
-        if (element instanceof Image) {
-            Image img = (Image)element;
-            PdfPTable t = new PdfPTable(1);
-            float w = img.getWidthPercentage();
-            if (w == 0) {
-                t.setTotalWidth(img.getScaledWidth());
-                t.setLockedWidth(true);
-            }
-            else
-                t.setWidthPercentage(w);
-            t.setSpacingAfter(img.getSpacingAfter());
-            t.setSpacingBefore(img.getSpacingBefore());
-            switch (img.getAlignment()) {
-                case Image.LEFT:
-                    t.setHorizontalAlignment(Element.ALIGN_LEFT);
-                    break;
-                case Image.RIGHT:
-                    t.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                    break;
-                default:
-                    t.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    break;
-            }
-            PdfPCell c = new PdfPCell(img, true);
-            c.setPadding(0);
-            c.setBorder(img.getBorder());
-            c.setBorderColor(img.getBorderColor());
-            c.setBorderWidth(img.getBorderWidth());
-            c.setBackgroundColor(img.getBackgroundColor());
-            t.addCell(c);
-            element = t;
-        }
         if (element.type() == Element.CHUNK) {
             element = new Paragraph((Chunk)element);
         }
         else if (element.type() == Element.PHRASE) {
             element = new Paragraph((Phrase)element);
         }
-        else if (element.type() != Element.PARAGRAPH && element.type() != Element.LIST && element.type() != Element.PTABLE && element.type() != Element.YMARK)
+        else if (element.type() != Element.PARAGRAPH  && element.type() != Element.PTABLE)
             throw new IllegalArgumentException(MessageLocalization.getComposedMessage("element.not.allowed"));
         if (!composite) {
             composite = true;
@@ -1347,13 +1312,6 @@ public class ColumnText {
                     return NO_MORE_COLUMN;
                 }
             }
-            else if (element.type() == Element.YMARK) {
-                if (!simulate) {
-                    DrawInterface zh = (DrawInterface)element;
-                    zh.draw(canvas, leftX, minY, rightX, maxY, yLine);
-                }
-                compositeElements.removeFirst();
-            }
             else
                 compositeElements.removeFirst();
         }
@@ -1393,26 +1351,7 @@ public class ColumnText {
         if (compositeColumn != null)
             compositeColumn.setCanvases(canvases);
     }
-    
-    /**
-     * Gets the canvases.
-     * 
-     * @return an array of PdfContentByte
-     */
-    public PdfContentByte[] getCanvases() {
-        return canvases;
-    }
-    
-    /**
-     * Checks if the element has a height of 0.
-     * 
-     * @return true or false
-     * @since 2.1.2
-     */
-    public boolean zeroHeightElement() {
-        return composite && !compositeElements.isEmpty() && compositeElements.getFirst().type() == Element.YMARK;
-    }
-    
+
     /**
      * Checks if UseAscender is enabled/disabled.
      * 

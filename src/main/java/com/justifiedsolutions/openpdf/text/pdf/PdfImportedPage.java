@@ -48,11 +48,9 @@
  */
 
 package com.justifiedsolutions.openpdf.text.pdf;
-import java.io.IOException;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Image;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.io.IOException;
 
 /** Represents an imported page.
  *
@@ -77,19 +75,6 @@ public class PdfImportedPage extends PdfTemplate {
     }
 
 
-    /** Always throws an error. This operation is not allowed.
-     * @param image dummy
-     * @param a dummy
-     * @param b dummy
-     * @param c dummy
-     * @param d dummy
-     * @param e dummy
-     * @param f dummy
-     * @throws DocumentException  dummy */    
-    public void addImage(Image image, float a, float b, float c, float d, float e, float f) throws DocumentException {
-        throwError();
-    }
-    
     /** Always throws an error. This operation is not allowed.
      * @param template dummy
      * @param a dummy

@@ -165,18 +165,6 @@ public interface Element {
 
     /** This is a possible type of <CODE>Element</CODE>. */
     int MULTI_COLUMN_TEXT = 40;
-    
-    /** This is a possible type of <CODE>Element</CODE>. */
-    int MARKED = 50;
-
-    /** This is a possible type of <CODE>Element</CODE>.
-     * @since 2.1.2
-     */
-    int YMARK = 55;
-
-    /** This is a possible type of <CODE>Element</CODE>.
-     */
-    int FOOTNOTE = 56;
 
     // static membervariables (alignment)
 

@@ -53,7 +53,6 @@ import com.justifiedsolutions.openpdf.text.DocWriter;
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.Image;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.events.PdfPageEventForwarder;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
@@ -71,9 +70,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -660,25 +657,6 @@ public class PdfWriter extends DocWriter implements
 
     /** body of the PDF document */
     protected PdfBody body;
-
-    /**
-     * Adds the local destinations to the body of the document.
-     * @param dest the <CODE>HashMap</CODE> containing the destinations
-     * @throws IOException on error
-     */
-
-    void addLocalDestinations(TreeMap dest) throws IOException {
-        for (Object o : dest.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
-            String name = (String) entry.getKey();
-            Object[] obj = (Object[]) entry.getValue();
-            PdfDestination destination = (PdfDestination) obj[2];
-            if (obj[1] == null)
-                obj[1] = getPdfIndirectReference();
-            addToBody(Objects.requireNonNullElseGet(destination,
-                    () -> new PdfString("invalid_" + name)), (PdfIndirectReference) obj[1]);
-        }
-    }
 
     /**
      * Use this method to add a PDF object to the PDF body.
@@ -1739,127 +1717,8 @@ public class PdfWriter extends DocWriter implements
 
 //  [M3] Images
 
-    /** Dictionary, containing all the images of the PDF document */
-    protected PdfDictionary imageDictionary = new PdfDictionary();
-
     /** This is the list with all the images in the document. */
     private final HashMap<Long, PdfName> images = new HashMap<>();
-
-    /**
-     * Use this method to adds an image to the document
-     * but not to the page resources. It is used with
-     * templates and <CODE>Document.add(Image)</CODE>.
-     * Use this method only if you know what you're doing!
-     * @param image the <CODE>Image</CODE> to add
-     * @return the name of the image added
-     * @throws PdfException on error
-     * @throws DocumentException on error
-     */
-    public PdfName addDirectImageSimple(Image image) throws DocumentException {
-        return addDirectImageSimple(image, null);
-    }
-
-    /**
-     * Adds an image to the document but not to the page resources.
-     * It is used with templates and <CODE>Document.add(Image)</CODE>.
-     * Use this method only if you know what you're doing!
-     * @param image the <CODE>Image</CODE> to add
-     * @param fixedRef the reference to used. It may be <CODE>null</CODE>,
-     * a <CODE>PdfIndirectReference</CODE> or a <CODE>PRIndirectReference</CODE>.
-     * @return the name of the image added
-     * @throws PdfException on error
-     * @throws DocumentException on error
-     */
-    public PdfName addDirectImageSimple(Image image, PdfIndirectReference fixedRef) throws DocumentException {
-        PdfName name;
-        // if the images is already added, just retrieve the name
-        if (images.containsKey(image.getMySerialId())) {
-            name = images.get(image.getMySerialId());
-        }
-        // if it's a new image, add it to the document
-        else {
-            if (image.isImgTemplate()) {
-                name = new PdfName("img" + images.size());
-            }
-            else {
-                PdfIndirectReference dref = image.getDirectReference();
-                if (dref != null) {
-                    PdfName rname = new PdfName("img" + images.size());
-                    images.put(image.getMySerialId(), rname);
-                    imageDictionary.put(rname, dref);
-                    return rname;
-                }
-                Image maskImage = image.getImageMask();
-                PdfIndirectReference maskRef = null;
-                if (maskImage != null) {
-                    PdfName mname = images.get(maskImage.getMySerialId());
-                    maskRef = getImageReference(mname);
-                }
-                PdfImage i = new PdfImage(image, "img" + images.size(), maskRef);
-                if (image.hasICCProfile()) {
-                    PdfICCBased icc = new PdfICCBased(image.getICCProfile(), image.getCompressionLevel());
-                    PdfIndirectReference iccRef = add(icc);
-                    PdfArray iccArray = new PdfArray();
-                    iccArray.add(PdfName.ICCBASED);
-                    iccArray.add(iccRef);
-                    PdfArray colorspace = i.getAsArray(PdfName.COLORSPACE);
-                    if (colorspace != null) {
-                        if (colorspace.size() > 1 && PdfName.INDEXED.equals(colorspace.getPdfObject(0)))
-                            colorspace.set(1, iccArray);
-                        else
-                            i.put(PdfName.COLORSPACE, iccArray);
-                    }
-                    else
-                        i.put(PdfName.COLORSPACE, iccArray);
-                }
-                add(i, fixedRef);
-                name = i.name();
-            }
-            images.put(image.getMySerialId(), name);
-        }
-        return name;
-    }
-
-    /**
-     * Writes a <CODE>PdfImage</CODE> to the outputstream.
-     *
-     * @param pdfImage the image to be added
-     * @return a <CODE>PdfIndirectReference</CODE> to the encapsulated image
-     * @throws PdfException when a document isn't open yet, or has been closed
-     */
-
-    PdfIndirectReference add(PdfImage pdfImage, PdfIndirectReference fixedRef) throws PdfException {
-        if (! imageDictionary.contains(pdfImage.name())) {
-            PdfXConformanceImp.checkPDFXConformance(this, PdfXConformanceImp.PDFXKEY_IMAGE, pdfImage);
-            if (fixedRef instanceof PRIndirectReference) {
-                PRIndirectReference r2 = (PRIndirectReference)fixedRef;
-                fixedRef = new PdfIndirectReference(0, getNewObjectNumber(r2.getReader(), r2.getNumber(), r2.getGeneration()));
-            }
-            try {
-                if (fixedRef == null)
-                    fixedRef = addToBody(pdfImage).getIndirectReference();
-                else
-                    addToBody(pdfImage, fixedRef);
-            }
-            catch(IOException ioe) {
-                throw new ExceptionConverter(ioe);
-            }
-            imageDictionary.put(pdfImage.name(), fixedRef);
-            return fixedRef;
-        }
-        return (PdfIndirectReference) imageDictionary.get(pdfImage.name());
-    }
-
-    /**
-     * return the <CODE>PdfIndirectReference</CODE> to the image with a given name.
-     *
-     * @param name the name of the image
-     * @return a <CODE>PdfIndirectReference</CODE>
-     */
-
-    PdfIndirectReference getImageReference(PdfName name) {
-        return (PdfIndirectReference) imageDictionary.get(name);
-    }
 
     protected PdfIndirectReference add(PdfICCBased icc) {
         PdfIndirectObject object;

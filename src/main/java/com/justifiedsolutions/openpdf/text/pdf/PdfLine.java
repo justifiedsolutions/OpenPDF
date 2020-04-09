@@ -49,11 +49,10 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Element;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * <CODE>PdfLine</CODE> defines an array with <CODE>PdfChunk</CODE>-objects
@@ -167,7 +166,7 @@ public class PdfLine {
             addToLine(chunk);
         }
         // if the length of the chunk > 0 we add it to the line
-        else if (chunk.length() > 0 || chunk.isImage()) {
+        else if (chunk.length() > 0) {
             if (overflow != null)
                 chunk.trimLastSpace();
             width -= chunk.width();
@@ -197,10 +196,6 @@ public class PdfLine {
     }
     
     private void addToLine(PdfChunk chunk) {
-        if (chunk.changeLeading && chunk.isImage()) {
-            float f = chunk.getImage().getScaledHeight() + chunk.getImageOffsetY() + chunk.getImage().getBorderWidthTop();
-            if (f > height) height = f;
-        }
         line.add(chunk);
     }
     
@@ -222,7 +217,7 @@ public class PdfLine {
      * @return    an <CODE>Iterator</CODE>
      */
     
-    public Iterator iterator() {
+    public Iterator<PdfChunk> iterator() {
         return line.iterator();
     }
     
@@ -273,20 +268,7 @@ public class PdfLine {
     public boolean hasToBeJustified() {
         return ((alignment == Element.ALIGN_JUSTIFIED || alignment == Element.ALIGN_JUSTIFIED_ALL) && width != 0);
     }
-    
-    /**
-     * Resets the alignment of this line.
-     * <P>
-     * The alignment of the last line of for instance a <CODE>Paragraph</CODE>
-     * that has to be justified, has to be reset to <VAR>ALIGN_LEFT</VAR>.
-     */
-    
-    public void resetAlignment() {
-        if (alignment == Element.ALIGN_JUSTIFIED) {
-            alignment = Element.ALIGN_LEFT;
-        }
-    }
-    
+
     /** Adds extra indentation to the left (for Paragraph.setFirstLineIndent). */
     void setExtraIndent(float extra) {
         left += extra;
@@ -421,11 +403,7 @@ public class PdfLine {
         PdfChunk chunk;
         for (Object o : line) {
             chunk = (PdfChunk) o;
-            if (!chunk.isImage()) {
-                normal_leading = Math.max(chunk.font().size(), normal_leading);
-            } else {
-                image_leading = Math.max(chunk.getImage().getScaledHeight() + chunk.getImageOffsetY(), image_leading);
-            }
+            normal_leading = Math.max(chunk.font().size(), normal_leading);
         }
         return new float[]{normal_leading, image_leading};
     }
@@ -453,23 +431,8 @@ public class PdfLine {
         }
         return s;
     }
-    
+
     /**
-     * Gets a width corrected with a charSpacing and wordSpacing.
-     * @param charSpacing
-     * @param wordSpacing
-     * @return a corrected width
-     */
-    public float getWidthCorrected(float charSpacing, float wordSpacing) {
-        float total = 0;
-        for (Object o : line) {
-            PdfChunk ck = (PdfChunk) o;
-            total += ck.getWidthCorrected(charSpacing, wordSpacing);
-        }
-        return total;
-    }
-    
-/**
  * Gets the maximum size of the ascender for all the fonts used
  * in this line.
  * @return maximum size of all the ascenders used in this line
@@ -478,12 +441,8 @@ public class PdfLine {
        float ascender = 0;
        for (Object o : line) {
            PdfChunk ck = (PdfChunk) o;
-           if (ck.isImage())
-               ascender = Math.max(ascender, ck.getImage().getScaledHeight() + ck.getImageOffsetY());
-           else {
-               PdfFont font = ck.font();
-               ascender = Math.max(ascender, font.getFont().getFontDescriptor(BaseFont.ASCENT, font.size()));
-           }
+           PdfFont font = ck.font();
+           ascender = Math.max(ascender, font.getFont().getFontDescriptor(BaseFont.ASCENT, font.size()));
        }
        return ascender;
    }
@@ -497,12 +456,9 @@ public class PdfLine {
         float descender = 0;
         for (Object o : line) {
             PdfChunk ck = (PdfChunk) o;
-            if (ck.isImage())
-                descender = Math.min(descender, ck.getImageOffsetY());
-            else {
-                PdfFont font = ck.font();
-                descender = Math.min(descender, font.getFont().getFontDescriptor(BaseFont.DESCENT, font.size()));
-            }
+            PdfFont font = ck.font();
+            descender = Math.min(descender,
+                    font.getFont().getFontDescriptor(BaseFont.DESCENT, font.size()));
         }
         return descender;
     }
