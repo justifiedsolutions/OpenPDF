@@ -401,14 +401,12 @@ public class PdfWriter extends DocWriter implements
          * @param os
          * @param root
          * @param info
-         * @param fileID
          * @param prevxref
          * @throws IOException
          */
 
         void writeCrossReferenceTable(OutputStream os, PdfIndirectReference root,
-                PdfIndirectReference info, PdfObject fileID,
-                int prevxref) throws IOException {
+                PdfIndirectReference info, int prevxref) throws IOException {
             int refNumber = 0;
             // Old-style xref tables limit object offsets to 10 digits
             boolean useNewXrefFormat = writer.isFullCompression() || position > 9_999_999_999L;
@@ -434,7 +432,7 @@ public class PdfWriter extends DocWriter implements
             }
             sections.add(first);
             sections.add(len);
-            PdfTrailer trailer = new PdfTrailer(size(), root, info, fileID, prevxref);
+            PdfTrailer trailer = new PdfTrailer(size(), root, info, prevxref);
             if (useNewXrefFormat) {
                 int mid = 8 - (Long.numberOfLeadingZeros(position) >> 3);
                 ByteBuffer buf = new ByteBuffer();
@@ -493,19 +491,15 @@ public class PdfWriter extends DocWriter implements
          * @param        size        the number of entries in the <CODE>PdfCrossReferenceTable</CODE>
          * @param        root        an indirect reference to the root of the PDF document
          * @param        info        an indirect reference to the info object of the PDF document
-         * @param fileID
          * @param prevxref
          */
 
-        PdfTrailer(int size, PdfIndirectReference root, PdfIndirectReference info,
-                PdfObject fileID, int prevxref) {
+        PdfTrailer(int size, PdfIndirectReference root, PdfIndirectReference info, int prevxref) {
             put(PdfName.SIZE, new PdfNumber(size));
             put(PdfName.ROOT, root);
             if (info != null) {
                 put(PdfName.INFO, info);
             }
-            if (fileID != null)
-                put(PdfName.ID, fileID);
             if (prevxref > 0)
                 put(PdfName.PREV, new PdfNumber(prevxref));
         }
@@ -1020,17 +1014,11 @@ public class PdfWriter extends DocWriter implements
                 // add the info-object to the body
                 PdfIndirectObject infoObj = addToBody(getInfo(), false);
 
-                PdfObject fileID;
                 body.flushObjStm();
-                if (getInfo().contains(PdfName.FILEID)) {
-                    fileID = getInfo().get(PdfName.FILEID);
-                } else {
-                    fileID = PdfEncryption.createInfoId(PdfEncryption.createDocumentId());
-                }
 
                 // write the cross-reference table of the body
                 body.writeCrossReferenceTable(os, indirectCatalog.getIndirectReference(),
-                    infoObj.getIndirectReference(), fileID, prevxref);
+                    infoObj.getIndirectReference(), prevxref);
 
                 os.write(getISOBytes("startxref\n"));
                 os.write(getISOBytes(String.valueOf(body.offset())));
