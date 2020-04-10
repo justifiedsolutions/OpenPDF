@@ -49,9 +49,7 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
-import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,11 +79,6 @@ import java.util.Objects;
 public class Chunk implements Element {
 
     // public static membervariables
-
-    /**
-     * The character stand in for an image or a separator.
-     */
-    public static final String OBJECT_REPLACEMENT_CHARACTER = "\ufffc";
 
     /**
      * This is a Chunk containing a newline.
@@ -148,10 +141,6 @@ public class Chunk implements Element {
      * Key for generic tag.
      */
     public static final String GENERICTAG = "GENERICTAG";
-    /**
-     * Key for image.
-     */
-    public static final String IMAGE = "IMAGE";
     /**
      * Key for newpage.
      */
@@ -218,27 +207,6 @@ public class Chunk implements Element {
         this(content, new Font());
     }
 
-    // the attributes are ordered as they appear in the book 'iText in Action'
-
-    /**
-     * Creates a tab Chunk. Note that separator chunks can't be used in combination with tab
-     * chunks!
-     *
-     * @param separator   the drawInterface to use to draw the tab.
-     * @param tabPosition an X coordinate that will be used as start position for the next Chunk.
-     * @param newline     if true, a newline will be added if the tabPosition has already been
-     *                    reached.
-     * @since 2.1.2
-     */
-    public Chunk(DrawInterface separator, float tabPosition, boolean newline) {
-        this(OBJECT_REPLACEMENT_CHARACTER, new Font());
-        if (tabPosition < 0) {
-            throw new IllegalArgumentException(MessageLocalization
-                    .getComposedMessage("a.tab.position.may.not.be.lower.than.0.yours.is.1",
-                            String.valueOf(tabPosition)));
-        }
-        setAttribute(TAB, new Object[]{separator, tabPosition, newline, (float) 0});
-    }
 
     /**
      * Creates a new internal Chunk from an API Chunk.
@@ -297,7 +265,7 @@ public class Chunk implements Element {
      * @param string <CODE>String</CODE>
      * @return a <CODE>StringBuffer</CODE>
      */
-    public StringBuffer append(String string) {
+    StringBuffer append(String string) {
         return content.append(string);
     }
 
@@ -316,7 +284,7 @@ public class Chunk implements Element {
      *
      * @param font a <CODE>Font</CODE>
      */
-    public void setFont(Font font) {
+    void setFont(Font font) {
         this.font = font;
     }
 
@@ -344,7 +312,7 @@ public class Chunk implements Element {
      * @return <CODE>false</CODE> if the Chunk contains other characters than
      * space.
      */
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return (content.toString().trim().length() == 0)
                 && (!content.toString().contains("\n"))
                 && (attributes == null);
@@ -356,7 +324,7 @@ public class Chunk implements Element {
      * @return false if there aren't any.
      */
 
-    public boolean hasAttributes() {
+    boolean hasAttributes() {
         return attributes != null;
     }
 
@@ -378,7 +346,7 @@ public class Chunk implements Element {
      *
      * @param attributes the attributes of a Chunk
      */
-    public void setChunkAttributes(Map<String, Object> attributes) {
+    void setChunkAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
@@ -404,7 +372,7 @@ public class Chunk implements Element {
      * @return this <CODE>Chunk</CODE>
      */
 
-    public Chunk setNewPage() {
+    private Chunk setNewPage() {
         return setAttribute(NEWPAGE, null);
     }
 
@@ -431,7 +399,7 @@ public class Chunk implements Element {
      *
      * @since 2.1.2
      */
-    public HyphenationEvent getHyphenation() {
+    HyphenationEvent getHyphenation() {
         if (attributes == null) {
             return null;
         }
@@ -444,7 +412,7 @@ public class Chunk implements Element {
      * @param hyphenation the hyphenation engine
      * @return this <CODE>Chunk</CODE>
      */
-    public Chunk setHyphenation(HyphenationEvent hyphenation) {
+    Chunk setHyphenation(HyphenationEvent hyphenation) {
         return setAttribute(HYPHENATION, hyphenation);
     }
 

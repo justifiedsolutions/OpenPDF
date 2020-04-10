@@ -51,7 +51,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Font;
-import com.justifiedsolutions.openpdf.text.SplitCharacter;
 import com.justifiedsolutions.openpdf.text.Utilities;
 import java.awt.Color;
 import java.util.HashMap;
@@ -64,7 +63,7 @@ import java.util.Map;
  * <CODE>PdfFont</CODE> and <CODE>Color</CODE>.
  */
 
-public class PdfChunk {
+class PdfChunk {
 
     private static final char[] singleSpace = {' '};
     private static final PdfChunk[] thisChunk = new PdfChunk[1];
@@ -79,7 +78,6 @@ public class PdfChunk {
         keysAttributes.put(Chunk.UNDERLINE, null);
         keysAttributes.put(Chunk.GENERICTAG, null);
         keysAttributes.put(Chunk.NEWPAGE, null);
-        keysAttributes.put(Chunk.IMAGE, null);
         keysAttributes.put(Chunk.BACKGROUND, null);
         keysAttributes.put(Chunk.SKEW, null);
         keysAttributes.put(Chunk.HSCALE, null);
@@ -225,7 +223,7 @@ public class PdfChunk {
      * @param c the CID code
      * @return the Unicode equivalent
      */    
-    public int getUnicodeEquivalent(int c) {
+    int getUnicodeEquivalent(int c) {
         return baseFont.getUnicodeEquivalent(c);
     }
 
@@ -455,7 +453,7 @@ public class PdfChunk {
  * @return <CODE>true</CODE> if the <CODE>PdfChunk</CODE> split was caused by a newline.
  */
     
-    public boolean isNewlineSplit()
+    boolean isNewlineSplit()
     {
         return newlineSplit;
     }
@@ -468,7 +466,7 @@ public class PdfChunk {
  * @return the calculated width
  */
     
-    public float getWidthCorrected(float charSpacing, float wordSpacing)
+    float getWidthCorrected(float charSpacing, float wordSpacing)
     {
         int numberOfSpaces = 0;
         int idx = -1;
@@ -481,7 +479,7 @@ public class PdfChunk {
      * Gets the text displacement relative to the baseline.
      * @return a displacement in points
      */
-    public float getTextRise() {
+    float getTextRise() {
         Float f = (Float) getAttribute(Chunk.SUBSUPSCRIPT);
         if (f != null) {
             return f;
@@ -494,7 +492,7 @@ public class PdfChunk {
  * @return the width of the space trimmed, otherwise 0
  */
     
-    public float trimLastSpace()
+    float trimLastSpace()
     {
         BaseFont ft = font.getFont();
         if (ft.getFontType() == BaseFont.FONT_TYPE_CJK && ft.getUnicodeEquivalent(' ') != ' ') {
@@ -511,7 +509,7 @@ public class PdfChunk {
         }
         return 0;
     }    
-    public void trimFirstSpace()
+    void trimFirstSpace()
     {
         BaseFont ft = font.getFont();
         if (ft.getFontType() == BaseFont.FONT_TYPE_CJK && ft.getUnicodeEquivalent(' ') != ' ') {
@@ -674,7 +672,7 @@ public class PdfChunk {
         return font.width(c);
     }
     
-    public static boolean noPrint(int c) {
+    static boolean noPrint(int c) {
         return ((c >= 0x200b && c <= 0x200f) || (c >= 0x202a && c <= 0x202e));
     }
     

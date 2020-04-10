@@ -94,7 +94,7 @@ import java.util.Properties;
  * </BLOCKQUOTE>
  */
 
-public class Document implements AutoCloseable, DocListener {
+public class Document {
 
     // membervariables
     private static final String VERSION_PROPERTIES = "com/justifiedsolutions/openpdf/text/version.properties";
@@ -180,6 +180,10 @@ public class Document implements AutoCloseable, DocListener {
         this.marginBottom = marginBottom;
     }
 
+    protected List<DocListener> getListeners() {
+        return listeners;
+    }
+
     private static String getVersionNumber() {
         String releaseVersion = "UNKNOWN";
         try (InputStream input = Document.class.getClassLoader()
@@ -241,7 +245,7 @@ public class Document implements AutoCloseable, DocListener {
                     "the.document.is.not.open.yet.you.can.only.add.meta.information"));
         }
         boolean success = false;
-        for (DocListener listener : listeners) {
+        for (DocListener listener : getListeners()) {
             success |= listener.add(element);
         }
         if (element instanceof LargeElement) {
@@ -263,29 +267,10 @@ public class Document implements AutoCloseable, DocListener {
         if (!close) {
             open = true;
         }
-        for (DocListener listener : listeners) {
+        for (DocListener listener : getListeners()) {
             listener.setPageSize(pageSize);
-            listener.setMargins(marginLeft, marginRight, marginTop,
-                    marginBottom);
-            listener.open();
-        }
-    }
-
-    /**
-     * Sets the margins.
-     *
-     * @param marginLeft   the margin on the left
-     * @param marginRight  the margin on the right
-     * @param marginTop    the margin on the top
-     * @param marginBottom the margin on the bottom
-     */
-    public void setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom) {
-        this.marginLeft = marginLeft;
-        this.marginRight = marginRight;
-        this.marginTop = marginTop;
-        this.marginBottom = marginBottom;
-        for (DocListener listener : listeners) {
             listener.setMargins(marginLeft, marginRight, marginTop, marginBottom);
+            listener.open();
         }
     }
 
@@ -296,7 +281,7 @@ public class Document implements AutoCloseable, DocListener {
         if (!open || close) {
             return;
         }
-        for (DocListener listener : listeners) {
+        for (DocListener listener : getListeners()) {
             listener.newPage();
         }
     }
@@ -316,13 +301,12 @@ public class Document implements AutoCloseable, DocListener {
      * Once all the content has been written in the body, you have to close the body. After that
      * nothing can be written to the body anymore.
      */
-    @Override
     public void close() {
         if (!close) {
             open = false;
             close = true;
         }
-        for (DocListener listener : listeners) {
+        for (DocListener listener : getListeners()) {
             listener.close();
         }
     }
@@ -374,7 +358,7 @@ public class Document implements AutoCloseable, DocListener {
      * @return the lower left x-coordinate
      */
 
-    public float left(float margin) {
+    protected float left(float margin) {
         return pageSize.getLeft(marginLeft + margin);
     }
 
@@ -385,7 +369,7 @@ public class Document implements AutoCloseable, DocListener {
      * @return the upper right x-coordinate
      */
 
-    public float right(float margin) {
+    protected float right(float margin) {
         return pageSize.getRight(marginRight + margin);
     }
 
@@ -396,7 +380,7 @@ public class Document implements AutoCloseable, DocListener {
      * @return the upper right y-coordinate
      */
 
-    public float top(float margin) {
+    protected float top(float margin) {
         return pageSize.getTop(marginTop + margin);
     }
 
@@ -407,7 +391,7 @@ public class Document implements AutoCloseable, DocListener {
      * @return the lower left y-coordinate
      */
 
-    public float bottom(float margin) {
+    protected float bottom(float margin) {
         return pageSize.getBottom(marginBottom + margin);
     }
 
@@ -419,18 +403,6 @@ public class Document implements AutoCloseable, DocListener {
 
     public Rectangle getPageSize() {
         return this.pageSize;
-    }
-
-    /**
-     * Sets the pagesize.
-     *
-     * @param pageSize the new pagesize
-     */
-    public void setPageSize(Rectangle pageSize) {
-        this.pageSize = pageSize;
-        for (DocListener listener : listeners) {
-            listener.setPageSize(pageSize);
-        }
     }
 
     /**

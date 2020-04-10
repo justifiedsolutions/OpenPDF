@@ -49,8 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.SplitCharacter;
-
 /**
  * The default class that is used to determine whether or not a character
  * is a split character. You can subclass this class to define your own
