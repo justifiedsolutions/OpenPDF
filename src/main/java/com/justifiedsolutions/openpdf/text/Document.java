@@ -156,10 +156,10 @@ public class Document implements AutoCloseable, DocListener {
     protected int pageN = 0;
 
     /**
-     * Constructs a new <CODE>Document</CODE> -object.
+     * Constructs a new <CODE>Document</CODE> with a default page size of A4 with 36pt margins all around.
      */
     public Document() {
-        this(PageSize.A4, 36, 36, 36, 36);
+        this(new RectangleReadOnly(595,842), 36, 36, 36, 36);
     }
 
     /**
