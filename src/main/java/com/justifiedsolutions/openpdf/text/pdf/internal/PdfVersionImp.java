@@ -49,15 +49,14 @@
 
 package com.justifiedsolutions.openpdf.text.pdf.internal;
 
-import com.justifiedsolutions.openpdf.text.pdf.PdfDeveloperExtension;
-import com.justifiedsolutions.openpdf.text.pdf.PdfName;
-import java.io.IOException;
-
-import com.justifiedsolutions.openpdf.text.DocWriter;
+import com.justifiedsolutions.openpdf.text.Utilities;
 import com.justifiedsolutions.openpdf.text.pdf.OutputStreamCounter;
+import com.justifiedsolutions.openpdf.text.pdf.PdfDeveloperExtension;
 import com.justifiedsolutions.openpdf.text.pdf.PdfDictionary;
+import com.justifiedsolutions.openpdf.text.pdf.PdfName;
 import com.justifiedsolutions.openpdf.text.pdf.PdfWriter;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
+import java.io.IOException;
 
 /**
  * Stores the PDF version information,
@@ -69,9 +68,9 @@ public class PdfVersionImp implements PdfVersion {
     
     /** Contains different strings that are part of the header. */
     public static final byte[][] HEADER = {
-        DocWriter.getISOBytes("\n"),
-        DocWriter.getISOBytes("%PDF-"),
-        DocWriter.getISOBytes("\n%\u00e2\u00e3\u00cf\u00d3\n")
+        Utilities.getISOBytes("\n"),
+        Utilities.getISOBytes("%PDF-"),
+        Utilities.getISOBytes("\n%\u00e2\u00e3\u00cf\u00d3\n")
     };
     
     /** Indicates if the header was already written. */
@@ -162,7 +161,7 @@ public class PdfVersionImp implements PdfVersion {
      * @param version the version character
      */
     public byte[] getVersionAsByteArray(char version) {
-        return DocWriter.getISOBytes(getVersionAsName(version).toString().substring(1));
+        return Utilities.getISOBytes(getVersionAsName(version).toString().substring(1));
     }
 
     /** Adds the version to the Catalog dictionary. */

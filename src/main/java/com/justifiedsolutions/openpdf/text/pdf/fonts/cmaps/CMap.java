@@ -30,9 +30,8 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf.fonts.cmaps;
 
-import java.io.IOException;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,79 +55,6 @@ public class CMap
     public CMap()
     {
         //default constructor
-    }
-    
-    /**
-     * This will tell if this cmap has any one byte mappings.
-     * 
-     * @return true If there are any one byte mappings, false otherwise.
-     */
-    public boolean hasOneByteMappings()
-    {
-        return !singleByteMappings.isEmpty();
-    }
-    
-    /**
-     * This will tell if this cmap has any two byte mappings.
-     * 
-     * @return true If there are any two byte mappings, false otherwise.
-     */
-    public boolean hasTwoByteMappings()
-    {
-        return !doubleByteMappings.isEmpty();
-    }
-
-    /**
-     * This will perform a lookup into the map.
-     * 
-     * Some characters (e.g. ligatures) decode to character sequences.
-     *
-     * @param code The code used to lookup.
-     * @return The string that matches the lookup.
-     */
-    public String lookup(char code)
-    {
-        String result = null;
-        if (hasTwoByteMappings()) {
-            result = doubleByteMappings.get((int) code);
-        }
-        if (result == null && code <= 0xff && hasOneByteMappings()) {
-            result = singleByteMappings.get(code & 0xff);
-        }
-        return result;
-    }
-
-    /**
-     * This will perform a lookup into the map.
-     *
-     * @param code The code used to lookup.
-     * @param offset The offset into the byte array.
-     * @param length The length of the data we are getting.
-     *
-     * @return The string that matches the lookup.
-     */
-    public String lookup( byte[] code, int offset, int length )
-    {
-
-        String result = null;
-        Integer key = null;
-        if( length == 1 )
-        {
-            
-            key = code[offset] & 0xff;
-            result = singleByteMappings.get( key );
-        }
-        else if( length == 2 )
-        {
-            int intKey = code[offset] & 0xff;
-            intKey <<= 8;
-            intKey += code[offset+1] & 0xff;
-            key = intKey;
-
-            result = doubleByteMappings.get( key );
-        }
-
-        return result;
     }
 
     /**
@@ -167,16 +93,6 @@ public class CMap
     public void addCodespaceRange( CodespaceRange range )
     {
         codeSpaceRanges.add( range );
-    }
-
-    /**
-     * Getter for property codeSpaceRanges.
-     *
-     * @return Value of property codeSpaceRanges.
-     */
-    public List getCodeSpaceRanges()
-    {
-        return codeSpaceRanges;
     }
 
 }

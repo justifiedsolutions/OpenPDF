@@ -82,7 +82,7 @@ import java.util.Objects;
  * @see        Paragraph
  */
 
-public class Phrase extends ArrayList<Element> implements TextElementArray {
+public class Phrase extends ArrayList<Element> implements Element {
 
     // constants
     private static final long serialVersionUID = 2643594602455068231L;
@@ -141,46 +141,12 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
     }
 
     /**
-     * Constructs a <CODE>Phrase</CODE> with a certain <CODE>Chunk</CODE>
-     * and a certain leading.
-     *
-     * @param    leading    the leading
-     * @param    chunk        a <CODE>Chunk</CODE>
-     */
-    public Phrase(float leading, Chunk chunk) {
-        this.leading = leading;
-        super.add(chunk);
-        font = chunk.getFont();
-        setHyphenation(chunk.getHyphenation());
-    }
-
-    /**
      * Constructs a <CODE>Phrase</CODE> with a certain <CODE>String</CODE>.
      *
      * @param    string        a <CODE>String</CODE>
      */
     public Phrase(String string) {
         this(Float.NaN, string, new Font());
-    }
-
-    /**
-     * Constructs a <CODE>Phrase</CODE> with a certain <CODE>String</CODE> and a certain <CODE>Font</CODE>.
-     *
-     * @param    string        a <CODE>String</CODE>
-     * @param    font        a <CODE>Font</CODE>
-     */
-    public Phrase(String string, Font font) {
-        this(Float.NaN, string, font);
-    }
-
-    /**
-     * Constructs a <CODE>Phrase</CODE> with a certain leading and a certain <CODE>String</CODE>.
-     *
-     * @param    leading    the leading
-     * @param    string        a <CODE>String</CODE>
-     */
-    public Phrase(float leading, String string) {
-        this(leading, string, new Font());
     }
 
     /**
@@ -420,18 +386,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
      */
     public Font getFont() {
         return font;
-    }
-
-    /**
-     * Returns the content as a String object.
-     * This method differs from toString because toString will return an ArrayList with the toString value of the Chunks in this Phrase.
-     */
-    public String getContent() {
-        StringBuilder buf = new StringBuilder();
-        for (Object o : getChunks()) {
-            buf.append(o.toString());
-        }
-        return buf.toString();
     }
 
     /**

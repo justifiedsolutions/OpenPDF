@@ -49,17 +49,14 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Element;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ElementListener;
-import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Formats content into one or more columns bounded by a
@@ -86,11 +83,6 @@ public class MultiColumnText implements Element {
     private float totalHeight;
 
     /**
-     * true if all the text could not be written out due to height restriction
-     */
-    private boolean overflow;
-
-    /**
      * Top of the columns - y position on starting page.
      * If <CODE>AUTOMATIC</CODE>, it means current y position when added to document
      */
@@ -106,11 +98,6 @@ public class MultiColumnText implements Element {
      */
     private List<ColumnDef> columnDefs;
 
-    /**
-     * true if all columns are simple (rectangular)
-     */
-    private boolean simple = true;
-
     private int currentColumn = 0;
     
     private float nextY = AUTOMATIC;
@@ -118,13 +105,6 @@ public class MultiColumnText implements Element {
     private boolean columnsRightToLeft = false;
     
     private PdfDocument document;
-    /**
-     * Default constructor.  Sets height to <CODE>AUTOMATIC</CODE>.
-     * Columns will repeat on each page as necessary to accommodate content length.
-     */
-    public MultiColumnText() {
-        this(AUTOMATIC);
-    }
 
     /**
      * Construct a MultiColumnText container of the specified height.
@@ -142,138 +122,9 @@ public class MultiColumnText implements Element {
         totalHeight = 0f;
     }
 
-    /**
-     * Construct a MultiColumnText container of the specified height
-     * starting at the specified Y position.
-     *
-     * @param height
-     * @param top
-     */
-    public MultiColumnText(float top, float height) {
-        columnDefs = new ArrayList<>();
-        desiredHeight = height;
-        this.top = top;
-        nextY = top;
-        // canvas will be set later
-        columnText = new ColumnText(null);
-        totalHeight = 0f;
-    }
-    
-    /**
-     * Indicates that all of the text did not fit in the
-     * specified height. Note that isOverflow will return
-     * false before the MultiColumnText object has been
-     * added to the document.  It will always be false if
-     * the height is AUTOMATIC.
-     *
-     * @return true if there is still space left in the column
-     */
-    public boolean isOverflow() {
-        return overflow;
-    }
 
     /**
-     * Copy the parameters from the specified ColumnText to use
-     * when rendering.  Parameters like <CODE>setArabicOptions</CODE>
-     * must be set in this way.
-     *
-     * @param sourceColumn
-     */
-    public void useColumnParams(ColumnText sourceColumn) {
-        // note that canvas will be overwritten later
-        columnText.setSimpleVars(sourceColumn);
-    }
-
-    /**
-     * Add a new column.  The parameters are limits for each column
-     * wall in the format of a sequence of points (x1,y1,x2,y2,...).
-     *
-     * @param left  limits for left column
-     * @param right limits for right column
-     */
-    public void addColumn(float[] left, float[] right) {
-        ColumnDef nextDef = new ColumnDef(left, right);
-        if (!nextDef.isSimple()) simple = false;
-        columnDefs.add(nextDef);
-    }
-
-    /**
-     * Add a simple rectangular column with specified left
-     * and right x position boundaries.
-     *
-     * @param left  left boundary
-     * @param right right boundary
-     */
-    public void addSimpleColumn(float left, float right) {
-        ColumnDef newCol = new ColumnDef(left, right);
-        columnDefs.add(newCol);
-    }
-
-    /**
-     * Add the specified number of evenly spaced rectangular columns.
-     * Columns will be separated by the specified gutterWidth.
-     *
-     * @param left        left boundary of first column
-     * @param right       right boundary of last column
-     * @param gutterWidth width of gutter spacing between columns
-     * @param numColumns  number of columns to add
-     */
-    public void addRegularColumns(float left, float right, float gutterWidth, int numColumns) {
-        float currX = left;
-        float width = right - left;
-        float colWidth = (width - (gutterWidth * (numColumns - 1))) / numColumns;
-        for (int i = 0; i < numColumns; i++) {
-            addSimpleColumn(currX, currX + colWidth);
-            currX += colWidth + gutterWidth;
-        }
-    }
-
-    /**
-     * Adds a <CODE>Phrase</CODE> to the current text array.
-     * Will not have any effect if addElement() was called before.
-     * @param phrase the text
-     * @since    2.1.5
-     */
-    public void addText(Phrase phrase) {
-        columnText.addText(phrase);
-    }
-    
-    /**
-     * Adds a <CODE>Chunk</CODE> to the current text array.
-     * Will not have any effect if addElement() was called before.
-     * @param chunk the text
-     * @since    2.1.5
-     */
-    public void addText(Chunk chunk) {
-        columnText.addText(chunk);
-    }
-    
-    /**
-     * Add an element to be rendered in a column.
-     * Note that you can only add a <CODE>Phrase</CODE>
-     * or a <CODE>Chunk</CODE> if the columns are
-     * not all simple.  This is an underlying restriction in
-     * {@link ColumnText}
-     *
-     * @param element element to add
-     * @throws DocumentException if element can't be added
-     */
-    public void addElement(Element element) throws DocumentException {
-        if (simple) {
-            columnText.addElement(element);
-        } else if (element instanceof Phrase) {
-            columnText.addText((Phrase) element);
-        } else if (element instanceof Chunk) {
-            columnText.addText((Chunk) element);
-        } else {
-            throw new DocumentException(MessageLocalization.getComposedMessage("can.t.add.1.to.multicolumntext.with.complex.columns", element.getClass()));
-        }
-    }
-
-
-    /**
-     * Write out the columns.  After writing, use
-     * {@link #isOverflow()} to see if all text was written.
+     * Write out the columns.
      * @param canvas PdfContentByte to write with
      * @param document document to write to (only used to get page limit info)
      * @param documentY starting y position to begin writing at
@@ -286,7 +137,6 @@ public class MultiColumnText implements Element {
         if (columnDefs.isEmpty()) {
             throw new DocumentException(MessageLocalization.getComposedMessage("multicolumntext.has.no.columns"));
         }
-        overflow = false;
         float currentHeight = 0;
         boolean done = false;
         try {
@@ -320,7 +170,6 @@ public class MultiColumnText implements Element {
                 } else {  // check if we are done because of height
                     totalHeight += currentHeight;
                     if ((desiredHeight != AUTOMATIC) && (totalHeight >= desiredHeight)) {
-                        overflow = true;
                         break;
                     } else {  // need to start new page and reset the columns
                         documentY = nextY;
@@ -445,19 +294,6 @@ public class MultiColumnText implements Element {
     }
 
     /**
-     * Moves the text insertion point to the beginning of the next column, issuing a page break if
-     * needed.
-     * @throws DocumentException on error
-     */    
-    public void nextColumn() throws DocumentException {
-        currentColumn = (currentColumn + 1) % columnDefs.size();
-        top = nextY;
-        if (currentColumn == 0) {
-            newPage();
-        }
-    }
-
-    /**
      * Gets the current column.
      * @return the current column
      */
@@ -486,81 +322,13 @@ public class MultiColumnText implements Element {
         }
         return false;
     }
-    
-    /**
-     * Sets the direction of the columns.
-     * @param direction true = right2left; false = left2right
-     */
-    public void setColumnsRightToLeft(boolean direction) {
-        columnsRightToLeft = direction;
-    }
-    
-    /** Sets the ratio between the extra word spacing and the extra character spacing
-     * when the text is fully justified.
-     * Extra word spacing will grow <CODE>spaceCharRatio</CODE> times more than extra character spacing.
-     * If the ratio is <CODE>PdfWriter.NO_SPACE_CHAR_RATIO</CODE> then the extra character spacing
-     * will be zero.
-     * @param spaceCharRatio the ratio between the extra word spacing and the extra character spacing
-     */
-    public void setSpaceCharRatio(float spaceCharRatio) {
-        columnText.setSpaceCharRatio(spaceCharRatio);
-    }
 
-    /** Sets the run direction. 
-     * @param runDirection the run direction
-     */    
-    public void setRunDirection(int runDirection) {
-        columnText.setRunDirection(runDirection);
-    }
-    
-    /** Sets the arabic shaping options. The option can be AR_NOVOWEL,
-     * AR_COMPOSEDTASHKEEL and AR_LIG.
-     * @param arabicOptions the arabic shaping options
-     */
-    public void setArabicOptions(int arabicOptions) {
-        columnText.setArabicOptions(arabicOptions);
-    }
-    
-    /** Sets the default alignment
-     * @param alignment the default alignment
-     */
-    public void setAlignment(int alignment) {
-        columnText.setAlignment(alignment);
-    }
-    
     /**
      * Inner class used to define a column
      */
     private class ColumnDef {
         private float[] left;
         private float[] right;
-
-        ColumnDef(float[] newLeft, float[] newRight) {
-            left = newLeft;
-            right = newRight;
-        }
-
-        ColumnDef(float leftPosition, float rightPosition) {
-            left = new float[4];
-            left[0] = leftPosition; // x1
-            left[1] = top;          // y1
-            left[2] = leftPosition; // x2
-            if (desiredHeight == AUTOMATIC || top == AUTOMATIC) {
-                left[3] = AUTOMATIC;
-            } else {
-                left[3] = top - desiredHeight;
-            }
-
-            right = new float[4];
-            right[0] = rightPosition; // x1
-            right[1] = top;           // y1
-            right[2] = rightPosition; // x2
-            if (desiredHeight == AUTOMATIC || top == AUTOMATIC) {
-                right[3] = AUTOMATIC;
-            } else {
-                right[3] = top - desiredHeight;
-            }
-        }
 
         /**
          * Resolves the positions for the specified side of the column

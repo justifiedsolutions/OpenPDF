@@ -52,7 +52,6 @@ import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Utilities;
 import java.text.Bidi;
 import java.util.ArrayList;
-import java.util.List;
 
 /** Does all the line bidirectional processing with PdfChunk assembly.
  *
@@ -128,12 +127,6 @@ public class BidiLine {
     public boolean isEmpty() {
         return (currentChar >= totalTextLength && indexChunk >= chunks.size());
     }
-    
-    public void clearChunks() {
-        chunks.clear();
-        totalTextLength = 0;
-        currentChar = 0;
-    }
 
     public boolean getParagraph(int runDirection) {
         this.runDirection = runDirection;
@@ -202,10 +195,6 @@ public class BidiLine {
     
     public void addChunk(PdfChunk chunk) {
         chunks.add(chunk);
-    }
-
-    public void addChunks(List<PdfChunk> chunks) {
-        this.chunks.addAll(chunks);
     }
 
     public void addPiece(char c, PdfChunk chunk) {
@@ -313,7 +302,8 @@ public class BidiLine {
                 ++src;
             }
             int arabicWordSize = src - startArabicIdx;
-            int size = ArabicLigaturizer.arabic_shape(text, startArabicIdx, arabicWordSize, text, dest, arabicWordSize, arabicOptions);
+            int size = ArabicLigaturizer.arabic_shape(text, startArabicIdx, arabicWordSize, text, dest,
+                    arabicOptions);
             if (startArabicIdx != dest) {
                 for (int k = 0; k < size; ++k) {
                     detailChunks[dest] = detailChunks[startArabicIdx];
@@ -364,7 +354,7 @@ public class BidiLine {
                 charWidth = ck.getCharWidth(uniC);
             else
                 charWidth = ck.getCharWidth(text[currentChar]);
-            splitChar = ck.isExtSplitCharacter(oldCurrentChar, currentChar, totalTextLength, text, detailChunks);
+            splitChar = ck.isExtSplitCharacter(currentChar, text, detailChunks);
             if (splitChar && Character.isWhitespace((char)uniC))
                 lastSplit = currentChar;
             if (width - charWidth < 0)
@@ -439,7 +429,6 @@ public class BidiLine {
      */    
     public float getWidth(int startIdx, int lastIdx) {
         char c = 0;
-        char uniC;
         PdfChunk ck = null;
         float width = 0;
         for (; startIdx <= lastIdx; ++startIdx) {
@@ -536,18 +525,7 @@ public class BidiLine {
         }
         return idx;
     }
-    
-    public int trimLeft(int startIdx, int endIdx) {
-        int idx = startIdx;
-        char c;
-        for (; idx <= endIdx; ++idx) {
-            c = (char)detailChunks[idx].getUnicodeEquivalent(text[idx]);
-            if (!isWS(c))
-                break;
-        }
-        return idx;
-    }
-    
+
     public int trimRightEx(int startIdx, int endIdx) {
         int idx = endIdx;
         char c = 0;

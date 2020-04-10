@@ -287,7 +287,7 @@ public class PdfChunk {
                 if (currentWidth > width)
                     break;
                 // if a split-character is encountered, the splitPosition is altered
-                if (splitCharacter.isSplitCharacter(0, currentPosition, length, valueArray, thisChunk))
+                if (splitCharacter.isSplitCharacter(currentPosition, valueArray, thisChunk))
                     splitPosition = currentPosition + 1;
                 currentPosition++;
             }
@@ -323,7 +323,7 @@ public class PdfChunk {
                 if (currentWidth > width)
                     break;
                 // if a split-character is encountered, the splitPosition is altered
-                if (splitCharacter.isSplitCharacter(0, currentPosition, length, valueArray, null))
+                if (splitCharacter.isSplitCharacter(currentPosition, valueArray, null))
                     splitPosition = currentPosition + 1;
                 currentPosition++;
             }
@@ -339,7 +339,7 @@ public class PdfChunk {
             value = "";
             return new PdfChunk(returnValue, this);
         }
-        if (lastSpace > splitPosition && splitCharacter.isSplitCharacter(0, 0, 1, singleSpace, null))
+        if (lastSpace > splitPosition && splitCharacter.isSplitCharacter(0, singleSpace, null))
             splitPosition = lastSpace;
         if (hyphenationEvent != null && lastSpace >= 0 && lastSpace < currentPosition) {
             int wordIdx = getWord(value, lastSpace);
@@ -639,8 +639,8 @@ public class PdfChunk {
         return total;
     }
     
-    boolean isExtSplitCharacter(int start, int current, int end, char[] cc, PdfChunk[] ck) {
-        return splitCharacter.isSplitCharacter(start, current, end, cc, ck);
+    boolean isExtSplitCharacter(int current, char[] cc, PdfChunk[] ck) {
+        return splitCharacter.isSplitCharacter(current, cc, ck);
     }
     
 /**

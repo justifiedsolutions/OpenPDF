@@ -49,15 +49,14 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Chunk;
+import com.justifiedsolutions.openpdf.text.Font;
+import com.justifiedsolutions.openpdf.text.Paragraph;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.Font;
-import com.justifiedsolutions.openpdf.text.Paragraph;
 
 /**
  * <CODE>PdfOutline</CODE> is an object that represents a PDF outline entry.
@@ -268,15 +267,7 @@ public class PdfOutline extends PdfDictionary {
     public List<PdfOutline> getKids() {
         return kids;
     }
-    
-    /**
-     * Sets the kids of this outline
-     * @param kids
-     */
-    public void setKids(List<PdfOutline> kids) {
-        this.kids = kids;
-    }
-    
+
     /** Getter for property tag.
      * @return Value of property tag.
      */

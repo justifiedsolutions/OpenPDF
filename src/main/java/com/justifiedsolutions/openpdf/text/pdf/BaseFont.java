@@ -51,7 +51,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -600,13 +599,6 @@ public abstract class BaseFont {
      *            the true type font or the afm in a byte array
      * @param pfb
      *            the pfb in a byte array
-     * @param noThrow
-     *            if true will not throw an exception if the font is not
-     *            recognized and will return null, if false will throw an
-     *            exception if the font is not recognized. Note that even if
-     *            true an exception may be thrown in some circumstances. This
-     *            parameter is useful for FontFactory that may have to check
-     *            many invalid font names before finding the right one
      * @return returns a new font. This font may come from the cache but only if
      *         cached is true, otherwise it will always be created new
      * @throws DocumentException
@@ -738,7 +730,7 @@ public abstract class BaseFont {
                 fontBuilt.fastWinansi = encoding.equals(CP1252);
             }
         } else if (isCJKFont) {
-            fontBuilt = new CJKFont(name, encoding, embedded);
+            fontBuilt = new CJKFont(name, encoding);
         } else if (noThrow) {
             return null;
         } else {
@@ -883,17 +875,6 @@ public abstract class BaseFont {
     abstract int getRawWidth(int c, String name);
 
     /**
-     * Gets the kerning between two Unicode chars.
-     * 
-     * @param char1
-     *            the first char
-     * @param char2
-     *            the second char
-     * @return the kerning to be applied in normalized 1000 units
-     */
-    public abstract int getKerning(int char1, int char2);
-
-    /**
      * Gets the width of a <CODE>char</CODE> in normalized 1000 units.
      * 
      * @param char1
@@ -947,30 +928,6 @@ public abstract class BaseFont {
     }
 
     // ia>
-
-    /**
-     * Gets the width of a <CODE>String</CODE> in points taking kerning into
-     * account.
-     * 
-     * @param text
-     *            the <CODE>String</CODE> to get the width of
-     * @param fontSize
-     *            the font size
-     * @return the width in points
-     */
-    public float getWidthPointKerned(String text, float fontSize) {
-        float size = getWidth(text) * 0.001f * fontSize;
-        if (!hasKernPairs()) {
-            return size;
-        }
-        int len = text.length() - 1;
-        int kern = 0;
-        char[] c = text.toCharArray();
-        for (int k = 0; k < len; ++k) {
-            kern += getKerning(c[k], c[k + 1]);
-        }
-        return size + kern * 0.001f * fontSize;
-    }
 
     /**
      * Gets the width of a <CODE>String</CODE> in points.
@@ -1243,15 +1200,6 @@ public abstract class BaseFont {
     }
 
     /**
-     * Gets the font width array.
-     * 
-     * @return the font width array
-     */
-    public int[] getWidths() {
-        return widths;
-    }
-
-    /**
      * Gets the font resources.
      * 
      * @param key
@@ -1317,63 +1265,6 @@ public abstract class BaseFont {
         return c;
     }
 
-    /**
-     * Gets the CID code given an Unicode. It has only meaning with CJK fonts.
-     * 
-     * @param c
-     *            the Unicode
-     * @return the CID equivalent
-     */
-    public int getCidCode(int c) {
-        return c;
-    }
-
-    /**
-     * Checks if the font has any kerning pairs.
-     * 
-     * @return <CODE>true</CODE> if the font has any kerning pairs
-     */
-    public abstract boolean hasKernPairs();
-
-    /**
-     * Checks if a character exists in this font.
-     * 
-     * @param c
-     *            the character to check
-     * @return <CODE>true</CODE> if the character has a glyph,
-     *         <CODE>false</CODE> otherwise
-     */
-    public boolean charExists(int c) {
-        byte[] b = convertToBytes(c);
-        return b.length > 0;
-    }
-
     protected abstract int[] getRawCharBBox(int c, String name);
 
-    /**
-     * Returns the compression level used for the font streams.
-     * 
-     * @return the compression level (0 = best speed, 9 = best compression, -1
-     *         is default)
-     * @since 2.1.3
-     */
-    public int getCompressionLevel() {
-        return compressionLevel;
-    }
-
-    /**
-     * Sets the compression level to be used for the font streams.
-     * 
-     * @param compressionLevel
-     *            a value between 0 (best speed) and 9 (best compression)
-     * @since 2.1.3
-     */
-    public void setCompressionLevel(int compressionLevel) {
-        if (compressionLevel < PdfStream.NO_COMPRESSION
-                || compressionLevel > PdfStream.BEST_COMPRESSION) {
-            this.compressionLevel = PdfStream.DEFAULT_COMPRESSION;
-        } else {
-            this.compressionLevel = compressionLevel;
-        }
-    }
 }

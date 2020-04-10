@@ -80,10 +80,7 @@ public class PdfLine {
     
     /** The listsymbol (if necessary). */
     protected Chunk listSymbol = null;
-    
-    /** The listsymbol (if necessary). */
-    protected float symbolIndent;
-    
+
     /** <CODE>true</CODE> if the chunk splitting was caused by a newline. */
     protected boolean newlineSplit = false;
     
@@ -312,17 +309,7 @@ public class PdfLine {
     public Chunk listSymbol() {
         return listSymbol;
     }
-    
-    /**
-     * Return the indentation needed to show the listsymbol.
-     *
-     * @return    a value
-     */
-    
-    public float listIndent() {
-        return symbolIndent;
-    }
-    
+
     /**
      * Get the string representation of what is in this line.
      *

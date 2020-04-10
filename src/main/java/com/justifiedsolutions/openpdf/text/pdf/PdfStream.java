@@ -49,17 +49,16 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Document;
+import com.justifiedsolutions.openpdf.text.ExceptionConverter;
+import com.justifiedsolutions.openpdf.text.Utilities;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.DocWriter;
-import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 
 
 /**
@@ -97,19 +96,9 @@ public class PdfStream extends PdfDictionary {
      * @since    2.1.3
      */
     public static final int NO_COMPRESSION = 0;
-    /**
-     * A possible compression level.
-     * @since    2.1.3
-     */
-    public static final int BEST_SPEED = 1;
-    /**
-     * A possible compression level.
-     * @since    2.1.3
-     */
-    public static final int BEST_COMPRESSION = 9;
-    
-    
-/** is the stream compressed? */
+
+
+    /** is the stream compressed? */
     protected boolean compressed = false;
     /**
      * The level of compression.
@@ -121,12 +110,10 @@ public class PdfStream extends PdfDictionary {
     protected InputStream inputStream;
     protected PdfIndirectReference ref;
     protected long inputStreamLength = -1;
-    protected PdfWriter writer;
     protected long rawLength;
 
-    static final byte[] STARTSTREAM = DocWriter.getISOBytes("stream\n");
-    static final byte[] ENDSTREAM = DocWriter.getISOBytes("\nendstream");
-    static final int SIZESTREAM = STARTSTREAM.length + ENDSTREAM.length;
+    static final byte[] STARTSTREAM = Utilities.getISOBytes("stream\n");
+    static final byte[] ENDSTREAM = Utilities.getISOBytes("\nendstream");
 
     // constructors
     
@@ -143,32 +130,8 @@ public class PdfStream extends PdfDictionary {
         rawLength = bytes.length;
         put(PdfName.LENGTH, new PdfNumber(bytes.length));
     }
-  
+
     /**
-     * Creates an efficient stream. No temporary array is ever created. The <CODE>InputStream</CODE>
-     * is totally consumed but is not closed. The general usage is:
-     * <p>
-     * <pre>
-     * InputStream in = ...;
-     * PdfStream stream = new PdfStream(in, writer);
-     * stream.flateCompress();
-     * writer.addToBody(stream);
-     * stream.writeLength();
-     * in.close();
-     * </pre>
-     * @param inputStream the data to write to this stream
-     * @param writer the <CODE>PdfWriter</CODE> for this stream
-     */    
-    public PdfStream(InputStream inputStream, PdfWriter writer) {
-        super();
-        type = STREAM;
-        this.inputStream = inputStream;
-        this.writer = writer;
-        ref = writer.getPdfIndirectReference();
-        put(PdfName.LENGTH, ref);
-    }
-  
-/**
  * Constructs a <CODE>PdfStream</CODE>-object.
  */
     
@@ -176,38 +139,7 @@ public class PdfStream extends PdfDictionary {
         super();
         type = STREAM;
     }
-    
-    /**
-     * Writes the stream length to the <CODE>PdfWriter</CODE>.
-     * <p>
-     * This method must be called and can only be called if the constructor {@link #PdfStream(InputStream,PdfWriter)}
-     * is used to create the stream.
-     * @throws IOException on error
-     * @see #PdfStream(InputStream,PdfWriter)
-     */
-    public void writeLength() throws IOException {
-        if (inputStream == null)
-            throw new UnsupportedOperationException(MessageLocalization.getComposedMessage("writelength.can.only.be.called.in.a.contructed.pdfstream.inputstream.pdfwriter"));
-        if (inputStreamLength == -1)
-            throw new IOException(MessageLocalization.getComposedMessage("writelength.can.only.be.called.after.output.of.the.stream.body"));
-        writer.addToBody(new PdfNumber(inputStreamLength), ref, false);
-    }
-    
-    /**
-     * Gets the raw length of the stream.
-     * @return the raw length of the stream
-     */
-    public long getRawLength() {
-        return rawLength;
-    }
-    
-    /**
-     * Compresses the stream.
-     */
-    public void flateCompress() {
-        flateCompress(DEFAULT_COMPRESSION);
-    }
-    
+
     /**
      * Compresses the stream.
      * @param compressionLevel the compression level (0 = best speed, 9 = best compression, -1 is default)
@@ -269,15 +201,6 @@ public class PdfStream extends PdfDictionary {
             throw new ExceptionConverter(ioe);
         }
     }
-
-//    public int getStreamLength(PdfWriter writer) {
-//        if (dicBytes == null)
-//            toPdf(writer);
-//        if (streamBytes != null)
-//            return streamBytes.size() + dicBytes.length + SIZESTREAM;
-//        else
-//            return bytes.length + dicBytes.length + SIZESTREAM;
-//    }
     
     protected void superToPdf(PdfWriter writer, OutputStream os) throws IOException {
         super.toPdf(writer, os);
@@ -324,19 +247,7 @@ public class PdfStream extends PdfDictionary {
             }
         os.write(ENDSTREAM);
     }
-    
-    /**
-     * Writes the data content to an <CODE>OutputStream</CODE>.
-     * @param os the destination to write to
-     * @throws IOException on error
-     */    
-    public void writeContent(OutputStream os) throws IOException {
-        if (streamBytes != null)
-            streamBytes.writeTo(os);
-        else if (bytes != null)
-            os.write(bytes);
-    }
-    
+
     /**
      * @see PdfObject#toString()
      */

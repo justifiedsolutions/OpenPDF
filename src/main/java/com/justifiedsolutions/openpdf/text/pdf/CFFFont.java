@@ -69,7 +69,6 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -946,23 +945,8 @@ public class CFFFont {
         
         return b;
     }
-    
-    
-    public boolean isCID(String fontName) {
-        int j;
-        for (j=0; j<fonts.length; j++)
-            if (fontName.equals(fonts[j].name)) return fonts[j].isCID;
-        return false;
-    }
-    
-    public boolean exists(String fontName) {
-        int j;
-        for (j=0; j<fonts.length; j++)
-            if (fontName.equals(fonts[j].name)) return true;
-        return false;
-    }
-    
-    
+
+
     public String[] getNames() {
         String[] names = new String[ fonts.length ];
         for (int i=0; i<fonts.length; i++)
@@ -995,20 +979,17 @@ public class CFFFont {
         public int       privateLength     = -1; // only if not CID
         public int       privateSubrs      = -1;
         public int       charstringsOffset = -1;
-        public int       encodingOffset    = -1;
         public int       charsetOffset     = -1;
         public int       fdarrayOffset     = -1; // only if CID
         public int       fdselectOffset    = -1; // only if CID
         public int[]     fdprivateOffsets;
         public int[]     fdprivateLengths;
-        public int[]     fdprivateSubrs;
-        
+
         // Added by Oren & Ygal
         public int nglyphs;
         public int nstrings;
         public int CharsetLength;
         public int[]    charstringsOffsets;
-        public int[]    charset;
         public int[]     FDSelect;
         public int FDSelectLength;
         public int FDSelectFormat;

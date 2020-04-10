@@ -107,16 +107,6 @@ public class Chapter extends Section {
         triggerNewPage = true;
     }
 
-    /**
-     * Constructs a new <CODE>Chapter</CODE>.
-     *
-     * @param title  the Chapter title (as a <CODE>String</CODE>)
-     * @param number the Chapter number
-     */
-    public Chapter(String title, int number) {
-        this(new Paragraph(title), number);
-    }
-
     // implementation of the Element-methods
 
     public static Chapter getInstance(com.justifiedsolutions.openpdf.pdf.Chapter chapter) {

@@ -118,22 +118,7 @@ public class PdfRectangle extends PdfArray {
         this(llx, lly, urx, ury, 0);
     }
 
-/**
- * Constructs a <CODE>PdfRectangle</CODE>-object starting from the origin (0, 0).
- *
- * @param        urx            upper right x
- * @param        ury            upper right y
- */
-
-    public PdfRectangle(float urx, float ury, int rotation) {
-        this(0, 0, urx, ury, rotation);
-    }
-
-    public PdfRectangle(float urx, float ury) {
-        this(0, 0, urx, ury, 0);
-    }
-
-/**
+    /**
  * Constructs a <CODE>PdfRectangle</CODE>-object with a <CODE>Rectangle</CODE>-object.
  *
  * @param    rectangle    a <CODE>Rectangle</CODE>

@@ -47,7 +47,7 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import java.io.IOException;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+
 /** Implements the shading pattern dictionary.
  *
  * @author Paulo Soares (psoares@consiste.pt)
@@ -64,21 +64,10 @@ public class PdfShadingPattern extends PdfDictionary {
 
     protected PdfIndirectReference patternReference;
 
-    /** Creates new PdfShadingPattern */
-    public PdfShadingPattern(PdfShading shading) {
-        writer = shading.getWriter();
-        put(PdfName.PATTERNTYPE, new PdfNumber(2));
-        this.shading = shading;
-    }
-        
     PdfName getPatternName() {
         return patternName;
     }
 
-    PdfName getShadingName() {
-        return shading.getShadingName();
-    }
-    
     PdfIndirectReference getPatternReference() {
         if (patternReference == null)
             patternReference = writer.getPdfIndirectReference();
@@ -98,17 +87,7 @@ public class PdfShadingPattern extends PdfDictionary {
         put(PdfName.MATRIX, new PdfArray(matrix));
         writer.addToBody(this, getPatternReference());
     }
-    
-    public void setMatrix(float[] matrix) {
-        if (matrix.length != 6)
-            throw new RuntimeException(MessageLocalization.getComposedMessage("the.matrix.size.must.be.6"));
-        this.matrix = matrix;
-    }
-    
-    public float[] getMatrix() {
-        return matrix;
-    }
-    
+
     public PdfShading getShading() {
         return shading;
     }

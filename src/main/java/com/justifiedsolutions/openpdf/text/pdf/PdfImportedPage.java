@@ -52,43 +52,19 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.io.IOException;
 
-/** Represents an imported page.
+/**
+ * Represents an imported page.
  *
  * @author Paulo Soares (psoares@consiste.pt)
  */
 public class PdfImportedPage extends PdfTemplate {
 
-    PdfReaderInstance readerInstance;
-    int pageNumber;
-    
-    /** Reads the content from this <CODE>PdfImportedPage</CODE>-object from a reader.
+
+    /**
+     * Always throws an error. This operation is not allowed.
      *
-     * @return self
-     *
+     * @return dummy
      */
-    public PdfImportedPage getFromReader() {
-      return this;
-    }
-
-    public int getPageNumber() {
-        return pageNumber;
-    }
-
-
-    /** Always throws an error. This operation is not allowed.
-     * @param template dummy
-     * @param a dummy
-     * @param b dummy
-     * @param c dummy
-     * @param d dummy
-     * @param e dummy
-     * @param f  dummy */    
-    public void addTemplate(PdfTemplate template, float a, float b, float c, float d, float e, float f) {
-        throwError();
-    }
-    
-    /** Always throws an error. This operation is not allowed.
-     * @return  dummy */    
     public PdfContentByte getDuplicate() {
         throwError();
         return null;
@@ -97,47 +73,39 @@ public class PdfImportedPage extends PdfTemplate {
     /**
      * Gets the stream representing this page.
      *
-     * @param    compressionLevel    the compressionLevel
+     * @param compressionLevel the compressionLevel
      * @return the stream representing this page
-     * @since    2.1.3    (replacing the method without param compressionLevel)
+     * @since 2.1.3    (replacing the method without param compressionLevel)
      */
     PdfStream getFormXObject(int compressionLevel) throws IOException {
-         return readerInstance.getFormXObject(pageNumber, compressionLevel);
+        return null;
     }
-    
+
     public void setColorFill(PdfSpotColor sp, float tint) {
         throwError();
     }
-    
+
     public void setColorStroke(PdfSpotColor sp, float tint) {
         throwError();
     }
-    
+
     PdfObject getResources() {
-        return readerInstance.getResources(pageNumber);
+        return null;
     }
-    
-    /** Always throws an error. This operation is not allowed.
-     * @param bf dummy
-     * @param size dummy */    
-    public void setFontAndSize(BaseFont bf, float size) {
-        throwError();
-    }
-    
+
     /**
      * Always throws an error. This operation is not allowed.
-     * @param group New value of property group.
-     * @since    2.1.6
-     */ 
-    public void setGroup(PdfTransparencyGroup group) {
+     *
+     * @param bf   dummy
+     * @param size dummy
+     */
+    public void setFontAndSize(BaseFont bf, float size) {
         throwError();
     }
 
     void throwError() {
-        throw new RuntimeException(MessageLocalization.getComposedMessage("content.can.not.be.added.to.a.pdfimportedpage"));
+        throw new RuntimeException(MessageLocalization
+                .getComposedMessage("content.can.not.be.added.to.a.pdfimportedpage"));
     }
-    
-    PdfReaderInstance getPdfReaderInstance() {
-        return readerInstance;
-    }
+
 }

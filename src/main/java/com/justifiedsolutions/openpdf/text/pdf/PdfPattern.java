@@ -56,14 +56,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
  */
 
 public class PdfPattern extends PdfStream {
-    
-    /**
-     * Creates a PdfPattern object.
-     * @param    painter    a pattern painter instance
-     */
-    PdfPattern(PdfPatternPainter painter) {
-        this(painter, DEFAULT_COMPRESSION);
-    }
 
     /**
      * Creates a PdfPattern object.

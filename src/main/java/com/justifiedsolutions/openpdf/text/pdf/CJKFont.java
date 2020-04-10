@@ -51,7 +51,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -132,12 +131,10 @@ class CJKFont extends BaseFont {
      *            the name of the font
      * @param enc
      *            the encoding of the font
-     * @param emb
-     *            always <CODE>false</CODE>. CJK font and not embedded
      * @throws DocumentException
      *             on error
      */
-    CJKFont(String fontName, String enc, boolean emb) throws DocumentException {
+    CJKFont(String fontName, String enc) throws DocumentException {
         loadProperties();
         fontType = FONT_TYPE_CJK;
         String nameBase = getBaseName(fontName);
@@ -279,11 +276,6 @@ class CJKFont extends BaseFont {
 
     @Override
     int getRawWidth(int c, String name) {
-        return 0;
-    }
-
-    @Override
-    public int getKerning(int char1, int char2) {
         return 0;
     }
 
@@ -689,35 +681,11 @@ class CJKFont extends BaseFont {
         return c;
     }
 
-    @Override
     public int getCidCode(int c) {
         if (cidDirect) {
             return c;
         }
         return translationMap[c];
-    }
-
-    /**
-     * Checks if the font has any kerning pairs.
-     * 
-     * @return always <CODE>false</CODE>
-     */
-    @Override
-    public boolean hasKernPairs() {
-        return false;
-    }
-
-    /**
-     * Checks if a character exists in this font.
-     * 
-     * @param c
-     *            the character to check
-     * @return <CODE>true</CODE> if the character has a glyph,
-     *         <CODE>false</CODE> otherwise
-     */
-    @Override
-    public boolean charExists(int c) {
-        return translationMap[c] != 0;
     }
 
     @Override

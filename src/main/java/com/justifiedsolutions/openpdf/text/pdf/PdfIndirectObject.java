@@ -50,10 +50,9 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Utilities;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import com.justifiedsolutions.openpdf.text.DocWriter;
 
 /**
  * <CODE>PdfIndirectObject</CODE> is the Pdf indirect object.
@@ -80,9 +79,8 @@ public class PdfIndirectObject {
 /** the generation number */
     protected int generation = 0;
 
-    static final byte[] STARTOBJ = DocWriter.getISOBytes(" obj\n");
-    static final byte[] ENDOBJ = DocWriter.getISOBytes("\nendobj\n");
-    static final int SIZEOBJ = STARTOBJ.length + ENDOBJ.length;
+    static final byte[] STARTOBJ = Utilities.getISOBytes(" obj\n");
+    static final byte[] ENDOBJ = Utilities.getISOBytes("\nendobj\n");
     PdfObject object;
     PdfWriter writer;
     
@@ -98,11 +96,8 @@ public class PdfIndirectObject {
     PdfIndirectObject(int number, PdfObject object, PdfWriter writer) {
         this(number, 0, object, writer);
     }
-    
-    PdfIndirectObject(PdfIndirectReference ref, PdfObject object, PdfWriter writer) {
-        this(ref.getNumber(),ref.getGeneration(),object,writer);
-    }
-/**
+
+    /**
  * Constructs a <CODE>PdfIndirectObject</CODE>.
  *
  * @param        number            the object number
@@ -151,9 +146,9 @@ public class PdfIndirectObject {
  */
     void writeTo(OutputStream os) throws IOException
     {
-        os.write(DocWriter.getISOBytes(String.valueOf(number)));
+        os.write(Utilities.getISOBytes(String.valueOf(number)));
         os.write(' ');
-        os.write(DocWriter.getISOBytes(String.valueOf(generation)));
+        os.write(Utilities.getISOBytes(String.valueOf(generation)));
         os.write(STARTOBJ);
         object.toPdf(writer, os);
         os.write(ENDOBJ);

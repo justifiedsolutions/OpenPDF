@@ -268,15 +268,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Gets the current text leading.
-     *
-     * @return the current text leading
-     */
-    public float getLeading() {
-        return state.leading;
-    }
-
-    /**
      * Gets the current character spacing.
      *
      * @return the current character spacing
@@ -367,18 +358,6 @@ public class PdfContentByte {
         content.append("0 g").append_i(separator);
     }
 
-    /**
-     * Changes the currentgray tint for stroking paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceGray</B> (or the <B>DefaultGray</B> color space),
-     * and sets the gray tint to use for stroking paths.</P>
-     *
-     * @param   gray    a value between 0 (black) and 1 (white)
-     */
-
-    public void setGrayStroke(float gray) {
-        setGrayStroke(gray, MAX_FLOAT_COLOR_VALUE);
-    }
     public void setGrayStroke(float gray, float alpha) {
         saveColorStroke(new GrayColor(gray, alpha));
         content.append(gray).append(" G").append_i(separator);
@@ -490,18 +469,6 @@ public class PdfContentByte {
     /**
      * Helper to validate and write the CMYK color components.
      *
-     * @param   cyan    the intensity of cyan. A value between 0 and 255
-     * @param   magenta the intensity of magenta. A value between 0 and 255
-     * @param   yellow  the intensity of yellow. A value between 0 and 255
-     * @param   black   the intensity of black. A value between 0 and 255
-     */
-    private void HelperCMYK(int cyan, int magenta, int yellow, int black) {
-        HelperCMYK((float)(cyan & MAX_COLOR_VALUE) / MAX_INT_COLOR_VALUE, (float)(magenta & MAX_COLOR_VALUE) / MAX_INT_COLOR_VALUE, (float)(yellow & MAX_COLOR_VALUE) / MAX_INT_COLOR_VALUE, (float)(black & MAX_COLOR_VALUE) / MAX_INT_COLOR_VALUE);
-    }
-
-    /**
-     * Helper to validate and write the CMYK color components.
-     *
      * @param   cyan    the intensity of cyan. A value between 0 and 1
      * @param   magenta the intensity of magenta. A value between 0 and 1
      * @param   yellow  the intensity of yellow. A value between 0 and 1
@@ -527,74 +494,15 @@ public class PdfContentByte {
         content.append(cyan).append(' ').append(magenta).append(' ').append(yellow).append(' ').append(black);
     }
 
-    /**
-     * Changes the current color for filling paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceCMYK</B> (or the <B>DefaultCMYK</B> color space),
-     * and sets the color to use for filling paths.</P>
-     * <P>
-     * Following the PDF manual, each operand must be a number between 0 (no ink) and
-     * 1 (maximum ink).</P>
-     *
-     * @param   cyan    the intensity of cyan. A value between 0 and 1
-     * @param   magenta the intensity of magenta. A value between 0 and 1
-     * @param   yellow  the intensity of yellow. A value between 0 and 1
-     * @param   black   the intensity of black. A value between 0 and 1
-     */
-
-    public void setCMYKColorFillF(float cyan, float magenta, float yellow, float black) {
-        setCMYKColorFillF(cyan, magenta, yellow, black, MAX_FLOAT_COLOR_VALUE);
-    }
-
     public void setCMYKColorFillF(float cyan, float magenta, float yellow, float black, float alpha) {
         saveColorFill(new CMYKColor(cyan, magenta, yellow, black, alpha));
         HelperCMYK(cyan, magenta, yellow, black);
         content.append(" k").append_i(separator);
     }
 
-    /**
-     * Changes the current color for filling paths to black.
-     *
-     */
-
-    public void resetCMYKColorFill() {
-        saveColorFill(new CMYKColor(0.0f, 0.0f, 0.0f, MAX_FLOAT_COLOR_VALUE));
-        HelperCMYK(0.0f, 0.0f, 0.0f, MAX_FLOAT_COLOR_VALUE);
-        content.append(" k").append_i(separator);
-    }
-
-    /**
-     * Changes the current color for stroking paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceCMYK</B> (or the <B>DefaultCMYK</B> color space),
-     * and sets the color to use for stroking paths.</P>
-     * <P>
-     * Following the PDF manual, each operand must be a number between 0 (miniumum intensity) and
-     * 1 (maximum intensity).
-     *
-     * @param   cyan    the intensity of cyan. A value between 0 and 1
-     * @param   magenta the intensity of magenta. A value between 0 and 1
-     * @param   yellow  the intensity of yellow. A value between 0 and 1
-     * @param   black   the intensity of black. A value between 0 and 1
-     */
-
-    public void setCMYKColorStrokeF(float cyan, float magenta, float yellow, float black) {
-        setCMYKColorStrokeF(cyan, magenta, yellow, black, MAX_FLOAT_COLOR_VALUE);
-    }
     public void setCMYKColorStrokeF(float cyan, float magenta, float yellow, float black, float alpha) {
         saveColorStroke(new CMYKColor(cyan, magenta, yellow, black, alpha));
         HelperCMYK(cyan, magenta, yellow, black);
-        content.append(" K").append_i(separator);
-    }
-
-    /**
-     * Changes the current color for stroking paths to black.
-     *
-     */
-
-    public void resetCMYKColorStroke() {
-        saveColorStroke(new CMYKColor(0.0f, 0.0f, 0.0f, MAX_FLOAT_COLOR_VALUE));
-        HelperCMYK(0.0f, 0.0f, 0.0f, MAX_FLOAT_COLOR_VALUE);
         content.append(" K").append_i(separator);
     }
 
@@ -974,19 +882,6 @@ public class PdfContentByte {
     }
 
     /**
-     * Sets the text leading parameter.
-     * <P>
-     * The leading parameter is measured in text space units. It specifies the vertical distance
-     * between the baselines of adjacent lines of text.</P>
-     *
-     * @param       leading         the new leading
-     */
-    public void setLeading(float leading) {
-        state.leading = leading;
-        content.append(leading).append(" TL").append_i(separator);
-    }
-
-    /**
      * Set the font and the size for the subsequent text writing.
      *
      * @param bf the font
@@ -1162,77 +1057,6 @@ public class PdfContentByte {
     public void concatCTM(float a, float b, float c, float d, float e, float f) {
         content.append(a).append(' ').append(b).append(' ').append(c).append(' ');
         content.append(d).append(' ').append(e).append(' ').append(f).append(" cm").append_i(separator);
-    }
-
-    /**
-     * Adds a template to this content.
-     *
-     * @param template the template
-     * @param a an element of the transformation matrix
-     * @param b an element of the transformation matrix
-     * @param c an element of the transformation matrix
-     * @param d an element of the transformation matrix
-     * @param e an element of the transformation matrix
-     * @param f an element of the transformation matrix
-     */
-    public void addTemplate(PdfTemplate template, float a, float b, float c, float d, float e, float f) {
-        checkWriter();
-        checkNoPattern(template);
-        PdfName name = writer.addDirectTemplateSimple(template, null);
-        PageResources prs = getPageResources();
-        name = prs.addXObject(name, template.getIndirectReference());
-        content.append("q ");
-        content.append(a).append(' ');
-        content.append(b).append(' ');
-        content.append(c).append(' ');
-        content.append(d).append(' ');
-        content.append(e).append(' ');
-        content.append(f).append(" cm ");
-        content.append(name.getBytes()).append(" Do Q").append_i(separator);
-    }
-
-    /**
-     * Changes the current color for filling paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceCMYK</B> (or the <B>DefaultCMYK</B> color space),
-     * and sets the color to use for filling paths.</P>
-     * <P>
-     * This method is described in the 'Portable Document Format Reference Manual version 1.3'
-     * section 8.5.2.1 (page 331).</P>
-     * <P>
-     * Following the PDF manual, each operand must be a number between 0 (no ink) and
-     * 1 (maximum ink). This method however accepts only integers between 0x00 and 0xFF.</P>
-     *
-     * @param cyan the intensity of cyan
-     * @param magenta the intensity of magenta
-     * @param yellow the intensity of yellow
-     * @param black the intensity of black
-     */
-
-    public void setCMYKColorFill(int cyan, int magenta, int yellow, int black) {
-        HelperCMYK(cyan, magenta, yellow, black);
-        content.append(" k").append_i(separator);
-    }
-    /**
-     * Changes the current color for stroking paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceCMYK</B> (or the <B>DefaultCMYK</B> color space),
-     * and sets the color to use for stroking paths.</P>
-     * <P>
-     * This method is described in the 'Portable Document Format Reference Manual version 1.3'
-     * section 8.5.2.1 (page 331).</P>
-     * Following the PDF manual, each operand must be a number between 0 (minimum intensity) and
-     * 1 (maximum intensity). This method however accepts only integers between 0x00 and 0xFF.
-     *
-     * @param cyan the intensity of red
-     * @param magenta the intensity of green
-     * @param yellow the intensity of blue
-     * @param black the intensity of black
-     */
-
-    public void setCMYKColorStroke(int cyan, int magenta, int yellow, int black) {
-        HelperCMYK(cyan, magenta, yellow, black);
-        content.append(" K").append_i(separator);
     }
 
     /**
@@ -1631,15 +1455,6 @@ public class PdfContentByte {
     }
 
 
-    /** Throws an error if it is a pattern.
-     * @param t the object to check
-     */
-    void checkNoPattern(PdfTemplate t) {
-        if (t.getType() == PdfTemplate.TYPE_PATTERN)
-            throw new RuntimeException(MessageLocalization.getComposedMessage("invalid.use.of.a.pattern.a.template.was.expected"));
-    }
-
-
     PageResources getPageResources() {
         return pdf.getPageResources();
     }
@@ -1653,58 +1468,6 @@ public class PdfContentByte {
         PdfName name = prs.addExtGState((PdfName)obj[0], (PdfIndirectReference)obj[1]);
         state.extGState = gstate;
         content.append(name.getBytes()).append(" gs").append_i(separator);
-    }
-
-    /**
-     * Begins a graphic block whose visibility is controlled by the <CODE>layer</CODE>.
-     * Blocks can be nested. Each block must be terminated by an {@link #endLayer()}.<p>
-     * Note that nested layers with {@link PdfLayer#addChild(PdfLayer)} only require a single
-     * call to this method and a single call to {@link #endLayer()}; all the nesting control
-     * is built in.
-     * @param layer the layer
-     */
-    public void beginLayer(PdfOCG layer) {
-        if ((layer instanceof PdfLayer) && ((PdfLayer)layer).getTitle() != null)
-            throw new IllegalArgumentException(MessageLocalization.getComposedMessage("a.title.is.not.a.layer"));
-        if (layerDepth == null)
-            layerDepth = new ArrayList<>();
-        if (layer instanceof PdfLayerMembership) {
-            layerDepth.add(1);
-            beginLayer2(layer);
-        } else if (layer instanceof PdfLayer) {
-            PdfLayer la = (PdfLayer) layer;
-            int n = 0;
-            while (la != null) {
-                if (la.getTitle() == null) {
-                    beginLayer2(la);
-                    ++n;
-                }
-                la = la.getParent();
-            }
-            layerDepth.add(n);
-        }
-    }
-
-    private void beginLayer2(PdfOCG layer) {
-        PdfName name = (PdfName)writer.addSimpleProperty(layer, layer.getRef())[0];
-        PageResources prs = getPageResources();
-        name = prs.addProperty(name, layer.getRef());
-        content.append("/OC ").append(name.getBytes()).append(" BDC").append_i(separator);
-    }
-
-    /**
-     * Ends a layer controlled graphic block. It will end the most recent open block.
-     */
-    public void endLayer() {
-        int n;
-        if (layerDepth != null && !layerDepth.isEmpty()) {
-            n = layerDepth.get(layerDepth.size() - 1);
-            layerDepth.remove(layerDepth.size() - 1);
-        } else {
-            throw new IllegalPdfSyntaxException(MessageLocalization.getComposedMessage("unbalanced.layer.operators"));
-        }
-        while (n-- > 0)
-            content.append("EMC").append_i(separator);
     }
 
     /**

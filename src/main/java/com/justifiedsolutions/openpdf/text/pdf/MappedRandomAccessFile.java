@@ -109,13 +109,6 @@ public class MappedRandomAccessFile {
     }
 
     /**
-     * @since 2.0.8
-     */
-    public FileChannel getChannel() {
-        return channel;
-    }
-    
-    /**
      * @see java.io.RandomAccessFile#read()
      * @return int next integer or -1 on EOF
      */

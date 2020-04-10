@@ -65,16 +65,12 @@ import java.util.Objects;
  */
 public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
 
-    // CLASS VARIABLES
-    
     /**
      * actual value of this <CODE>PdfNumber</CODE>, represented as a
      * <CODE>double</CODE>
      */
     private final double value;
-    
-    // CONSTRUCTORS
-    
+
     /**
      * Constructs a <CODE>PdfNumber</CODE>-object.
      *
@@ -132,9 +128,7 @@ public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
     public PdfNumber(float value) {
         this((double)value);
     }
-    
-    // methods returning the value of this object
-    
+
     /**
      * Returns the primitive <CODE>int</CODE> value of this object.
      *
@@ -152,17 +146,6 @@ public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
     public double doubleValue() {
         return value;
     }
-    
-    /**
-     * Returns the primitive <CODE>float</CODE> value of this object.
-     *
-     * @return The value as <CODE>float</CODE>
-     */
-    public float floatValue() {
-        return (float)value;
-    }
-    
-    // other methods
 
     @Override
     public boolean equals(Object o) {

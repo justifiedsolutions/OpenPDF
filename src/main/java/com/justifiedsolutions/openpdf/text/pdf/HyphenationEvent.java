@@ -53,11 +53,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
  */
 public interface HyphenationEvent {
 
-    /** Gets the hyphen symbol.
-     * @return the hyphen symbol
-     */
-    String getHyphenSymbol();
-    
     /** Hyphenates a word and returns the first part of it. To get
      * the second part of the hyphenated word call <CODE>getHyphenatedWordPost()</CODE>.
      * @param word the word to hyphenate

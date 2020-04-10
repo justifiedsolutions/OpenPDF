@@ -187,26 +187,17 @@ public class PdfDocument extends Document {
 
     static class PdfCatalog extends PdfDictionary {
 
-        /** The writer writing the PDF for which we are creating this catalog object. */
-        PdfWriter writer;
-
         /**
          * Constructs a <CODE>PdfCatalog</CODE>.
          *
          * @param        pages        an indirect reference to the root of the document's Pages tree.
-         * @param writer the writer the catalog applies to
          */
-
-        PdfCatalog(PdfIndirectReference pages, PdfWriter writer) {
+        PdfCatalog(PdfIndirectReference pages) {
             super(CATALOG);
-            this.writer = writer;
             put(PdfName.PAGES, pages);
         }
 
-
     }
-
-// CONSTRUCTING A PdfDocument/PdfWriter INSTANCE
 
     /**
      * Constructs a new PDF document.
@@ -245,15 +236,6 @@ public class PdfDocument extends Document {
 
     /** This represents the leading of the lines. */
     protected float leading = 0;
-
-    /**
-     * Getter for the current leading.
-     * @return    the current leading
-     * @since    2.1.2
-     */
-    public float getLeading() {
-        return leading;
-    }
 
     /** This represents the current alignment of the PDF Elements. */
     protected int alignment = Element.ALIGN_LEFT;
@@ -609,11 +591,6 @@ public class PdfDocument extends Document {
 
             // [M1]
             pageResources.addDefaultColorDiff(writer.getDefaultColorspace());
-            if (writer.isRgbTransparencyBlending()) {
-                PdfDictionary dcs = new PdfDictionary();
-                dcs.put(PdfName.CS, PdfName.DEVICERGB);
-                pageResources.addDefaultColorDiff(dcs);
-            }
             PdfDictionary resources = pageResources.getResources();
 
             // we create the page dictionary
@@ -649,10 +626,6 @@ public class PdfDocument extends Document {
             }
 
             // [C5] and [C8] we add the annotations
-
-            // [F12] we add tag info
-            if (writer.isTagged())
-                page.put(PdfName.STRUCTPARENTS, new PdfNumber(writer.getCurrentPageNumber() - 1));
 
             if (text.size() > textEmptySize)
                 text.endText();
@@ -733,7 +706,6 @@ public class PdfDocument extends Document {
         text.beginText();
         textEmptySize = text.size();
 
-        markPoint = 0;
         setNewPageSizeAndMargins();
         imageEnd = -1;
         indentation.imageIndentRight = 0;
@@ -894,7 +866,7 @@ public class PdfDocument extends Document {
             text.moveText(moveTextX, -l.height());
             // is the line preceded by a symbol?
             if (l.listSymbol() != null) {
-                ColumnText.showTextAligned(graphics, Element.ALIGN_LEFT, new Phrase(l.listSymbol()), text.getXTLM() - l.listIndent(), text.getYTLM(), 0);
+                ColumnText.showTextAligned(graphics, Element.ALIGN_LEFT, new Phrase(l.listSymbol()), text.getXTLM(), text.getYTLM(), 0);
             }
 
             currentValues[0] = currentFont;
@@ -1346,7 +1318,7 @@ public class PdfDocument extends Document {
      */
 
     PdfCatalog getCatalog(PdfIndirectReference pages) {
-        PdfCatalog catalog = new PdfCatalog(pages, writer);
+        PdfCatalog catalog = new PdfCatalog(pages);
 
         // [C1] outlines
         if (rootOutline.getKids().size() > 0) {
@@ -1440,14 +1412,6 @@ public class PdfDocument extends Document {
         }
     }
 
-
-
-//    [F12] tagged PDF
-
-    protected int markPoint;
-
-    //    [U1] page sizes
-
     /** This is the size of the next page. */
     protected Rectangle nextPageSize = null;
 
@@ -1497,11 +1461,6 @@ public class PdfDocument extends Document {
     PageResources getPageResources() {
         return pageResources;
     }
-
-//    [M3] Images
-
-    /** Holds value of property strictImageSequence. */
-    protected boolean strictImageSequence = false;
 
     /** This is the position where the image ends. */
     protected float imageEnd = -1;

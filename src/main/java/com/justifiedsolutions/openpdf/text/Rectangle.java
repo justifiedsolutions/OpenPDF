@@ -48,10 +48,9 @@
  */
 package com.justifiedsolutions.openpdf.text;
 
+import com.justifiedsolutions.openpdf.text.pdf.GrayColor;
 import java.awt.Color;
 import java.util.ArrayList;
-
-import com.justifiedsolutions.openpdf.text.pdf.GrayColor;
 import java.util.List;
 
 /**
@@ -180,40 +179,6 @@ public class Rectangle implements Element {
 
   // OJO... Modificacion de
   // flopez-------------------------------------------------
-  /**
-   * Constructs a <CODE>Rectangle</CODE> -object.
-   * 
-   * @param llx
-   *          lower left x
-   * @param lly
-   *          lower left y
-   * @param urx
-   *          upper right x
-   * @param ury
-   *          upper right y
-   * @param rotation
-   *          0, 90, 180, or 270 grades
-   */
-  public Rectangle(float llx, float lly, float urx, float ury, int rotation) {
-    this(llx, lly, urx, ury);
-    setRotation(rotation);
-  }
-
-  /**
-   * Constructs a <CODE>Rectangle</CODE> -object starting from the origin (0,
-   * 0).
-   * 
-   * @param urx
-   *          upper right x
-   * @param ury
-   *          upper right y
-   * @param rotation
-   *          0, 90, 180, or 270 grades
-   */
-  public Rectangle(float urx, float ury, int rotation) {
-    this(0, 0, urx, ury);
-    setRotation(rotation);
-  }
 
   /**
    * Sets the rotation of the rectangle. Valid values are 0, 90, 180, and 270.
@@ -441,23 +406,6 @@ public class Rectangle implements Element {
     return ury - lly;
   }
 
-  /**
-   * Normalizes the rectangle. Switches lower left with upper right if
-   * necessary.
-   */
-  public void normalize() {
-    if (llx > urx) {
-      float a = llx;
-      llx = urx;
-      urx = a;
-    }
-    if (lly > ury) {
-      float a = lly;
-      lly = ury;
-      ury = a;
-    }
-  }
-
   // METHODS TO GET/SET THE ROTATION:
 
   /**
@@ -467,18 +415,6 @@ public class Rectangle implements Element {
    */
   public int getRotation() {
     return rotation;
-  }
-
-  /**
-   * Rotates the rectangle. Swaps the values of llx and lly and of urx and ury.
-   * 
-   * @return the rotated <CODE>Rectangle</CODE>
-   */
-  public Rectangle rotate() {
-    Rectangle rect = new Rectangle(lly, llx, ury, urx);
-    rect.rotation = rotation + 90;
-    rect.rotation %= 360;
-    return rect;
   }
 
   // METHODS TO GET/SET THE BACKGROUND COLOR:
@@ -770,16 +706,6 @@ public class Rectangle implements Element {
   }
 
   /**
-   * Sets the color of the border.
-   * 
-   * @param borderColor
-   *          a <CODE>Color</CODE>
-   */
-  public void setBorderColor(Color borderColor) {
-    this.borderColor = borderColor;
-  }
-
-  /**
    * Gets the color of the left border.
    * 
    * @return a <CODE>Color</CODE>
@@ -864,28 +790,6 @@ public class Rectangle implements Element {
   }
 
   // SPECIAL METHODS:
-
-  /**
-   * Gets a Rectangle that is altered to fit on the page.
-   * 
-   * @param top
-   *          the top position
-   * @param bottom
-   *          the bottom position
-   * @return a <CODE>Rectangle</CODE>
-   */
-  public Rectangle rectangle(float top, float bottom) {
-    Rectangle tmp = new Rectangle(this);
-    if (getTop() > top) {
-      tmp.setTop(top);
-      tmp.disableBorderSide(TOP);
-    }
-    if (getBottom() < bottom) {
-      tmp.setBottom(bottom);
-      tmp.disableBorderSide(BOTTOM);
-    }
-    return tmp;
-  }
 
   /**
    * Copies each of the parameters, except the position, from a

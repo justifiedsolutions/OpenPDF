@@ -48,30 +48,12 @@
  */
 package com.justifiedsolutions.openpdf.text;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * A collection of convenience methods that were present in many different iText
  * classes.
  */
 
 public class Utilities {
-
-    /**
-     * Gets the keys of a Hashtable
-     * 
-     * @param table
-     *            a Hashtable
-     * @return the keyset of a Hashtable (or an empty set if table is null)
-     */
-    public static Set<String> getKeySet(Map<String, ?> table) {
-        return (table == null) ? Collections.emptySet() : table.keySet();
-    }
 
     /**
      * Utility method to extend an array.
@@ -182,27 +164,21 @@ public class Utilities {
     }
 
     /**
-     * Reads an input stream to a byte array.
+     * Converts a <CODE>String</CODE> into a <CODE>Byte</CODE> array according to the ISO-8859-1
+     * codepage.
      *
-     * Similar as IOUtils.toByteArray.
-     *
-     * By evernat on Github.
-     *
-     * @param is
-     * @return byte[]
-     * @throws IOException
+     * @param text the text to be converted
+     * @return the conversion result
      */
-    public static byte[] toByteArray(InputStream is) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-        int nRead;
-        byte[] data = new byte[16384];
-
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
+    public static byte[] getISOBytes(String text) {
+        if (text == null) {
+            return null;
         }
-
-        return buffer.toByteArray();
+        int len = text.length();
+        byte[] b = new byte[len];
+        for (int k = 0; k < len; ++k) {
+            b[k] = (byte) text.charAt(k);
+        }
+        return b;
     }
-
 }

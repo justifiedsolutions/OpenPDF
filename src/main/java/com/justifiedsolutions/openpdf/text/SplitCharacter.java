@@ -82,9 +82,7 @@ public interface SplitCharacter {
      *    || (c >= 0xff61 && c < 0xffa0));
      * }
      * }</pre>
-     * @param start the lower limit of <CODE>cc</CODE> inclusive
      * @param current the pointer to the character in <CODE>cc</CODE>
-     * @param end the upper limit of <CODE>cc</CODE> exclusive
      * @param cc an array of characters at least <CODE>end</CODE> sized
      * @param ck an array of <CODE>PdfChunk</CODE>. The main use is to be able to call
      * {@link PdfChunk#getUnicodeEquivalent(int)}. It may be <CODE>null</CODE>
@@ -92,5 +90,5 @@ public interface SplitCharacter {
      * If shorter than <CODE>end</CODE> the last element is used
      * @return <CODE>true</CODE> if the character(s) can split a line
      */
-    boolean isSplitCharacter(int start, int current, int end, char[] cc, PdfChunk[] ck);
+    boolean isSplitCharacter(int current, char[] cc, PdfChunk[] ck);
 }

@@ -55,14 +55,6 @@ public class PdfPSXObject extends PdfTemplate {
     protected PdfPSXObject() {
         super();
     }
-    
-    /**
-     * Constructs a PSXObject
-     * @param wr
-     */
-    public PdfPSXObject(PdfWriter wr) {
-        super(wr);
-    }
 
     /**
      * Gets the stream representing this object.

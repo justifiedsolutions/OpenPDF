@@ -78,8 +78,6 @@ public class PdfXConformanceImp implements PdfXConformance {
     /** A key for an aspect that can be checked for PDF/X Conformance. */
     public static final int PDFXKEY_FONT = 4;
     /** A key for an aspect that can be checked for PDF/X Conformance. */
-    public static final int PDFXKEY_IMAGE = 5;
-    /** A key for an aspect that can be checked for PDF/X Conformance. */
     public static final int PDFXKEY_GSTATE = 6;
     /** A key for an aspect that can be checked for PDF/X Conformance. */
     public static final int PDFXKEY_LAYER = 7;

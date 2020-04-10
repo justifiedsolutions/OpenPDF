@@ -48,7 +48,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -131,27 +130,5 @@ public class PdfNumberTree {
             top = tt;
         }
     }
-    
-    private static void iterateItems(PdfDictionary dic, Map<Integer, PdfObject> items) {
-        PdfArray nn = (PdfArray)PdfReader.getPdfObjectRelease(dic.get(PdfName.NUMS));
-        if (nn != null) {
-            for (int k = 0; k < nn.size(); ++k) {
-                PdfNumber s = (PdfNumber)PdfReader.getPdfObjectRelease(nn.getPdfObject(k++));
-                items.put(s.intValue(), nn.getPdfObject(k));
-            }
-        }
-        else if ((nn = (PdfArray)PdfReader.getPdfObjectRelease(dic.get(PdfName.KIDS))) != null) {
-            for (int k = 0; k < nn.size(); ++k) {
-                PdfDictionary kid = (PdfDictionary)PdfReader.getPdfObjectRelease(nn.getPdfObject(k));
-                iterateItems(kid, items);
-            }
-        }
-    }
-    
-    public static HashMap<Integer, PdfObject> readTree(PdfDictionary dic) {
-        HashMap<Integer, PdfObject> items = new HashMap<>();
-        if (dic != null)
-            iterateItems(dic, items);
-        return items;
-    }
+
 }

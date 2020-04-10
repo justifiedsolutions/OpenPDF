@@ -52,15 +52,13 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.pdf.content.Cell;
 import com.justifiedsolutions.openpdf.pdf.content.Table;
 import com.justifiedsolutions.openpdf.text.Chunk;
-import java.util.ArrayList;
-
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ElementListener;
 import com.justifiedsolutions.openpdf.text.LargeElement;
 import com.justifiedsolutions.openpdf.text.Phrase;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -300,38 +298,6 @@ public class PdfPTable implements LargeElement{
         horizontalAlignment = sourceTable.horizontalAlignment;
         keepTogether = sourceTable.keepTogether;
         complete = sourceTable.complete;
-    }
-
-    /**
-     * Sets the relative widths of the table.
-     * 
-     * @param relativeWidths the relative widths of the table.
-     * @throws DocumentException if the number of widths is different than the number
-     * of columns
-     */    
-    public void setWidths(float[] relativeWidths) throws DocumentException {
-        if (relativeWidths.length != getNumberOfColumns())
-            throw new DocumentException(MessageLocalization.getComposedMessage("wrong.number.of.columns"));
-        this.relativeWidths = new float[relativeWidths.length];
-        System.arraycopy(relativeWidths, 0, this.relativeWidths, 0, relativeWidths.length);
-        absoluteWidths = new float[relativeWidths.length];
-        totalHeight = 0;
-        calculateWidths();
-        calculateHeights(true);
-    }
-
-    /**
-     * Sets the relative widths of the table.
-     * 
-     * @param relativeWidths the relative widths of the table.
-     * @throws DocumentException if the number of widths is different than the number
-     * of columns
-     */    
-    public void setWidths(int[] relativeWidths) throws DocumentException {
-        float[] tb = new float[relativeWidths.length];
-        for (int k = 0; k < relativeWidths.length; ++k)
-            tb[k] = relativeWidths[k];
-        setWidths(tb);
     }
 
     /**
@@ -982,18 +948,7 @@ public class PdfPTable implements LargeElement{
     public int getHorizontalAlignment() {
         return horizontalAlignment;
     }
-    
-    /**
-     * Sets the horizontal alignment of the table relative to the page.
-     * It only has meaning if the width percentage is less than 100%.
-     *
-     * @param horizontalAlignment the horizontal alignment of the table
-     * relative to the page
-     */
-    public void setHorizontalAlignment(int horizontalAlignment) {
-        this.horizontalAlignment = horizontalAlignment;
-    }
-    
+
     /**
      * Gets a row with a given index
      * (added by Jin-Hsia Yang).
@@ -1164,16 +1119,7 @@ public class PdfPTable implements LargeElement{
     public boolean isLockedWidth() {
         return this.lockedWidth;
     }
-    
-    /**
-     * Uses the value in <CODE>setTotalWidth()</CODE> in <CODE>Document.add()</CODE>.
-     * 
-     * @param lockedWidth <CODE>true</CODE> to use the value in <CODE>setTotalWidth()</CODE> in <CODE>Document.add()</CODE>
-     */
-    public void setLockedWidth(boolean lockedWidth) {
-        this.lockedWidth = lockedWidth;
-    }
-    
+
     /**
      * Gets the split value.
      * 

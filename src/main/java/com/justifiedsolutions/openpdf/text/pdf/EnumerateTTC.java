@@ -50,11 +50,10 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.io.IOException;
 import java.util.HashMap;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.DocumentException;
 /** Enumerates all the fonts inside a True Type Collection.
  *
  * @author  Paulo Soares (psoares@consiste.pt)
@@ -83,12 +82,6 @@ class EnumerateTTC extends TrueTypeFont{
         findNames();
     }
 
-    EnumerateTTC(byte[] ttcArray) throws DocumentException, IOException {
-        fileName = "Byte array TTC";
-        rf = new RandomAccessFileOrArray(ttcArray);
-        findNames();
-    }
-    
     void findNames() throws DocumentException, IOException {
         tables = new HashMap<>();
         

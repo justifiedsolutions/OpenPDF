@@ -147,15 +147,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetGrayFill();
     }
-    
-    /**
-     * @see PdfContentByte#setGrayStroke(float)
-     */
-    public void setGrayStroke(float gray) {
-        checkNoColor();
-        super.setGrayStroke(gray);
-    }
-    
+
     /**
      * @see PdfContentByte#resetGrayStroke()
      */
@@ -195,55 +187,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetRGBColorStroke();
     }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorFillF(float, float, float, float)
-     */
-    public void setCMYKColorFillF(float cyan, float magenta, float yellow, float black) {
-        checkNoColor();
-        super.setCMYKColorFillF(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#resetCMYKColorFill()
-     */
-    public void resetCMYKColorFill() {
-        checkNoColor();
-        super.resetCMYKColorFill();
-    }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorStrokeF(float, float, float, float)
-     */
-    public void setCMYKColorStrokeF(float cyan, float magenta, float yellow, float black) {
-        checkNoColor();
-        super.setCMYKColorStrokeF(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#resetCMYKColorStroke()
-     */
-    public void resetCMYKColorStroke() {
-        checkNoColor();
-        super.resetCMYKColorStroke();
-    }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorFill(int, int, int, int)
-     */
-    public void setCMYKColorFill(int cyan, int magenta, int yellow, int black) {
-        checkNoColor();
-        super.setCMYKColorFill(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorStroke(int, int, int, int)
-     */
-    public void setCMYKColorStroke(int cyan, int magenta, int yellow, int black) {
-        checkNoColor();
-        super.setCMYKColorStroke(cyan, magenta, yellow, black);
-    }
-    
+
     /**
      * @see PdfContentByte#setRGBColorFill(int, int, int)
      */

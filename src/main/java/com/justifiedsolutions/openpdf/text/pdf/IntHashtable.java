@@ -29,10 +29,10 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 /***
  * <p>A hash map that uses primitive ints for the key rather than objects.</p>
@@ -140,9 +140,6 @@ public class IntHashtable implements Cloneable {
      *             determined by the <tt>equals</tt> method;
      *             <code>false</code> otherwise.
      * @throws  NullPointerException  if the value is <code>null</code>.
-     * @see        #containsKey(int)
-     * @see        #containsValue(int)
-     * @see        java.util.Map
      */
     public boolean contains(int value) {
 
@@ -320,17 +317,6 @@ public class IntHashtable implements Cloneable {
         return 0;
     }
 
-    /***
-     * <p>Clears this hashtable so that it contains no keys.</p>
-     */
-    public void clear() {
-        Entry[] tab = table;
-        for (int index = tab.length; --index >= 0;) {
-            tab[index] = null;
-        }
-        count = 0;
-    }
-    
     /***
      * <p>Innerclass that acts as a datastructure to create a new entry in the
      * table.</p>

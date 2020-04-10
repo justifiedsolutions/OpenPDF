@@ -91,10 +91,7 @@ public class ColumnText {
     
     /** the space char ratio */
     public static final float GLOBAL_SPACE_CHAR_RATIO = 0;
-    
-    /** Initial value of the status. */
-    public static final int START_COLUMN = 0;
-    
+
     /** Signals that there is no more text available. */
     public static final int NO_MORE_TEXT = 1;
     
@@ -335,19 +332,7 @@ public class ColumnText {
         splittedRow = false;
         waitPhrase = phrase;
     }
-    
-    /**
-     * Adds a <CODE>Chunk</CODE> to the current text array.
-     * Will not have any effect if addElement() was called before.
-     * 
-     * @param chunk the text
-     */
-    public void addText(Chunk chunk) {
-        if (chunk == null || composite)
-            return;
-        addText(new Phrase(chunk));
-    }
-    
+
     /**
      * Adds an element. Elements supported are <CODE>Paragraph</CODE>,
      * <CODE>List</CODE>, <CODE>PdfPTable</CODE>, <CODE>Image</CODE> and
@@ -582,25 +567,7 @@ public class ColumnText {
         this.fixedLeading = fixedLeading;
         this.multipliedLeading = multipliedLeading;
     }
-    
-    /**
-     * Gets the fixed leading.
-     * 
-     * @return the leading
-     */
-    public float getLeading() {
-        return fixedLeading;
-    }
-    
-    /**
-     * Gets the variable leading.
-     * 
-     * @return the leading
-     */
-    public float getMultipliedLeading() {
-        return multipliedLeading;
-    }
-    
+
     /**
      * Sets the yLine. The line will be written to yLine-leading.
      * 
@@ -646,16 +613,7 @@ public class ColumnText {
         this.indent = indent;
         lastWasNewline = true;
     }
-    
-    /**
-     * Gets the first paragraph line indent.
-     * 
-     * @return the indent
-     */
-    public float getIndent() {
-        return indent;
-    }
-    
+
     /**
      * Sets the following paragraph lines indent.
      * 
@@ -665,16 +623,7 @@ public class ColumnText {
         this.followingIndent = indent;
         lastWasNewline = true;
     }
-    
-    /**
-     * Gets the following paragraph lines indent.
-     * 
-     * @return the indent
-     */
-    public float getFollowingIndent() {
-        return followingIndent;
-    }
-    
+
     /**
      * Sets the right paragraph lines indent.
      * 
@@ -684,16 +633,7 @@ public class ColumnText {
         this.rightIndent = indent;
         lastWasNewline = true;
     }
-    
-    /**
-     * Gets the right paragraph lines indent.
-     * 
-     * @return the indent
-     */
-    public float getRightIndent() {
-        return rightIndent;
-    }
-    
+
     /**
      * Outputs the lines to the document. It is equivalent to <CODE>go(false)</CODE>.
      * 
@@ -836,16 +776,7 @@ public class ColumnText {
         }
         return status;
     }
-    
-    /**
-     * Sets the extra space between paragraphs.
-     * 
-     * @return the extra space between paragraphs
-     */
-    public float getExtraParagraphSpace() {
-        return extraParagraphSpace;
-    }
-    
+
     /**
      * Sets the extra space between paragraphs.
      * 
@@ -854,25 +785,7 @@ public class ColumnText {
     public void setExtraParagraphSpace(float extraParagraphSpace) {
         this.extraParagraphSpace = extraParagraphSpace;
     }
-    
-    /**
-     * Clears the chunk array.
-     * A call to <CODE>go()</CODE> will always return NO_MORE_TEXT.
-     */
-    public void clearChunks() {
-        if (bidiLine != null)
-            bidiLine.clearChunks();
-    }
-    
-    /**
-     * Gets the space/character extra spacing ratio for fully justified text.
-     *
-     * @return the space/character extra spacing ratio
-     */    
-    public float getSpaceCharRatio() {
-        return spaceCharRatio;
-    }
-    
+
     /**
      * Sets the ratio between the extra word spacing and the extra character
      * spacing when the text is fully justified.
@@ -906,25 +819,7 @@ public class ColumnText {
     public int getRunDirection() {
         return runDirection;
     }
-    
-    /**
-     * Gets the number of lines written.
-     * 
-     * @return the number of lines written
-     */
-    public int getLinesWritten() {
-        return this.linesWritten;
-    }
-    
-    /**
-     * Gets the arabic shaping options.
-     * 
-     * @return the arabic shaping options
-     */
-    public int getArabicOptions() {
-        return this.arabicOptions;
-    }
-    
+
     /**
      * Sets the arabic shaping options. The option can be AR_NOVOWEL,
      * AR_COMPOSEDTASHKEEL and AR_LIG.
@@ -943,38 +838,7 @@ public class ColumnText {
     public float getDescender() {
         return descender;
     }
-    
-    /**
-     * Gets the width that the line will occupy after writing.
-     * Only the width of the first line is returned.
-     * 
-     * @param phrase the <CODE>Phrase</CODE> containing the line
-     * @param runDirection the run direction
-     * @param arabicOptions the options for the arabic shaping
-     * @return the width of the line
-     */    
-    public static float getWidth(Phrase phrase, int runDirection, int arabicOptions) {
-        ColumnText ct = new ColumnText(null);
-        ct.addText(phrase);
-        ct.addWaitingPhrase();
-        PdfLine line = ct.bidiLine.processLine(0, 20000, Element.ALIGN_LEFT, runDirection, arabicOptions);
-        if (line == null)
-            return 0;
-        else
-            return 20000 - line.widthLeft();
-    }
-    
-    /**
-     * Gets the width that the line will occupy after writing.
-     * Only the width of the first line is returned.
-     * 
-     * @param phrase the <CODE>Phrase</CODE> containing the line
-     * @return the width of the line
-     */    
-    public static float getWidth(Phrase phrase) {
-        return getWidth(phrase, PdfWriter.RUN_DIRECTION_NO_BIDI, 0);
-    }
-    
+
     /**
      * Shows a line of text. Only the first line is written.
      * 
@@ -1316,17 +1180,7 @@ public class ColumnText {
                 compositeElements.removeFirst();
         }
     }
-    
-    /**
-     * Gets the canvas.
-     * If a set of four canvases exists, the TEXTCANVAS is returned.
-     * 
-     * @return a PdfContentByte.
-     */
-    public PdfContentByte getCanvas() {
-        return canvas;
-    }
-    
+
     /**
      * Sets the canvas.
      * If before a set of four canvases was set, it is being unset.
@@ -1369,13 +1223,6 @@ public class ColumnText {
     public void setUseAscender(boolean useAscender) {
         this.useAscender = useAscender;
     }
-    
-    /**
-     * Checks the status variable and looks if there's still some text.
-     */
-    public static boolean hasMoreText(int status) {
-        return (status & ColumnText.NO_MORE_TEXT) == 0;
-    }
 
     /**
      * Gets the real width used by the largest line.
@@ -1407,26 +1254,4 @@ public class ColumnText {
     }
 
 
-    /**
-     * Gets the first line adjustment property.
-     * 
-     * @return the first line adjustment property.
-     */
-    public boolean isAdjustFirstLine() {
-        return adjustFirstLine;
-    }
-
-    /**
-     * Sets the first line adjustment.
-     * Some objects have properties, like spacing before, that behave
-     * differently if the object is the first to be written after go() or not.
-     * The first line adjustment is <CODE>true</CODE> by default but can be
-     * changed if several objects are to be placed one after the other in the
-     * same column calling go() several times.
-     * 
-     * @param adjustFirstLine <CODE>true</CODE> to adjust the first line, <CODE>false</CODE> otherwise
-     */
-    public void setAdjustFirstLine(boolean adjustFirstLine) {
-        this.adjustFirstLine = adjustFirstLine;
-    }
 }

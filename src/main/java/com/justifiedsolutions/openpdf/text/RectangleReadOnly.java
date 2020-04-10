@@ -49,8 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import java.awt.Color;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import java.awt.Color;
 
 /**
  * A <CODE>RectangleReadOnly</CODE> is the representation of a geometric figure.
@@ -69,18 +69,6 @@ public class RectangleReadOnly extends Rectangle {
     // CONSTRUCTORS
 
     /**
-     * Constructs a <CODE>RectangleReadOnly</CODE> -object.
-     * 
-     * @param llx    lower left x
-     * @param lly    lower left y
-     * @param urx    upper right x
-     * @param ury    upper right y
-     */
-    public RectangleReadOnly(float llx, float lly, float urx, float ury) {
-        super(llx, lly, urx, ury);
-    }
-
-    /**
      * Constructs a <CODE>RectangleReadOnly</CODE> -object starting from the origin
      * (0, 0).
      * 
@@ -89,16 +77,6 @@ public class RectangleReadOnly extends Rectangle {
      */
     public RectangleReadOnly(float urx, float ury) {
         super(0, 0, urx, ury);
-    }
-
-    /**
-     * Constructs a <CODE>RectangleReadOnly</CODE> -object.
-     * 
-     * @param rect    another <CODE>Rectangle</CODE>
-     */
-    public RectangleReadOnly(Rectangle rect) {
-        super(rect.llx, rect.lly, rect.urx, rect.ury);
-        super.cloneNonPositionParameters(rect);
     }
 
     /**
@@ -144,14 +122,6 @@ public class RectangleReadOnly extends Rectangle {
      * @param lly    the new value
      */
     public void setBottom(float lly) {
-        throwReadOnlyError();
-    }
-
-    /**
-     * Normalizes the rectangle.
-     * Switches lower left with upper right if necessary.
-     */
-    public void normalize() {
         throwReadOnlyError();
     }
 
@@ -269,16 +239,6 @@ public class RectangleReadOnly extends Rectangle {
 
     // METHODS TO GET/SET THE BORDER COLOR:
 
-    /**
-     * Sets the color of the border.
-     * 
-     * @param borderColor    a <CODE>Color</CODE>
-     */
-
-    public void setBorderColor(Color borderColor) {
-        throwReadOnlyError();
-    }
-    
     /**
      * Sets the color of the left border.
      * 

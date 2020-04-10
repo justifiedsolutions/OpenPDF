@@ -79,11 +79,7 @@ public class PdfString extends PdfObject {
 
     /** The encoding. */
     protected String encoding = TEXT_PDFDOCENCODING;
-    
-    protected int objNum = 0;
-    
-    protected int objGen = 0;
-    
+
     protected boolean hexWriting = false;
 
     // CONSTRUCTORS
@@ -118,18 +114,7 @@ public class PdfString extends PdfObject {
         this.value = value;
         this.encoding = encoding;
     }
-    
-    /**
-     * Constructs a <CODE>PdfString</CODE>-object.
-     *
-     * @param bytes    an array of <CODE>byte</CODE>
-     */
-    public PdfString(byte[] bytes) {
-        super(STRING);
-        value = PdfEncodings.convertToString(bytes, null);
-        encoding = NOTHING;
-    }
-    
+
     // methods overriding some methods in PdfObject
     
     /**
@@ -144,7 +129,6 @@ public class PdfString extends PdfObject {
         if (hexWriting) {
             ByteBuffer buf = new ByteBuffer();
             buf.append('<');
-            int len = b.length;
             for (byte b1 : b) buf.appendHex(b1);
             buf.append('>');
             os.write(buf.toByteArray());
@@ -171,39 +155,7 @@ public class PdfString extends PdfObject {
         }
         return bytes;
     }
-    
-    // other methods
-    
-    /**
-     * Returns the Unicode <CODE>String</CODE> value of this
-     * <CODE>PdfString</CODE>-object.
-     *
-     * @return A <CODE>String</CODE>
-     */
-    public String toUnicodeString() {
-        if (encoding != null && encoding.length() != 0)
-            return value;
-        getBytes();
-        if (bytes.length >= 2 && bytes[0] == (byte)254 && bytes[1] == (byte)255)
-            return PdfEncodings.convertToString(bytes, PdfObject.TEXT_UNICODE);
-        else
-            return PdfEncodings.convertToString(bytes, PdfObject.TEXT_PDFDOCENCODING);
-    }
-    
-    /**
-     * Gets the encoding of this string.
-     *
-     * @return a <CODE>String</CODE>
-     */
-    public String getEncoding() {
-        return encoding;
-    }
-    
-    void setObjNum(int objNum, int objGen) {
-        this.objNum = objNum;
-        this.objGen = objGen;
-    }
-    
+
     public PdfString setHexWriting(boolean hexWriting) {
         this.hexWriting = hexWriting;
         return this;

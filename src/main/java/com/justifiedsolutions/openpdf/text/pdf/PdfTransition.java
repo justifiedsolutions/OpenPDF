@@ -121,24 +121,7 @@ public class PdfTransition {
      *  type of the transition effect
      */
     protected int type;
-    
-    /**
-     *  Constructs a <CODE>Transition</CODE>.
-     *
-     */
-    public PdfTransition() {
-        this(BLINDH);
-    }
-    
-    /**
-     *  Constructs a <CODE>Transition</CODE>.
-     *
-     *@param  type      type of the transition effect
-     */
-    public PdfTransition(int type) {
-        this(type,1);
-    }
-    
+
     /**
      *  Constructs a <CODE>Transition</CODE>.
      *
@@ -149,13 +132,8 @@ public class PdfTransition {
         this.duration = duration;
         this.type = type;
     }
-    
-    
-    public int getDuration() {
-        return duration;
-    }
-    
-    
+
+
     public int getType() {
         return type;
     }

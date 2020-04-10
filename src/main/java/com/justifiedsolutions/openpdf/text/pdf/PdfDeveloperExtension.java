@@ -65,10 +65,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
  */
 public class PdfDeveloperExtension {
 
-    /** An instance of this class for Adobe 1.7 Extension level 3. */
-    public static final PdfDeveloperExtension ADOBE_1_7_EXTENSIONLEVEL3 =
-        new PdfDeveloperExtension(PdfName.ADBE, PdfWriter.PDF_VERSION_1_7, 3);
-    
     /** The prefix used in the Extensions dictionary added to the Catalog. */
     protected PdfName prefix;
     /** The base version. */

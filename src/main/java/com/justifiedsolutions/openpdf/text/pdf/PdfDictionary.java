@@ -82,16 +82,10 @@ public class PdfDictionary extends PdfObject {
     // CONSTANTS
 
     /** This is a possible type of dictionary */
-    public static final PdfName FONT = PdfName.FONT;
-
-    /** This is a possible type of dictionary */
     public static final PdfName OUTLINES = PdfName.OUTLINES;
 
     /** This is a possible type of dictionary */
     public static final PdfName PAGE = PdfName.PAGE;
-
-    /** This is a possible type of dictionary */
-    public static final PdfName PAGES = PdfName.PAGES;
 
     /** This is a possible type of dictionary */
     public static final PdfName CATALOG = PdfName.CATALOG;
@@ -189,24 +183,6 @@ public class PdfDictionary extends PdfObject {
     }
 
     /**
-     * Associates the specified <CODE>PdfObject</CODE> as value to the
-     * specified <CODE>PdfName</CODE> as key in this map.
-     *
-     * If the <VAR>value</VAR> is a <CODE>PdfNull</CODE>, it is treated just as
-     * any other <CODE>PdfObject</CODE>. If the <VAR>value</VAR> is
-     * <CODE>null</CODE> however nothing is done.
-     *
-     * @param key a <CODE>PdfName</CODE>
-     * @param value the <CODE>PdfObject</CODE> to be associated to the
-     * <VAR>key</VAR>
-     */
-    public void putEx(PdfName key, PdfObject value) {
-        if (value == null)
-            return;
-        put(key, value);
-    }
-
-    /**
      * Copies all of the mappings from the specified <CODE>PdfDictionary</CODE>
      * to this <CODE>PdfDictionary</CODE>.
      *
@@ -277,62 +253,7 @@ public class PdfDictionary extends PdfObject {
         return hashMap.size();
     }
 
-    /**
-     * Returns <CODE>true</CODE> if this <CODE>PdfDictionary</CODE> contains a
-     * mapping for the specified <VAR>key</VAR>.
-     *
-     * @return <CODE>true</CODE> if the key is set, otherwise <CODE>false</CODE>.
-     */
-    public boolean contains(PdfName key) {
-        return hashMap.containsKey(key);
-    }
-
     // DICTIONARY TYPE METHODS
-
-    /**
-     * Checks if a <CODE>Dictionary</CODE> is of the type FONT.
-     *
-     * @return <CODE>true</CODE> if it is, otherwise <CODE>false</CODE>.
-     */
-    public boolean isFont() {
-        return FONT.equals(dictionaryType);
-    }
-
-    /**
-     * Checks if a <CODE>Dictionary</CODE> is of the type PAGE.
-     *
-     * @return <CODE>true</CODE> if it is, otherwise <CODE>false</CODE>.
-     */
-    public boolean isPage() {
-        return PAGE.equals(dictionaryType);
-    }
-
-    /**
-     * Checks if a <CODE>Dictionary</CODE> is of the type PAGES.
-     *
-     * @return <CODE>true</CODE> if it is, otherwise <CODE>false</CODE>.
-     */
-    public boolean isPages() {
-        return PAGES.equals(dictionaryType);
-    }
-
-    /**
-     * Checks if a <CODE>Dictionary</CODE> is of the type CATALOG.
-     *
-     * @return <CODE>true</CODE> if it is, otherwise <CODE>false</CODE>.
-     */
-    public boolean isCatalog() {
-        return CATALOG.equals(dictionaryType);
-    }
-
-    /**
-     * Checks if a <CODE>Dictionary</CODE> is of the type OUTLINES.
-     *
-     * @return <CODE>true</CODE> if it is, otherwise <CODE>false</CODE>.
-     */
-    public boolean isOutlineTree() {
-        return OUTLINES.equals(dictionaryType);
-    }
 
     // OTHER METHODS
 
@@ -369,69 +290,6 @@ public class PdfDictionary extends PdfObject {
         if (orig != null && orig.isDictionary())
             dict = (PdfDictionary) orig;
         return dict;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfArray</CODE>,
-     * resolving indirect references.
-     *
-     * The object associated with the <CODE>PdfName</CODE> given is retrieved
-     * and resolved to a direct object.
-     * If it is a <CODE>PdfArray</CODE>, it is cast down and returned as such.
-     * Otherwise <CODE>null</CODE> is returned.
-     *
-     * @param key A <CODE>PdfName</CODE>
-     * @return the associated <CODE>PdfArray</CODE> object,
-     *   or <CODE>null</CODE>
-     */
-    public PdfArray getAsArray(PdfName key) {
-        PdfArray array = null;
-        PdfObject orig = getDirectObject(key);
-        if (orig != null && orig.isArray())
-            array = (PdfArray) orig;
-        return array;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfStream</CODE>,
-     * resolving indirect references.
-     *
-     * The object associated with the <CODE>PdfName</CODE> given is retrieved
-     * and resolved to a direct object.
-     * If it is a <CODE>PdfStream</CODE>, it is cast down and returned as such.
-     * Otherwise <CODE>null</CODE> is returned.
-     *
-     * @param key A <CODE>PdfName</CODE>
-     * @return the associated <CODE>PdfStream</CODE> object,
-     *   or <CODE>null</CODE>
-     */
-    public PdfStream getAsStream(PdfName key) {
-        PdfStream stream = null;
-        PdfObject orig = getDirectObject(key);
-        if (orig != null && orig.isStream())
-            stream = (PdfStream) orig;
-        return stream;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfString</CODE>,
-     * resolving indirect references.
-     *
-     * The object associated with the <CODE>PdfName</CODE> given is retrieved
-     * and resolved to a direct object.
-     * If it is a <CODE>PdfString</CODE>, it is cast down and returned as such.
-     * Otherwise <CODE>null</CODE> is returned.
-     *
-     * @param key A <CODE>PdfName</CODE>
-     * @return the associated <CODE>PdfString</CODE> object,
-     *   or <CODE>null</CODE>
-     */
-    public PdfString getAsString(PdfName key) {
-        PdfString string = null;
-        PdfObject orig = getDirectObject(key);
-        if (orig != null && orig.isString())
-            string = (PdfString) orig;
-        return string;
     }
 
     /**
@@ -476,43 +334,4 @@ public class PdfDictionary extends PdfObject {
         return name;
     }
 
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfBoolean</CODE>,
-     * resolving indirect references.
-     *
-     * The object associated with the <CODE>PdfName</CODE> given is retrieved
-     * and resolved to a direct object.
-     * If it is a <CODE>PdfBoolean</CODE>, it is cast down and returned as such.
-     * Otherwise <CODE>null</CODE> is returned.
-     *
-     * @param key A <CODE>PdfName</CODE>
-     * @return the associated <CODE>PdfBoolean</CODE> object,
-     *   or <CODE>null</CODE>
-     */
-    public PdfBoolean getAsBoolean(PdfName key) {
-        PdfBoolean bool = null;
-        PdfObject orig = getDirectObject(key);
-        if (orig != null && orig.isBoolean())
-            bool = (PdfBoolean)orig;
-        return bool;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfIndirectReference</CODE>.
-     *
-     * The object associated with the <CODE>PdfName</CODE> given is retrieved
-     * If it is a <CODE>PdfIndirectReference</CODE>, it is cast down and returned
-     * as such. Otherwise <CODE>null</CODE> is returned.
-     *
-     * @param key A <CODE>PdfName</CODE>
-     * @return the associated <CODE>PdfIndirectReference</CODE> object,
-     *   or <CODE>null</CODE>
-     */
-    public PdfIndirectReference getAsIndirectObject(PdfName key) {
-        PdfIndirectReference ref = null;
-        PdfObject orig = get(key); // not getDirect this time.
-        if (orig != null && orig.isIndirect())
-            ref = (PdfIndirectReference) orig;
-        return ref;
-    }
 }

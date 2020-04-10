@@ -52,7 +52,6 @@ package com.justifiedsolutions.openpdf.text;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -194,31 +193,6 @@ public class Chunk implements Element {
     protected Map<String, Object> attributes = null;
 
     /**
-     * Empty constructor.
-     */
-    public Chunk() {
-        this.content = new StringBuffer();
-        this.font = new Font();
-    }
-
-    /**
-     * A <CODE>Chunk</CODE> copy constructor.
-     *
-     * @param ck the <CODE>Chunk</CODE> to be copied
-     */
-    public Chunk(Chunk ck) {
-        if (ck.content != null) {
-            content = new StringBuffer(ck.content.toString());
-        }
-        if (ck.font != null) {
-            font = new Font(ck.font);
-        }
-        if (ck.attributes != null) {
-            attributes = new HashMap<>(ck.attributes);
-        }
-    }
-
-    /**
      * Constructs a chunk of text with a certain content and a certain <CODE> Font</CODE>.
      *
      * @param content the content
@@ -244,65 +218,7 @@ public class Chunk implements Element {
         this(content, new Font());
     }
 
-    /**
-     * Constructs a chunk of text with a char and a certain <CODE>Font</CODE>.
-     *
-     * @param c    the content
-     * @param font the font
-     */
-    public Chunk(char c, Font font) {
-        this.content = new StringBuffer();
-        this.content.append(c);
-        this.font = font;
-    }
-
-    /**
-     * Constructs a chunk of text with a char, without specifying a <CODE>Font
-     * </CODE>.
-     *
-     * @param c the content
-     */
-    public Chunk(char c) {
-        this(c, new Font());
-    }
-
-    /**
-     * Creates a separator Chunk. Note that separator chunks can't be used in combination with tab
-     * chunks!
-     *
-     * @param separator the drawInterface to use to draw the separator.
-     * @since 2.1.2
-     */
-    public Chunk(DrawInterface separator) {
-        this(separator, false);
-    }
-
-    /**
-     * Creates a separator Chunk. Note that separator chunks can't be used in combination with tab
-     * chunks!
-     *
-     * @param separator the drawInterface to use to draw the separator.
-     * @param vertical  true if this is a vertical separator
-     * @since 2.1.2
-     */
-    public Chunk(DrawInterface separator, boolean vertical) {
-        this(OBJECT_REPLACEMENT_CHARACTER, new Font());
-        setAttribute(SEPARATOR, new Object[]{separator, vertical});
-    }
-
     // the attributes are ordered as they appear in the book 'iText in Action'
-
-    /**
-     * Creates a tab Chunk. Note that separator chunks can't be used in combination with tab
-     * chunks!
-     *
-     * @param separator   the drawInterface to use to draw the tab.
-     * @param tabPosition an X coordinate that will be used as start position for the next Chunk.
-     * @since 2.1.2
-     */
-    public Chunk(DrawInterface separator, float tabPosition) {
-        this(separator, tabPosition, false);
-    }
 
     /**
      * Creates a tab Chunk. Note that separator chunks can't be used in combination with tab
@@ -480,32 +396,6 @@ public class Chunk implements Element {
         }
         attributes.put(name, obj);
         return this;
-    }
-
-    /**
-     * Sets the color of the background <CODE>Chunk</CODE>.
-     *
-     * @param color the color of the background
-     * @return this <CODE>Chunk</CODE>
-     */
-    public Chunk setBackground(Color color) {
-        return setBackground(color, 0, 0, 0, 0);
-    }
-
-    /**
-     * Sets the color and the size of the background <CODE>Chunk</CODE>.
-     *
-     * @param color       the color of the background
-     * @param extraLeft   increase the size of the rectangle in the left
-     * @param extraBottom increase the size of the rectangle in the bottom
-     * @param extraRight  increase the size of the rectangle in the right
-     * @param extraTop    increase the size of the rectangle in the top
-     * @return this <CODE>Chunk</CODE>
-     */
-    public Chunk setBackground(Color color, float extraLeft, float extraBottom,
-            float extraRight, float extraTop) {
-        return setAttribute(BACKGROUND, new Object[]{color,
-                new float[]{extraLeft, extraBottom, extraRight, extraTop}});
     }
 
     /**

@@ -501,7 +501,8 @@ public class ArabicLigaturizer {
         copycstostring(string, curchar, level);
     }
 
-    static int arabic_shape(char[] src, int srcoffset, int srclength, char[] dest, int destoffset, int destlength, int level) {
+    static int arabic_shape(char[] src, int srcoffset, int srclength, char[] dest, int destoffset,
+            int level) {
         char[] str = new char[srclength];
         if (srclength + srcoffset - srcoffset >= 0)
             System.arraycopy(src, srcoffset, str, srcoffset - srcoffset, srclength + srcoffset - srcoffset);
@@ -627,8 +628,6 @@ public class ArabicLigaturizer {
     private static final char ALEFHAMZABELOW = 0x0625;
     private static final char ALEFMADDA = 0x0622;
     private static final char LAM = 0x0644;
-    private static final char HAMZA = 0x0621;
-    private static final char TATWEEL = 0x0640;
     private static final char ZWJ = 0x200D;
 
     private static final char HAMZAABOVE = 0x0654;
@@ -731,8 +730,7 @@ public class ArabicLigaturizer {
             {0x06D3, 0xFBB0, 0xFBB1} /* YEH BARREE WITH HAMZA ABOVE */
     };
 
-        public static final int ar_nothing  = 0x0;
-        public static final int ar_novowel = 0x1;
+    public static final int ar_novowel = 0x1;
         public static final int ar_composedtashkeel = 0x4;
         public static final int ar_lig = 0x8;
         /**
@@ -766,11 +764,8 @@ public class ArabicLigaturizer {
          * Compare to DIGITS_ALEN2AN_INT_LR.
          */
         public static final int DIGITS_EN2AN_INIT_AL = 0x80;
-        
-        /** Not a valid option value. */
-        private static final int DIGITS_RESERVED = 0xa0;
-        
-        /**
+
+    /**
          * Bit mask for digit shaping options.
          */
         public static final int DIGITS_MASK = 0xe0;

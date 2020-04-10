@@ -50,10 +50,10 @@ package com.justifiedsolutions.openpdf.text.error_messages;
 
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
 import java.io.BufferedReader;
-import java.io.Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -184,32 +184,6 @@ public final class MessageLocalization {
             msg = msg.replaceAll("\\{4}", p4.toString());
         }
         return msg;
-    }
-
-    /**
-     * Sets the language to be used globally for the error messages. The language
-     * is a two letter lowercase country designation like "en" or "pt". The country
-     * is an optional two letter uppercase code like "US" or "PT".
-     * @param language the language
-     * @param country the country
-     * @return true if the language was found, false otherwise
-     * @throws IOException on error
-     */
-    public static boolean setLanguage(String language, String country) throws IOException {
-        Map<String, String> lang = getLanguageMessages(language, country);
-        if (lang == null)
-            return false;
-        currentLanguage = lang;
-        return true;
-    }
-
-    /**
-     * Sets the error messages directly from a Reader.
-     * @param r the Reader
-     * @throws IOException on error
-     */
-    public static void setMessages(Reader r) throws IOException {
-        currentLanguage = readLanguageStream(r);
     }
 
     private static Map<String, String> getLanguageMessages(String language, String country) throws IOException {

@@ -51,7 +51,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Utilities;
-import java.awt.font.GlyphVector;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
@@ -159,15 +158,6 @@ class FontDetails {
     }
 
     /**
-     * Gets the <CODE>BaseFont</CODE> of this font.
-     *
-     * @return the <CODE>BaseFont</CODE> of this font
-     */
-    BaseFont getBaseFont() {
-        return baseFont;
-    }
-
-    /**
      * Converts the text into bytes to be placed in the document. The conversion is done according
      * to the font and the encoding and the characters used are stored.
      *
@@ -260,41 +250,6 @@ class FontDetails {
         return s.getBytes(CJKFont.CJK_ENCODING);
     }
 
-    byte[] convertToBytes(GlyphVector glyphVector) {
-        if (fontType != BaseFont.FONT_TYPE_TTUNI || symbolic) {
-            throw new UnsupportedOperationException("Only supported for True Type Unicode fonts");
-        }
-
-        char[] glyphs = new char[glyphVector.getNumGlyphs()];
-        int glyphCount = 0;
-        for (int i = 0; i < glyphs.length; i++) {
-            int code = glyphVector.getGlyphCode(i);
-            if (code == 0xFFFE || code == 0xFFFF) {// considered non-glyphs by
-                // AWT
-                continue;
-            }
-
-            glyphs[glyphCount++] = (char) code;// FIXME supplementary plane?
-
-            Integer codeKey = code;
-            if (!longTag.containsKey(codeKey)) {
-                int glyphWidth = ttu.getGlyphWidth(code);
-                Integer charCode = ttu.getCharacterCode(code);
-                int[] metrics =
-                        charCode != null ? new int[]{code, glyphWidth, charCode} : new int[]{
-                                code, glyphWidth};
-                longTag.put(codeKey, metrics);
-            }
-        }
-
-        String s = new String(glyphs, 0, glyphCount);
-        try {
-            return s.getBytes(CJKFont.CJK_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            throw new ExceptionConverter(e);
-        }
-    }
-
 
     /**
      * Writes the font definition to the document.
@@ -341,23 +296,4 @@ class FontDetails {
         }
     }
 
-    /**
-     * Indicates if all the glyphs and widths for that particular encoding should be included in the
-     * document.
-     *
-     * @return <CODE>false</CODE> to include all the glyphs and widths.
-     */
-    public boolean isSubset() {
-        return subset;
-    }
-
-    /**
-     * Indicates if all the glyphs and widths for that particular encoding should be included in the
-     * document. Set to <CODE>false</CODE> to include all.
-     *
-     * @param subset new value of property subset
-     */
-    public void setSubset(boolean subset) {
-        this.subset = subset;
-    }
 }

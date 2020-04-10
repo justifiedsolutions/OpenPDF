@@ -49,6 +49,9 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.Utilities;
+import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,10 +59,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Utilities;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 /** Represents a True Type font with Unicode encoding. All the character
  * in the font can be used directly by using the encoding Identity-H or
@@ -142,12 +141,8 @@ class TrueTypeFontUnicode extends TrueTypeFont implements Comparator{
             }
         }
     }
-    
-    protected Integer getCharacterCode(int code) {
-        return inverseCmap == null ? null : inverseCmap.get(code);
-    }
-    
-    
+
+
     /**
      * Gets the width of a <CODE>char</CODE> in normalized 1000 units.
      * @param char1 the unicode <CODE>char</CODE> to get the width of
@@ -178,7 +173,6 @@ class TrueTypeFontUnicode extends TrueTypeFont implements Comparator{
         int total = 0;
         if (fontSpecific) {
             char[] cc = text.toCharArray();
-            int len = cc.length;
             for (char c : cc) {
                 if ((c & 0xff00) == 0 || (c & 0xff00) == 0xf000)
                     total += getRawWidth(c & 0xff, null);
@@ -506,31 +500,6 @@ class TrueTypeFontUnicode extends TrueTypeFont implements Comparator{
         }
         else
             return map.get(c);
-    }
-    
-    /**
-     * Checks if a character exists in this font.
-     * @param c the character to check
-     * @return <CODE>true</CODE> if the character has a glyph,
-     * <CODE>false</CODE> otherwise
-     */
-    public boolean charExists(int c) {
-        return getMetricsTT(c) != null;
-    }
-    
-    /**
-     * Sets the character advance.
-     * @param c the character
-     * @param advance the character advance normalized to 1000 units
-     * @return <CODE>true</CODE> if the advance was set,
-     * <CODE>false</CODE> otherwise
-     */
-    public boolean setCharAdvance(int c, int advance) {
-        int[] m = getMetricsTT(c);
-        if (m == null)
-            return false;
-        m[1] = advance;
-        return true;
     }
 
 }
