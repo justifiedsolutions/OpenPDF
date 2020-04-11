@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.io.IOException;
@@ -131,9 +130,6 @@ public class PdfPages {
                     if ((p % leafSize) == 0)
                         nextParents.add(writer.getPdfIndirectReference());
                     top.put(PdfName.PARENT, nextParents.get(p / leafSize));
-                }
-                else {
-                    top.put(PdfName.ITXT, new PdfString(Document.getRelease()));
                 }
                 writer.addToBody(top, tParents.get(p));
             }

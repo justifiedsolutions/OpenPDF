@@ -49,12 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 
 /**
@@ -96,80 +92,46 @@ import java.util.Properties;
 
 public class Document {
 
-    // membervariables
-    private static final String VERSION_PROPERTIES = "com/justifiedsolutions/openpdf/text/version.properties";
-    private static final String OPEN_PDF = "JSOpenPDF";
-    private static final String RELEASE;
-    private static final String OPEN_PDF_VERSION;
-    /**
-     * Allows the pdf documents to be produced without compression for debugging purposes.
-     */
-    public static boolean compress = true;
-    /**
-     * When true the file access is not done through a memory mapped file. Use it if the file is too
-     * big to be mapped in your address space.
-     */
-    public static boolean plainRandomAccess = false;
-
-    static {
-        RELEASE = getVersionNumber();
-        OPEN_PDF_VERSION = OPEN_PDF + " " + RELEASE;
-    }
-
     /**
      * The DocListener.
      */
     private final List<DocListener> listeners = new ArrayList<>();
-    /**
-     * Is the document open or not?
-     */
-    protected boolean open;
-    /**
-     * Has the document already been closed?
-     */
-    protected boolean close;
+
     /**
      * The size of the page.
      */
-    protected Rectangle pageSize;
+    private Rectangle pageSize;
+    /**
+     * margin in x direction starting from the getDocumentLeft
+     */
+    private float marginLeft;
+    /**
+     * margin in x direction starting from the getDocumentRight
+     */
+    private float marginRight;
+    /**
+     * margin in y direction starting from the getDocumentTop
+     */
+    private float marginTop;
+    /**
+     * margin in y direction starting from the getDocumentBottom
+     */
+    private float marginBottom;
 
-    // membervariables concerning the layout
-    /**
-     * margin in x direction starting from the left
-     */
-    protected float marginLeft;
-    /**
-     * margin in x direction starting from the right
-     */
-    protected float marginRight;
-    /**
-     * margin in y direction starting from the top
-     */
-    protected float marginTop;
-    /**
-     * margin in y direction starting from the bottom
-     */
-    protected float marginBottom;
+
     /**
      * Current pagenumber
      */
-    protected int pageN = 0;
-
-    /**
-     * Constructs a new <CODE>Document</CODE> with a default page size of A4 with 36pt margins all around.
-     */
-    public Document() {
-        this(new RectangleReadOnly(595,842), 36, 36, 36, 36);
-    }
+    private int pageNumber = 0;
 
     /**
      * Constructs a new <CODE>Document</CODE> -object.
      *
      * @param pageSize     the pageSize
-     * @param marginLeft   the margin on the left
-     * @param marginRight  the margin on the right
-     * @param marginTop    the margin on the top
-     * @param marginBottom the margin on the bottom
+     * @param marginLeft   the margin on the getDocumentLeft
+     * @param marginRight  the margin on the getDocumentRight
+     * @param marginTop    the margin on the getDocumentTop
+     * @param marginBottom the margin on the getDocumentBottom
      */
     public Document(Rectangle pageSize, float marginLeft, float marginRight,
             float marginTop, float marginBottom) {
@@ -178,44 +140,6 @@ public class Document {
         this.marginRight = marginRight;
         this.marginTop = marginTop;
         this.marginBottom = marginBottom;
-    }
-
-    protected List<DocListener> getListeners() {
-        return listeners;
-    }
-
-    private static String getVersionNumber() {
-        String releaseVersion = "UNKNOWN";
-        try (InputStream input = Document.class.getClassLoader()
-                .getResourceAsStream(VERSION_PROPERTIES)) {
-            if (input != null) {
-                Properties prop = new Properties();
-                prop.load(input);
-                releaseVersion = prop.getProperty("bundleVersion", releaseVersion);
-            }
-        } catch (IOException ignored) {
-            // ignore this and leave the default
-        }
-        return releaseVersion;
-    }
-
-    /**
-     * Gets the release number.
-     *
-     * @return the product name
-     * @since 2.1.6
-     */
-    public static String getRelease() {
-        return RELEASE;
-    }
-
-    /**
-     * Gets the iText version.
-     *
-     * @return iText version
-     */
-    public static String getVersion() {
-        return OPEN_PDF_VERSION;
     }
 
     /**
@@ -236,23 +160,9 @@ public class Document {
      * @throws DocumentException when a document isn't open yet, or has been closed
      */
     public boolean add(Element element) throws DocumentException {
-        if (close) {
-            throw new DocumentException(MessageLocalization
-                    .getComposedMessage("the.document.has.been.closed.you.can.t.add.any.elements"));
-        }
-        if (!open && element.isContent()) {
-            throw new DocumentException(MessageLocalization.getComposedMessage(
-                    "the.document.is.not.open.yet.you.can.only.add.meta.information"));
-        }
         boolean success = false;
-        for (DocListener listener : getListeners()) {
+        for (DocListener listener : listeners) {
             success |= listener.add(element);
-        }
-        if (element instanceof LargeElement) {
-            LargeElement e = (LargeElement) element;
-            if (!e.isComplete()) {
-                e.flushContent();
-            }
         }
         return success;
     }
@@ -264,25 +174,8 @@ public class Document {
      * have to open the document before you can begin to add content to the body of the document.
      */
     public void open() {
-        if (!close) {
-            open = true;
-        }
-        for (DocListener listener : getListeners()) {
-            listener.setPageSize(pageSize);
-            listener.setMargins(marginLeft, marginRight, marginTop, marginBottom);
+        for (DocListener listener : listeners) {
             listener.open();
-        }
-    }
-
-    /**
-     * Signals that an new page has to be started.
-     */
-    public void newPage() {
-        if (!open || close) {
-            return;
-        }
-        for (DocListener listener : getListeners()) {
-            listener.newPage();
         }
     }
 
@@ -292,7 +185,7 @@ public class Document {
      * @return the current page number
      */
     public int getPageNumber() {
-        return this.pageN;
+        return this.pageNumber;
     }
 
     /**
@@ -302,97 +195,92 @@ public class Document {
      * nothing can be written to the body anymore.
      */
     public void close() {
-        if (!close) {
-            open = false;
-            close = true;
-        }
-        for (DocListener listener : getListeners()) {
+        for (DocListener listener : listeners) {
             listener.close();
         }
     }
 
     /**
-     * Returns the lower left x-coordinate.
+     * Returns the lower getDocumentLeft x-coordinate.
      *
-     * @return the lower left x-coordinate
+     * @return the lower getDocumentLeft x-coordinate
      */
-
-    public float left() {
+    public float getDocumentLeft() {
         return pageSize.getLeft(marginLeft);
     }
 
     /**
-     * Returns the upper right x-coordinate.
+     * Returns the upper getDocumentRight x-coordinate.
      *
-     * @return the upper right x-coordinate
+     * @return the upper getDocumentRight x-coordinate
      */
-
-    public float right() {
+    public float getDocumentRight() {
         return pageSize.getRight(marginRight);
     }
 
     /**
-     * Returns the upper right y-coordinate.
+     * Returns the upper getDocumentRight y-coordinate.
      *
-     * @return the upper right y-coordinate
+     * @return the upper getDocumentRight y-coordinate
      */
-
-    public float top() {
+    public float getDocumentTop() {
         return pageSize.getTop(marginTop);
     }
 
     /**
-     * Returns the lower left y-coordinate.
+     * Returns the lower getDocumentLeft y-coordinate.
      *
-     * @return the lower left y-coordinate
+     * @return the lower getDocumentLeft y-coordinate
      */
-
-    public float bottom() {
+    public float getDocumentBottom() {
         return pageSize.getBottom(marginBottom);
     }
 
     /**
-     * Returns the lower left x-coordinate considering a given margin.
+     * Returns the lower getDocumentLeft x-coordinate considering a given margin.
      *
      * @param margin a margin
-     * @return the lower left x-coordinate
+     * @return the lower getDocumentLeft x-coordinate
      */
-
-    protected float left(float margin) {
+    protected float getDocumentLeft(float margin) {
         return pageSize.getLeft(marginLeft + margin);
     }
 
     /**
-     * Returns the upper right x-coordinate, considering a given margin.
+     * Returns the upper getDocumentRight x-coordinate, considering a given margin.
      *
      * @param margin a margin
-     * @return the upper right x-coordinate
+     * @return the upper getDocumentRight x-coordinate
      */
-
-    protected float right(float margin) {
+    protected float getDocumentRight(float margin) {
         return pageSize.getRight(marginRight + margin);
     }
 
     /**
-     * Returns the upper right y-coordinate, considering a given margin.
+     * Returns the upper getDocumentRight y-coordinate, considering a given margin.
      *
      * @param margin a margin
-     * @return the upper right y-coordinate
+     * @return the upper getDocumentRight y-coordinate
      */
-
-    protected float top(float margin) {
+    protected float getDocumentTop(float margin) {
         return pageSize.getTop(marginTop + margin);
     }
 
     /**
-     * Returns the lower left y-coordinate, considering a given margin.
+     * Returns the lower getDocumentLeft y-coordinate, considering a given margin.
      *
      * @param margin a margin
-     * @return the lower left y-coordinate
+     * @return the lower getDocumentLeft y-coordinate
      */
-
-    protected float bottom(float margin) {
+    protected float getDocumentBottom(float margin) {
         return pageSize.getBottom(marginBottom + margin);
+    }
+
+    /**
+     * Utilized by subclasses to increment the current page number.
+     */
+    protected void incrementPageNumber() {
+        this.pageNumber++;
     }
 
     /**
@@ -400,18 +288,43 @@ public class Document {
      *
      * @return the page size
      */
-
     public Rectangle getPageSize() {
         return this.pageSize;
     }
 
     /**
-     * Checks if the document is open.
+     * Gets the left margin.
      *
-     * @return <CODE>true</CODE> if the document is open
+     * @return left margin
      */
-    public boolean isOpen() {
-        return open;
+    public float getMarginLeft() {
+        return marginLeft;
     }
 
+    /**
+     * Gets the right margin.
+     *
+     * @return right margin
+     */
+    public float getMarginRight() {
+        return marginRight;
+    }
+
+    /**
+     * Gets the top margin.
+     *
+     * @return top margin
+     */
+    public float getMarginTop() {
+        return marginTop;
+    }
+
+    /**
+     * Gets the bottom margin.
+     *
+     * @return bottom margin
+     */
+    public float getMarginBottom() {
+        return marginBottom;
+    }
 }

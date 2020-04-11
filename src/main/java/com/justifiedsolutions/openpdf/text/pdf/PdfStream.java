@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Utilities;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
@@ -146,7 +145,7 @@ public class PdfStream extends PdfDictionary {
      * @since    2.1.3
      */
     public void flateCompress(int compressionLevel) {
-        if (!Document.compress)
+        if (!PdfWriter.isCompressionEnabled())
             return;
         // check if the flateCompress-method has already been
         if (compressed) {

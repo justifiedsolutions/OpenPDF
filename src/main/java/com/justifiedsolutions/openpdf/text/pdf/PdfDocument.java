@@ -56,6 +56,7 @@ import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Font;
+import com.justifiedsolutions.openpdf.text.LargeElement;
 import com.justifiedsolutions.openpdf.text.Meta;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
@@ -85,6 +86,14 @@ class PdfDocument extends Document implements DocListener {
      * The characters to be applied the hanging punctuation.
      */
     private static final String hangingPunctuation = ".,;:'";
+    /**
+     * Is the document open or not?
+     */
+    protected boolean open;
+    /**
+     * Has the document already been closed?
+     */
+    protected boolean close;
     /**
      * The <CODE>PdfWriter</CODE>.
      */
@@ -118,22 +127,6 @@ class PdfDocument extends Document implements DocListener {
     private boolean isSectionTitle = false;
     private int textEmptySize;
     /**
-     * margin in x direction starting from the left. Will be valid in the next page
-     */
-    private float nextMarginLeft;
-    /**
-     * margin in x direction starting from the right. Will be valid in the next page
-     */
-    private float nextMarginRight;
-    /**
-     * margin in y direction starting from the top. Will be valid in the next page
-     */
-    private float nextMarginTop;
-    /**
-     * margin in y direction starting from the bottom. Will be valid in the next page
-     */
-    private float nextMarginBottom;
-    /**
      * Signals that OnOpenDocument should be called.
      */
     private boolean firstPageEvent = true;
@@ -165,10 +158,6 @@ class PdfDocument extends Document implements DocListener {
      */
     private PdfOutline currentOutline;
     /**
-     * This is the size of the next page.
-     */
-    private Rectangle nextPageSize = null;
-    /**
      * This is the size of the several boxes of the current Page.
      */
     private HashMap<String, PdfRectangle> thisBoxSize = new HashMap<>();
@@ -199,11 +188,9 @@ class PdfDocument extends Document implements DocListener {
      */
     private float imageEnd = -1;
 
-    /**
-     * Constructs a new PDF document.
-     */
-    PdfDocument() {
-        super();
+    public PdfDocument(Rectangle pageSize, float marginLeft, float marginRight, float marginTop,
+            float marginBottom) {
+        super(pageSize, marginLeft, marginRight, marginTop, marginBottom);
     }
 
     static PdfPTable createInOneCell(Iterator<Element> elements) {
@@ -245,6 +232,14 @@ class PdfDocument extends Document implements DocListener {
      */
     @Override
     public boolean add(Element element) throws DocumentException {
+        if (close) {
+            throw new DocumentException(MessageLocalization
+                    .getComposedMessage("the.document.has.been.closed.you.can.t.add.any.elements"));
+        }
+        if (!open && element.isContent()) {
+            throw new DocumentException(MessageLocalization.getComposedMessage(
+                    "the.document.is.not.open.yet.you.can.only.add.meta.information"));
+        }
         try {
             switch (element.type()) {
                 // Information (headers)
@@ -312,6 +307,14 @@ class PdfDocument extends Document implements DocListener {
                     return false;
             }
             lastElementType = element.type();
+
+            if (element instanceof LargeElement) {
+                LargeElement e = (LargeElement) element;
+                if (!e.isComplete()) {
+                    e.flushContent();
+                }
+            }
+
             return true;
         } catch (Exception e) {
             throw new DocumentException(e);
@@ -355,9 +358,9 @@ class PdfDocument extends Document implements DocListener {
 
         if (hasTitle) {
             float fith = indentTop() - currentHeight;
-            int rotation = pageSize.getRotation();
+            int rotation = getPageSize().getRotation();
             if (rotation == 90 || rotation == 180) {
-                fith = pageSize.getHeight() - fith;
+                fith = getPageSize().getHeight() - fith;
             }
             PdfDestination destination = new PdfDestination(PdfDestination.FITH, fith);
             while (currentOutline.level() >= section.getDepth()) {
@@ -485,15 +488,15 @@ class PdfDocument extends Document implements DocListener {
     @Override
     public void open() {
         if (!open) {
-            super.open();
+            open = true;
             writer.open();
             rootOutline = new PdfOutline(writer);
             currentOutline = rootOutline;
-        }
-        try {
-            initPage();
-        } catch (DocumentException de) {
-            throw new ExceptionConverter(de);
+            try {
+                initPage();
+            } catch (DocumentException de) {
+                throw new ExceptionConverter(de);
+            }
         }
     }
 
@@ -514,8 +517,8 @@ class PdfDocument extends Document implements DocListener {
             if (pageEvent != null) {
                 pageEvent.onCloseDocument(writer, this);
             }
-            super.close();
-
+            open = false;
+            close = true;
             calculateOutlineCount();
             writeOutlines();
         } catch (Exception e) {
@@ -528,11 +531,9 @@ class PdfDocument extends Document implements DocListener {
     /**
      * Makes a new page and sends it to the <CODE>PdfWriter</CODE>.
      */
-    @Override
     public void newPage() {
         lastElementType = -1;
         if (isPageEmpty()) {
-            setNewPageSizeAndMargins();
             return;
         }
         if (!open || close) {
@@ -543,9 +544,6 @@ class PdfDocument extends Document implements DocListener {
         if (pageEvent != null) {
             pageEvent.onEndPage(writer, this);
         }
-
-        //Added to inform any listeners that we are moving to a new page (added by David Freels)
-        super.newPage();
 
         // the following 2 lines were added by Pelikan Stephan
         indentation.imageIndentLeft = 0;
@@ -558,7 +556,7 @@ class PdfDocument extends Document implements DocListener {
             // we prepare the elements of the page dictionary
 
             // [U1] page size and rotation
-            int rotation = pageSize.getRotation();
+            int rotation = getPageSize().getRotation();
 
             // [C10]
             if (writer.isPdfX()) {
@@ -570,7 +568,7 @@ class PdfDocument extends Document implements DocListener {
                     if (thisBoxSize.containsKey("crop")) {
                         thisBoxSize.put("trim", thisBoxSize.get("crop"));
                     } else {
-                        thisBoxSize.put("trim", new PdfRectangle(pageSize, pageSize.getRotation()));
+                        thisBoxSize.put("trim", new PdfRectangle(getPageSize(), getPageSize().getRotation()));
                     }
                 }
             }
@@ -581,7 +579,7 @@ class PdfDocument extends Document implements DocListener {
 
             // we create the page dictionary
 
-            PdfPage page = new PdfPage(new PdfRectangle(pageSize, rotation), thisBoxSize, resources,
+            PdfPage page = new PdfPage(new PdfRectangle(getPageSize(), rotation), thisBoxSize, resources,
                     rotation);
             page.put(PdfName.TABS, writer.getTabs());
 
@@ -620,40 +618,13 @@ class PdfDocument extends Document implements DocListener {
                 text = null;
             }
             writer.add(page, new PdfContents(writer.getDirectContentUnder(), graphics, text,
-                    writer.getDirectContent(), pageSize));
+                    writer.getDirectContent(), getPageSize()));
             // we initialize the new page
             initPage();
         } catch (DocumentException | IOException de) {
             // maybe this never happens, but it's better to check.
             throw new ExceptionConverter(de);
         }
-    }
-
-    /**
-     * Sets the pagesize.
-     *
-     * @param pageSize the new pagesize
-     */
-    @Override
-    public void setPageSize(Rectangle pageSize) {
-        nextPageSize = new Rectangle(pageSize);
-    }
-
-    /**
-     * Sets the margins.
-     *
-     * @param marginLeft   the margin on the left
-     * @param marginRight  the margin on the right
-     * @param marginTop    the margin on the top
-     * @param marginBottom the margin on the bottom
-     */
-    @Override
-    public void setMargins(float marginLeft, float marginRight, float marginTop,
-            float marginBottom) {
-        nextMarginLeft = marginLeft;
-        nextMarginRight = marginRight;
-        nextMarginTop = marginTop;
-        nextMarginBottom = marginBottom;
     }
 
     /**
@@ -665,7 +636,7 @@ class PdfDocument extends Document implements DocListener {
      */
     private void initPage() throws DocumentException {
         // the pagenumber is incremented
-        pageN++;
+        incrementPageNumber();
 
         // initialization of some page objects
         pageResources = new PageResources();
@@ -677,7 +648,6 @@ class PdfDocument extends Document implements DocListener {
         text.beginText();
         textEmptySize = text.size();
 
-        setNewPageSizeAndMargins();
         imageEnd = -1;
         indentation.imageIndentRight = 0;
         indentation.imageIndentLeft = 0;
@@ -687,16 +657,16 @@ class PdfDocument extends Document implements DocListener {
 
         // backgroundcolors, etc...
         thisBoxSize = new HashMap<>(boxSize);
-        if (pageSize.getBackgroundColor() != null
-                || pageSize.hasBorders()
-                || pageSize.getBorderColor() != null) {
-            add(pageSize);
+        if (getPageSize().getBackgroundColor() != null
+                || getPageSize().hasBorders()
+                || getPageSize().getBorderColor() != null) {
+            add(getPageSize());
         }
 
         float oldleading = leading;
         int oldAlignment = alignment;
         // we move to the left/top position of the page
-        text.moveText(left(), top());
+        text.moveText(getDocumentLeft(), getDocumentTop());
         pageEmpty = true;
         leading = oldleading;
         alignment = oldAlignment;
@@ -776,7 +746,7 @@ class PdfDocument extends Document implements DocListener {
         if (ensureNewLine) {
             ensureNewLine();
         }
-        return top() - currentHeight - indentation.indentTop;
+        return getDocumentTop() - currentHeight - indentation.indentTop;
     }
 
     /**
@@ -1209,7 +1179,7 @@ class PdfDocument extends Document implements DocListener {
      */
 
     private float indentLeft() {
-        return left(
+        return getDocumentLeft(
                 indentation.indentLeft + indentation.listIndentLeft + indentation.imageIndentLeft
                         + indentation.sectionIndentLeft);
     }
@@ -1221,7 +1191,7 @@ class PdfDocument extends Document implements DocListener {
      */
 
     private float indentRight() {
-        return right(indentation.indentRight + indentation.sectionIndentRight
+        return getDocumentRight(indentation.indentRight + indentation.sectionIndentRight
                 + indentation.imageIndentRight);
     }
 
@@ -1232,7 +1202,7 @@ class PdfDocument extends Document implements DocListener {
      */
 
     private float indentTop() {
-        return top(indentation.indentTop);
+        return getDocumentTop(indentation.indentTop);
     }
 
     /**
@@ -1242,7 +1212,7 @@ class PdfDocument extends Document implements DocListener {
      */
 
     private float indentBottom() {
-        return bottom(indentation.indentBottom);
+        return getDocumentBottom(indentation.indentBottom);
     }
 
     /**
@@ -1383,14 +1353,6 @@ class PdfDocument extends Document implements DocListener {
         }
     }
 
-    private void setNewPageSizeAndMargins() {
-        pageSize = nextPageSize;
-        marginLeft = nextMarginLeft;
-        marginRight = nextMarginRight;
-        marginTop = nextMarginTop;
-        marginBottom = nextMarginBottom;
-    }
-
     private boolean isPageEmpty() {
         return writer == null || (writer.getDirectContent().size() == 0
                 && writer.getDirectContentUnder().size() == 0 && pageEmpty);
@@ -1465,6 +1427,15 @@ class PdfDocument extends Document implements DocListener {
         ensureNewLine();
         return table.getTotalHeight() + ((currentHeight > 0) ? table.spacingBefore() : 0f)
                 <= indentTop() - currentHeight - indentBottom() - margin;
+    }
+
+    /**
+     * Checks if the document is open.
+     *
+     * @return <CODE>true</CODE> if the document is open
+     */
+    public boolean isOpen() {
+        return open;
     }
 
     /**

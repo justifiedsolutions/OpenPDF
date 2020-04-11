@@ -13,60 +13,61 @@ public enum PageSize {
     /**
      * US Letter
      */
-    LETTER(new Rectangle(612, 792)),
+    LETTER(612, 792),
     /**
      * US Legal
      */
-    LEGAL(new Rectangle(612, 1008)),
+    LEGAL(612, 1008),
     /**
      * A0
      */
-    A0(new Rectangle(2384, 3370)),
+    A0(2384, 3370),
     /**
      * A1
      */
-    A1(new Rectangle(1684, 2384)),
+    A1(1684, 2384),
     /**
      * A2
      */
-    A2(new Rectangle(1191, 1684)),
+    A2(1191, 1684),
     /**
      * A3
      */
-    A3(new Rectangle(842, 1191)),
+    A3(842, 1191),
     /**
      * A4
      */
-    A4(new Rectangle(595, 842)),
+    A4(595, 842),
     /**
      * A5
      */
-    A5(new Rectangle(420, 595)),
+    A5(420, 595),
     /**
      * A6
      */
-    A6(new Rectangle(297, 420)),
+    A6(297, 420),
     /**
      * A7
      */
-    A7(new Rectangle(210, 297)),
+    A7(210, 297),
     /**
      * A8
      */
-    A8(new Rectangle(148, 210));
+    A8(148, 210);
 
-    private final Rectangle size;
+    private final float width;
+    private final float height;
 
-    PageSize(Rectangle size) {
-        this.size = size;
+    PageSize(float width, float height) {
+        this.width = width;
+        this.height = height;
     }
 
-    /**
-     * Gets the size of the page
-     *
-     * @return the page size
-     */
-    public Rectangle size() {
-        return this.size;
+    public float width() {
+        return width;
+    }
+
+    public float height() {
+        return height;
     }
 }

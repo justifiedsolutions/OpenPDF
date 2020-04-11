@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
@@ -568,7 +567,7 @@ class TrueTypeFont extends BaseFont {
         
         try {
             if (ttfAfm == null)
-                rf = new RandomAccessFileOrArray(fileName, preload, Document.plainRandomAccess);
+                rf = new RandomAccessFileOrArray(fileName, preload, false);
             else
                 rf = new RandomAccessFileOrArray(ttfAfm);
             if (ttcIndex.length() > 0) {

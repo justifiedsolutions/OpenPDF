@@ -287,9 +287,9 @@ public class MultiColumnText implements Element {
      */
     private float getColumnBottom() {
         if (desiredHeight == AUTOMATIC) {
-            return document.bottom();
+            return document.getDocumentBottom();
         } else {
-            return Math.max(top - (desiredHeight - totalHeight), document.bottom());
+            return Math.max(top - (desiredHeight - totalHeight), document.getDocumentBottom());
         }
     }
 

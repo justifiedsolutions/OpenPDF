@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.FontFactory;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.io.ByteArrayOutputStream;
@@ -85,7 +84,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
     private int startOffset = 0;
 
     public RandomAccessFileOrArray(String filename) throws IOException {
-        this(filename, false, Document.plainRandomAccess);
+        this(filename, false, false);
     }
     
     public RandomAccessFileOrArray(String filename, boolean forceRead, boolean plainRandomAccess) throws IOException {

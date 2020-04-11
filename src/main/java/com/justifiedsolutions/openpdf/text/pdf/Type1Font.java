@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.fonts.FontsResourceAnchor;
@@ -234,7 +233,7 @@ class Type1Font extends BaseFont
         else if (afmFile.toLowerCase().endsWith(".afm")) {
             try {
                 if (ttfAfm == null)
-                    rf = new RandomAccessFileOrArray(afmFile, forceRead, Document.plainRandomAccess);
+                    rf = new RandomAccessFileOrArray(afmFile, forceRead, false);
                 else
                     rf = new RandomAccessFileOrArray(ttfAfm);
                 process(rf);
@@ -254,7 +253,7 @@ class Type1Font extends BaseFont
             try {
                 ByteArrayOutputStream ba = new ByteArrayOutputStream();
                 if (ttfAfm == null)
-                    rf = new RandomAccessFileOrArray(afmFile, forceRead, Document.plainRandomAccess);
+                    rf = new RandomAccessFileOrArray(afmFile, forceRead, false);
                 else
                     rf = new RandomAccessFileOrArray(ttfAfm);
                 Pfm2afm.convert(rf, ba);
@@ -504,7 +503,7 @@ class Type1Font extends BaseFont
         try {
             String filePfb = fileName.substring(0, fileName.length() - 3) + "pfb";
             if (pfb == null)
-                rf = new RandomAccessFileOrArray(filePfb, true, Document.plainRandomAccess);
+                rf = new RandomAccessFileOrArray(filePfb, true, false);
             else
                 rf = new RandomAccessFileOrArray(pfb);
             int fileLength = rf.length();

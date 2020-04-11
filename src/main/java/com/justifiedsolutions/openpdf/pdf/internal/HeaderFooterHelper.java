@@ -38,12 +38,12 @@ class HeaderFooterHelper extends PdfPageEventHelper {
 
         if (header != null && header.isValidForPageNumber(pageNumber)) {
             writeHeaderFooter(writer, document, header.getParagraph(pageNumber),
-                    document.top() + DISTANCE_FROM_MARGIN);
+                    document.getDocumentTop() + DISTANCE_FROM_MARGIN);
         }
 
         if (footer != null && footer.isValidForPageNumber(pageNumber)) {
             writeHeaderFooter(writer, document, footer.getParagraph(pageNumber),
-                    document.bottom() - DISTANCE_FROM_MARGIN);
+                    document.getDocumentBottom() - DISTANCE_FROM_MARGIN);
         }
     }
 
@@ -54,9 +54,9 @@ class HeaderFooterHelper extends PdfPageEventHelper {
         float x;
         int alignment = paragraph.getAlignment();
         if (alignment == Element.ALIGN_LEFT) {
-            x = document.left();
+            x = document.getDocumentLeft();
         } else if (alignment == Element.ALIGN_RIGHT) {
-            x = document.right();
+            x = document.getDocumentRight();
         } else {
             x = document.getPageSize().getRight() / 2.0f;
             alignment = Element.ALIGN_CENTER;

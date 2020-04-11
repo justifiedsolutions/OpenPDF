@@ -7,7 +7,6 @@
 package com.justifiedsolutions.openpdf.pdf.internal;
 
 import com.justifiedsolutions.openpdf.pdf.Chapter;
-import com.justifiedsolutions.openpdf.pdf.Document;
 import com.justifiedsolutions.openpdf.pdf.Margin;
 import com.justifiedsolutions.openpdf.pdf.Metadata;
 import com.justifiedsolutions.openpdf.pdf.PageSize;
@@ -16,6 +15,7 @@ import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.content.Phrase;
 import com.justifiedsolutions.openpdf.pdf.content.Table;
+import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.Meta;
 import com.justifiedsolutions.openpdf.text.Rectangle;
@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class JSPDFWriter {
 
-    private final Document model;
+    private final com.justifiedsolutions.openpdf.pdf.Document model;
     private final OutputStream outputStream;
 
     /**
@@ -36,16 +36,16 @@ public class JSPDFWriter {
      * @param model        the document model
      * @param outputStream the output stream to write to
      */
-    public JSPDFWriter(Document model, OutputStream outputStream) {
+    public JSPDFWriter(com.justifiedsolutions.openpdf.pdf.Document model, OutputStream outputStream) {
         this.model = model;
         this.outputStream = outputStream;
     }
 
     /**
-     * Writes the {@link Document} to the {@link OutputStream}.
+     * Writes the {@link com.justifiedsolutions.openpdf.pdf.Document} to the {@link OutputStream}.
      */
     public void write() {
-        com.justifiedsolutions.openpdf.text.Document document = createDocument();
+        Document document = createDocument();
         PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
         pdfWriter.setPageEvent(new HeaderFooterHelper(model.getHeader(), model.getFooter()));
         addMetadata(document);
@@ -62,19 +62,17 @@ public class JSPDFWriter {
         document.close();
     }
 
-    private com.justifiedsolutions.openpdf.text.Document createDocument() {
+    private Document createDocument() {
         Rectangle pageSize = convertPageSize(model.getPageSize());
         Margin margin = model.getMargin();
-        return new com.justifiedsolutions.openpdf.text.Document(pageSize, margin.getLeft(),
-                margin.getRight(), margin.getTop(), margin.getBottom());
+        return new Document(pageSize, margin.getLeft(), margin.getRight(), margin.getTop(), margin.getBottom());
     }
 
     private Rectangle convertPageSize(PageSize pageSize) {
-        com.justifiedsolutions.openpdf.pdf.Rectangle size = pageSize.size();
-        return new RectangleReadOnly(size.getWidth(), size.getHeight());
+        return new RectangleReadOnly(pageSize.width(), pageSize.height());
     }
 
-    private void addMetadata(com.justifiedsolutions.openpdf.text.Document document) {
+    private void addMetadata(Document document) {
         Map<Metadata, String> metadata = model.getMetadata();
         for (Metadata key : metadata.keySet()) {
             Meta meta = new Meta(key, metadata.get(key));

@@ -49,7 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.Utilities;
 import java.io.ByteArrayOutputStream;
@@ -87,7 +86,7 @@ class PdfContents extends PdfStream {
             OutputStream out = null;
             Deflater deflater = null;
             streamBytes = new ByteArrayOutputStream();
-            if (Document.compress)
+            if (PdfWriter.isCompressionEnabled())
             {
                 compressed = true;
                 compressionLevel = text.getPdfWriter().getCompressionLevel();

@@ -68,27 +68,4 @@ public interface DocListener extends ElementListener {
      * The outputstream of every writer implementing <CODE>DocListener</CODE> will be closed.
      */
     void close();
-
-    /**
-     * Signals that an new page has to be started.
-     */
-    void newPage();
-
-    /**
-     * Sets the pagesize.
-     *
-     * @param pageSize the new pagesize
-     */
-    void setPageSize(Rectangle pageSize);
-
-    /**
-     * Sets the margins.
-     *
-     * @param marginLeft   the margin on the left
-     * @param marginRight  the margin on the right
-     * @param marginTop    the margin on the top
-     * @param marginBottom the margin on the bottom
-     */
-    void setMargins(float marginLeft, float marginRight, float marginTop, float marginBottom);
-
 }

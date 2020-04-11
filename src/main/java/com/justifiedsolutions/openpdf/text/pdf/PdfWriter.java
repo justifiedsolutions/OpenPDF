@@ -51,12 +51,9 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import static com.justifiedsolutions.openpdf.text.Utilities.getISOBytes;
 
-import com.justifiedsolutions.openpdf.text.DocListener;
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
@@ -85,7 +82,7 @@ import java.util.stream.Collectors;
  * representation of every Element added to this Document will be written to the outputstream.</P>
  */
 
-public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
+public class PdfWriter implements PdfVersion, PdfXConformance {
 
     /**
      * The highest generation number possible.
@@ -179,21 +176,17 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      */
     public static final int RUN_DIRECTION_NO_BIDI = 1;
     /**
-     * Use bidirectional reordering with left-to-right preferential run direction.
+     * Use bidirectional reordering with getDocumentLeft-to-getDocumentRight preferential run direction.
      */
     public static final int RUN_DIRECTION_LTR = 2;
     /**
-     * Use bidirectional reordering with right-to-left preferential run direction.
+     * Use bidirectional reordering with getDocumentRight-to-getDocumentLeft preferential run direction.
      */
     public static final int RUN_DIRECTION_RTL = 3;
     /**
      * Stores the PDF/X level.
      */
     private final PdfXConformanceImp pdfxConformance = new PdfXConformanceImp();
-    /**
-     * The pageSize.
-     */
-    protected Rectangle pageSize;
     /**
      * The outputstream of this writer.
      */
@@ -340,7 +333,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @param document The <CODE>PdfDocument</CODE> that has to be written
      * @param os       The <CODE>OutputStream</CODE> the writer has to write to.
      */
-    protected PdfWriter(PdfDocument document, OutputStream os) {
+    private PdfWriter(PdfDocument document, OutputStream os) {
         this.os = new OutputStreamCounter(new BufferedOutputStream(os));
         pdf = document;
         directContent = new PdfContentByte(this);
@@ -357,7 +350,8 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      */
     public static PdfWriter getInstance(Document document, OutputStream os)
             throws DocumentException {
-        PdfDocument pdf = new PdfDocument();
+        PdfDocument pdf = new PdfDocument(document.getPageSize(), document.getMarginLeft(),
+                document.getMarginRight(), document.getMarginTop(), document.getMarginBottom());
         document.addDocListener(pdf);
         PdfWriter writer = new PdfWriter(pdf, os);
         pdf.addWriter(writer);
@@ -388,48 +382,13 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
     }
 
     /**
-     * Signals that an <CODE>Element</CODE> was added to the <CODE>Document</CODE>.
-     * <p>
-     * This method should be overridden in the specific <CODE>DocWriter<CODE> classes derived from
-     * this abstract class.
+     * This method always returns <code>true</code>. If you want to debug the PDF output, you can
+     * set the return value to <code>false</code>.
      *
-     * @param element A high level object to add
-     * @return <CODE>false</CODE>
-     * @throws DocumentException when a document isn't open yet, or has been closed
+     * @return true
      */
-    public boolean add(Element element) throws DocumentException {
-        return false;
-    }
-
-    /**
-     * Sets the pagesize.
-     *
-     * @param pageSize the new pagesize
-     */
-    public void setPageSize(Rectangle pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    /**
-     * Sets the margins.
-     * <p>
-     * This does nothing. Has to be overridden if needed.
-     *
-     * @param marginLeft   the margin on the left
-     * @param marginRight  the margin on the right
-     * @param marginTop    the margin on the top
-     * @param marginBottom the margin on the bottom
-     */
-    public void setMargins(float marginLeft, float marginRight, float marginTop,
-            float marginBottom) {
-    }
-
-    /**
-     * Signals that an new page has to be started.
-     * <p>
-     * This does nothing. Has to be overridden if needed.
-     */
-    public void newPage() {
+    public static boolean isCompressionEnabled() {
+        return true;
     }
 
     /**
@@ -448,7 +407,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the info dictionary
      */
-    public PdfDictionary getInfo() {
+    private PdfDictionary getInfo() {
         return pdf.getInfo();
     }
 
@@ -472,7 +431,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the direct content
      */
-    public PdfContentByte getDirectContentUnder() {
+    PdfContentByte getDirectContentUnder() {
         if (!open) {
             throw new RuntimeException(
                     MessageLocalization.getComposedMessage("the.document.is.not.open"));
@@ -496,7 +455,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @return a PdfIndirectObject
      * @throws IOException if there is a problem adding it
      */
-    public PdfIndirectObject addToBody(PdfObject object) throws IOException {
+    PdfIndirectObject addToBody(PdfObject object) throws IOException {
         return body.add(object);
     }
 
@@ -509,7 +468,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @return a PdfIndirectObject
      * @throws IOException if there is a problem adding it
      */
-    public PdfIndirectObject addToBody(PdfObject object, boolean inObjStm) throws IOException {
+    private PdfIndirectObject addToBody(PdfObject object, boolean inObjStm) throws IOException {
         return body.add(object, inObjStm);
     }
 
@@ -522,7 +481,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @return a PdfIndirectObject
      * @throws IOException if there is a problem adding it
      */
-    public PdfIndirectObject addToBody(PdfObject object, PdfIndirectReference ref)
+    PdfIndirectObject addToBody(PdfObject object, PdfIndirectReference ref)
             throws IOException {
         return body.add(object, ref);
     }
@@ -536,7 +495,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @return a PdfIndirectObject
      * @throws IOException if there is a problem adding it
      */
-    public PdfIndirectObject addToBody(PdfObject object, int refNumber) throws IOException {
+    PdfIndirectObject addToBody(PdfObject object, int refNumber) throws IOException {
         return body.add(object, refNumber);
     }
 
@@ -546,7 +505,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the <CODE>PdfIndirectReference</CODE>
      */
-    public PdfIndirectReference getPdfIndirectReference() {
+    PdfIndirectReference getPdfIndirectReference() {
         return body.getPdfIndirectReference();
     }
 
@@ -559,11 +518,11 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the outputStreamCounter
      */
-    OutputStreamCounter getOs() {
+    private OutputStreamCounter getOs() {
         return os;
     }
 
-    protected PdfDictionary getCatalog(PdfIndirectReference rootObj) {
+    private PdfDictionary getCatalog(PdfIndirectReference rootObj) {
         PdfDictionary catalog = pdf.getCatalog(rootObj);
         if (!documentOCG.isEmpty()) {
             fillOCProperties();
@@ -577,7 +536,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the catalog to change
      */
-    public PdfDictionary getExtraCatalog() {
+    private PdfDictionary getExtraCatalog() {
         if (extraCatalog == null) {
             extraCatalog = new PdfDictionary();
         }
@@ -592,7 +551,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @param page the page number. The first page is 1
      * @return the reference to the page
      */
-    public PdfIndirectReference getPageReference(int page) {
+    private PdfIndirectReference getPageReference(int page) {
         --page;
         if (page < 0) {
             throw new IndexOutOfBoundsException(
@@ -625,7 +584,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @since 2.1.5
      */
-    public PdfName getTabs() {
+    PdfName getTabs() {
         return tabs;
     }
 
@@ -659,7 +618,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the <CODE>PdfPageEvent</CODE> for this document or <CODE>null</CODE> if none is set
      */
-    public PdfPageEvent getPageEvent() {
+    PdfPageEvent getPageEvent() {
         return pageEvent;
     }
 
@@ -689,7 +648,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * <p>
      * When this method is called, the PDF-document header is written to the outputstream.
      */
-    public void open() {
+    void open() {
         open = true;
         try {
             pdf_version.writeHeader(os);
@@ -718,8 +677,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * an Info-object, the reference table is composed and everything is written to the outputstream
      * embedded in a Trailer.
      */
-    @Override
-    public void close() {
+    void close() {
         if (open) {
 
             if ((currentPageNumber - 1) != pageReferences.size())
@@ -775,7 +733,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
         }
     }
 
-    protected void addSharedObjectsToBody() throws IOException {
+    private void addSharedObjectsToBody() throws IOException {
         // [F3] add the fonts
         for (FontDetails details : documentFonts.values()) {
             details.writeFont(this);
@@ -892,7 +850,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the 1.5 compression status
      */
-    public boolean isFullCompression() {
+    private boolean isFullCompression() {
         return this.fullCompression;
     }
 
@@ -902,7 +860,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @return the compression level (0 = best speed, 9 = best compression, -1 is default)
      * @since 2.1.3
      */
-    public int getCompressionLevel() {
+    int getCompressionLevel() {
         return compressionLevel;
     }
 
@@ -929,7 +887,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
         return ret;
     }
 
-    protected int getNewObjectNumber(PdfReader reader, int number) {
+    int getNewObjectNumber(PdfReader reader, int number) {
         if (currentPdfReaderInstance == null && importedPages.get(reader) == null) {
             importedPages.put(reader, reader.getPdfReaderInstance(this));
         }
@@ -939,7 +897,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
         return n;
     }
 
-    PdfName getColorspaceName() {
+    private PdfName getColorspaceName() {
         return new PdfName("CS" + (colorNumber++));
     }
 
@@ -982,7 +940,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
         }
     }
 
-    void addSimpleShading(PdfShading shading) {
+    private void addSimpleShading(PdfShading shading) {
         if (!documentShadings.containsKey(shading)) {
             documentShadings.put(shading, null);
             shading.setName(documentShadings.size());
@@ -1028,7 +986,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
     /**
      * @since 2.1.2
      */
-    protected void fillOCProperties() {
+    private void fillOCProperties() {
         if (OCProperties == null) {
             OCProperties = new PdfOCProperties();
         }
@@ -1086,7 +1044,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the space/character extra spacing ratio
      */
-    public float getSpaceCharRatio() {
+    float getSpaceCharRatio() {
         return SPACE_CHAR_RATIO_DEFAULT;
     }
 
@@ -1097,7 +1055,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return Returns the userunit.
      */
-    public float getUserunit() {
+    float getUserunit() {
         return userunit;
     }
 
@@ -1106,7 +1064,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      *
      * @return the default colorspaces
      */
-    public PdfDictionary getDefaultColorspace() {
+    PdfDictionary getDefaultColorspace() {
         return defaultColorspace;
     }
 
@@ -1123,7 +1081,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * @param cs  the colorspace. A <CODE>null</CODE> or <CODE>PdfNull</CODE> removes any colorspace
      *            with the same name
      */
-    public void setDefaultColorspace(PdfName key, PdfObject cs) {
+    private void setDefaultColorspace(PdfName key, PdfObject cs) {
         if (cs == null || cs.isNull()) {
             defaultColorspace.remove(key);
         }
@@ -1194,7 +1152,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * Manual version 1.3' (page 55-60). It contains the body of a PDF document (section 5.14) and
      * it can also generate a Cross-reference Table (section 5.15).
      */
-    public static class PdfBody {
+    private static class PdfBody {
 
         private static final int OBJSINSTREAM = 200;
         /**
@@ -1218,7 +1176,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          *
          * @param writer
          */
-        PdfBody(PdfWriter writer) {
+        private PdfBody(PdfWriter writer) {
             xrefs = new TreeSet<>();
             xrefs.add(new PdfCrossReference(0, 0, GENERATION_MAX));
             position = writer.getOs().getCounter();
@@ -1226,8 +1184,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
             this.writer = writer;
         }
 
-        private PdfWriter.PdfBody.PdfCrossReference addToObjStm(PdfObject obj, int nObj)
-                throws IOException {
+        private PdfCrossReference addToObjStm(PdfObject obj, int nObj) throws IOException {
             if (numObj >= OBJSINSTREAM) {
                 flushObjStm();
             }
@@ -1274,11 +1231,11 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          * @return a <CODE>PdfIndirectObject</CODE>
          * @throws IOException
          */
-        PdfIndirectObject add(PdfObject object) throws IOException {
+        private PdfIndirectObject add(PdfObject object) throws IOException {
             return add(object, getIndirectReferenceNumber());
         }
 
-        PdfIndirectObject add(PdfObject object, boolean inObjStm) throws IOException {
+        private PdfIndirectObject add(PdfObject object, boolean inObjStm) throws IOException {
             return add(object, getIndirectReferenceNumber(), inObjStm);
         }
 
@@ -1287,11 +1244,11 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          *
          * @return a PdfIndirectReference
          */
-        PdfIndirectReference getPdfIndirectReference() {
+        private PdfIndirectReference getPdfIndirectReference() {
             return new PdfIndirectReference(0, getIndirectReferenceNumber());
         }
 
-        int getIndirectReferenceNumber() {
+        private int getIndirectReferenceNumber() {
             int n = refnum++;
             xrefs.add(new PdfCrossReference(n, 0, GENERATION_MAX));
             return n;
@@ -1311,15 +1268,16 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          * @return a <CODE>PdfIndirectObject</CODE>
          * @throws IOException
          */
-        PdfIndirectObject add(PdfObject object, PdfIndirectReference ref) throws IOException {
+        private PdfIndirectObject add(PdfObject object, PdfIndirectReference ref)
+                throws IOException {
             return add(object, ref.getNumber());
         }
 
-        PdfIndirectObject add(PdfObject object, int refNumber) throws IOException {
+        private PdfIndirectObject add(PdfObject object, int refNumber) throws IOException {
             return add(object, refNumber, true); // to false
         }
 
-        PdfIndirectObject add(PdfObject object, int refNumber, boolean inObjStm)
+        private PdfIndirectObject add(PdfObject object, int refNumber, boolean inObjStm)
                 throws IOException {
             if (inObjStm && object.canBeInObjStm() && writer.isFullCompression()) {
                 PdfCrossReference pxref = addToObjStm(object, refNumber);
@@ -1347,7 +1305,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          *
          * @return an offset
          */
-        long offset() {
+        private long offset() {
             return position;
         }
 
@@ -1357,7 +1315,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          *
          * @return a number of objects
          */
-        int size() {
+        private int size() {
             return Math.max((xrefs.last()).getRefnum() + 1, refnum);
         }
 
@@ -1370,7 +1328,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          * @param prevxref
          * @throws IOException
          */
-        void writeCrossReferenceTable(OutputStream os, PdfIndirectReference root,
+        private void writeCrossReferenceTable(OutputStream os, PdfIndirectReference root,
                 PdfIndirectReference info, int prevxref) throws IOException {
             int refNumber = 0;
             // Old-style xref tables limit object offsets to 10 digits
@@ -1442,7 +1400,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
         /**
          * <CODE>PdfCrossReference</CODE> is an entry in the PDF Cross-Reference table.
          */
-        public static class PdfCrossReference implements Comparable<PdfCrossReference> {
+        private static class PdfCrossReference implements Comparable<PdfCrossReference> {
 
             /**
              * String template for cross-reference entry PDF representation.
@@ -1472,7 +1430,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
              * @param generation generation number of the object
              */
 
-            public PdfCrossReference(int refnum, long offset, int generation) {
+            private PdfCrossReference(int refnum, long offset, int generation) {
                 type = 0;
                 this.offset = offset;
                 this.refnum = refnum;
@@ -1486,21 +1444,21 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
              * @param offset byte offset of the object
              */
 
-            public PdfCrossReference(int refnum, long offset) {
+            private PdfCrossReference(int refnum, long offset) {
                 type = 1;
                 this.offset = offset;
                 this.refnum = refnum;
                 this.generation = 0;
             }
 
-            public PdfCrossReference(int type, int refnum, long offset, int generation) {
+            private PdfCrossReference(int type, int refnum, long offset, int generation) {
                 this.type = type;
                 this.offset = offset;
                 this.refnum = refnum;
                 this.generation = generation;
             }
 
-            int getRefnum() {
+            private int getRefnum() {
                 return refnum;
             }
 
@@ -1510,7 +1468,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
              * @param os Output stream this entry to write to
              * @throws IOException If any I/O error occurs
              */
-            public void toPdf(OutputStream os) throws IOException {
+            private void toPdf(OutputStream os) throws IOException {
                 // TODO: are generation number and 'In use' keyword bound that way?
                 final char inUse = generation == GENERATION_MAX ? 'f' : 'n';
                 os.write(String.format(CROSS_REFERENCE_ENTRY_FORMAT, offset, generation, inUse)
@@ -1524,7 +1482,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
              * @param os
              * @throws IOException
              */
-            public void toPdf(int midSize, OutputStream os) throws IOException {
+            private void toPdf(int midSize, OutputStream os) throws IOException {
                 os.write((byte) type);
                 while (--midSize >= 0) {
                     os.write((byte) ((offset >>> (8 * midSize)) & 0xff));
@@ -1573,7 +1531,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
      * section 5.16 (page 59-60).
      */
 
-    static class PdfTrailer extends PdfDictionary {
+    private static class PdfTrailer extends PdfDictionary {
 
         /**
          * Constructs a PDF-Trailer.
@@ -1583,7 +1541,8 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          * @param info     an indirect reference to the info object of the PDF document
          * @param prevxref
          */
-        PdfTrailer(int size, PdfIndirectReference root, PdfIndirectReference info, int prevxref) {
+        private PdfTrailer(int size, PdfIndirectReference root, PdfIndirectReference info,
+                int prevxref) {
             put(PdfName.SIZE, new PdfNumber(size));
             put(PdfName.ROOT, root);
             if (info != null) {
@@ -1601,6 +1560,7 @@ public class PdfWriter implements DocListener, PdfVersion, PdfXConformance {
          * @param os
          * @throws IOException
          */
+        @Override
         public void toPdf(PdfWriter writer, OutputStream os) throws IOException {
             os.write(getISOBytes("trailer\n"));
             super.toPdf(null, os);
