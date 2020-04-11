@@ -361,48 +361,7 @@ public class ColumnText {
         }
         compositeElements.add(element);
     }
-    
-    /**
-     * Converts a sequence of lines representing one of the column bounds into
-     * an internal format.
-     * <p>
-     * Each array element will contain a <CODE>float[4]</CODE> representing
-     * the line x = ax + b.
-     * 
-     * @param cLine the column array
-     * @return the converted array
-     */
-    protected List<float[]> convertColumn(float[] cLine) {
-        if (cLine.length < 4)
-            throw new RuntimeException(MessageLocalization.getComposedMessage("no.valid.column.line.found"));
-        List<float[]> cc = new ArrayList<>();
-        for (int k = 0; k < cLine.length - 2; k += 2) {
-            if (cLine.length == k + 3){
-                break;
-            }
-            float x1 = cLine[k];
-            float y1 = cLine[k + 1];
-            float x2 = cLine[k + 2];
-            float y2 = cLine[k + 3];
-            if (y1 == y2)
-                continue;
-            // x = ay + b
-            float a = (x1 - x2) / (y1 - y2);
-            float b = x1 - a * y1;
-            float[] r = new float[4];
-            r[0] = Math.min(y1, y2);
-            r[1] = Math.max(y1, y2);
-            r[2] = a;
-            r[3] = b;
-            cc.add(r);
-            maxY = Math.max(maxY, r[1]);
-            minY = Math.min(minY, r[0]);
-        }
-        if (cc.isEmpty())
-            throw new RuntimeException(MessageLocalization.getComposedMessage("no.valid.column.line.found"));
-        return cc;
-    }
-    
+
     /**
      * Finds the intersection between the <CODE>yLine</CODE> and the column. It will
      * set the <CODE>lineStatus</CODE> appropriately.
@@ -474,25 +433,7 @@ public class ColumnText {
             return new float[]{x1[0], x1[1], x2[0], x2[1]};
         }
     }
-    
-    /**
-     * Sets the columns bounds. Each column bound is described by a
-     * <CODE>float[]</CODE> with the line points [x1,y1,x2,y2,...].
-     * The array must have at least 4 elements.
-     * 
-     * @param leftLine the left column bound
-     * @param rightLine the right column bound
-     */
-    public void setColumns(float[] leftLine, float[] rightLine) {
-        maxY = -10e20f;
-        minY = 10e20f;
-        setYLine(Math.max(leftLine[1], leftLine[leftLine.length - 1]));
-        rightWall = convertColumn(rightLine);
-        leftWall = convertColumn(leftLine);
-        rectangularWidth = -1;
-        rectangularMode = false;
-    }
-    
+
     /**
      * Simplified method for rectangular columns.
      * 
@@ -568,15 +509,6 @@ public class ColumnText {
         this.multipliedLeading = multipliedLeading;
     }
 
-    /**
-     * Sets the yLine. The line will be written to yLine-leading.
-     * 
-     * @param yLine the yLine
-     */
-    public void setYLine(float yLine) {
-        this.yLine = yLine;
-    }
-    
     /**
      * Gets the yLine.
      * 
@@ -1181,19 +1113,6 @@ public class ColumnText {
         }
     }
 
-    /**
-     * Sets the canvas.
-     * If before a set of four canvases was set, it is being unset.
-     * 
-     * @param canvas
-     */
-    public void setCanvas(PdfContentByte canvas) {
-        this.canvas = canvas;
-        this.canvases = null;
-        if (compositeColumn != null)
-            compositeColumn.setCanvas(canvas);
-    }
-    
     /**
      * Sets the canvases.
      * 

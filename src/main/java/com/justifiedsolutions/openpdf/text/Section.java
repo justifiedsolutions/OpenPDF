@@ -115,11 +115,6 @@ public class Section extends ArrayList<Element> implements LargeElement {
     protected Paragraph title;
 
     /**
-     * The bookmark title if different from the content title
-     */
-    protected String bookmarkTitle;
-
-    /**
      * The number of sectionnumbers that has to be shown before the section title.
      */
     protected int numberDepth;
@@ -559,11 +554,7 @@ public class Section extends ArrayList<Element> implements LargeElement {
      * @return the bookmark title
      */
     public Paragraph getBookmarkTitle() {
-        if (bookmarkTitle == null) {
-            return getTitle();
-        } else {
-            return new Paragraph(bookmarkTitle);
-        }
+        return getTitle();
     }
 
     /**

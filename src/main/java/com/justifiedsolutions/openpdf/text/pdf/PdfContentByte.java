@@ -406,55 +406,12 @@ public class PdfContentByte {
     }
 
     /**
-     * Changes the current color for filling paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceRGB</B> (or the <B>DefaultRGB</B> color space),
-     * and sets the color to use for filling paths.</P>
-     * <P>
-     * Following the PDF manual, each operand must be a number between 0 (minimum intensity) and
-     * 1 (maximum intensity).</P>
-     *
-     * @param   red     the intensity of red. A value between 0 and 1
-     * @param   green   the intensity of green. A value between 0 and 1
-     * @param   blue    the intensity of blue. A value between 0 and 1
-     */
-
-    public void setRGBColorFillF(float red, float green, float blue) {
-        setRGBColorFillF(red, green, blue, MAX_FLOAT_COLOR_VALUE);
-    }
-    public void setRGBColorFillF(float red, float green, float blue, float alpha) {
-        saveColorFill(new RGBColor(red, green, blue, alpha));
-        HelperRGB(red, green, blue);
-        content.append(" rg").append_i(separator);
-    }
-
-    /**
      * Changes the current color for filling paths to black.
      * Resetting using gray color to keep the backward compatibility.
      */
 
     public void resetRGBColorFill() {
         resetGrayFill();
-    }
-
-    /**
-     * Changes the current color for stroking paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceRGB</B> (or the <B>DefaultRGB</B> color space),
-     * and sets the color to use for stroking paths.</P>
-     * <P>
-     * Following the PDF manual, each operand must be a number between 0 (miniumum intensity) and
-     * 1 (maximum intensity).
-     *
-     * @param   red     the intensity of red. A value between 0 and 1
-     * @param   green   the intensity of green. A value between 0 and 1
-     * @param   blue    the intensity of blue. A value between 0 and 1
-     */
-
-    public void setRGBColorStrokeF(float red, float green, float blue) {
-        saveColorStroke(new RGBColor(red, green, blue));
-        HelperRGB(red, green, blue);
-        content.append(" RG").append_i(separator);
     }
 
     /**
@@ -1059,51 +1016,12 @@ public class PdfContentByte {
         content.append(d).append(' ').append(e).append(' ').append(f).append(" cm").append_i(separator);
     }
 
-    /**
-     * Changes the current color for filling paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceRGB</B> (or the <B>DefaultRGB</B> color space),
-     * and sets the color to use for filling paths.</P>
-     * <P>
-     * This method is described in the 'Portable Document Format Reference Manual version 1.3'
-     * section 8.5.2.1 (page 331).</P>
-     * <P>
-     * Following the PDF manual, each operand must be a number between 0 (minimum intensity) and
-     * 1 (maximum intensity). This method however accepts only integers between 0x00 and 0xFF.</P>
-     *
-     * @param red the intensity of red
-     * @param green the intensity of green
-     * @param blue the intensity of blue
-     */
-
-    public void setRGBColorFill(int red, int green, int blue) {
-        setRGBColorFill(red, green, blue, MAX_COLOR_VALUE);
-    }
     public void setRGBColorFill(int red, int green, int blue, int alpha) {
         saveColorFill(new RGBColor(red, green, blue, alpha));
         HelperRGB(red, green, blue);
         content.append(" rg").append_i(separator);
     }
 
-    /**
-     * Changes the current color for stroking paths (device dependent colors!).
-     * <P>
-     * Sets the color space to <B>DeviceRGB</B> (or the <B>DefaultRGB</B> color space),
-     * and sets the color to use for stroking paths.</P>
-     * <P>
-     * This method is described in the 'Portable Document Format Reference Manual version 1.3'
-     * section 8.5.2.1 (page 331).</P>
-     * Following the PDF manual, each operand must be a number between 0 (minimum intensity) and
-     * 1 (maximum intensity). This method however accepts only integers between 0x00 and 0xFF.
-     *
-     * @param red the intensity of red
-     * @param green the intensity of green
-     * @param blue the intensity of blue
-     */
-
-    public void setRGBColorStroke(int red, int green, int blue) {
-        setRGBColorStroke(red, green, blue, MAX_COLOR_VALUE);
-    }
     public void setRGBColorStroke(int red, int green, int blue, int alpha) {
         saveColorStroke(new RGBColor(red, green, blue, alpha));
         HelperRGB(red, green, blue);

@@ -72,11 +72,6 @@ public class PdfShading {
     
     /** Holds value of property antiAlias. */
     protected boolean antiAlias = false;
-    
-    /** Creates new PdfShading */
-    protected PdfShading(PdfWriter writer) {
-        this.writer = writer;
-    }
 
     public Color getColorSpace() {
         return cspace;

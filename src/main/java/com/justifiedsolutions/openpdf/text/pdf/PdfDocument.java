@@ -173,10 +173,6 @@ class PdfDocument extends Document implements DocListener {
      * The duration of the page
      */
     private int duration = -1; // negative values will indicate no duration
-    /**
-     * The page transition
-     */
-    private PdfTransition transition = null;
     private PdfDictionary pageAA = null;
     private PdfIndirectReference thumb;
     /**
@@ -299,10 +295,6 @@ class PdfDocument extends Document implements DocListener {
                     add((PdfPTable) element);
                     break;
                 }
-                case Element.MULTI_COLUMN_TEXT: {
-                    add((MultiColumnText) element);
-                    break;
-                }
                 default:
                     return false;
             }
@@ -319,16 +311,6 @@ class PdfDocument extends Document implements DocListener {
         } catch (Exception e) {
             throw new DocumentException(e);
         }
-    }
-
-    private void add(MultiColumnText multiText) {
-        ensureNewLine();
-        flushLines();
-        float height = multiText
-                .write(writer.getDirectContent(), this, indentTop() - currentHeight);
-        currentHeight += height;
-        text.moveText(0, -1f * height);
-        pageEmpty = false;
     }
 
     private void add(PdfPTable ptable) {
@@ -586,10 +568,6 @@ class PdfDocument extends Document implements DocListener {
             // we complete the page dictionary
 
             // [U3] page actions: transition, duration, additional actions
-            if (this.transition != null) {
-                page.put(PdfName.TRANS, this.transition.getTransitionDictionary());
-                transition = null;
-            }
             if (this.duration > 0) {
                 page.put(PdfName.DUR, new PdfNumber(this.duration));
                 duration = 0;
@@ -731,22 +709,6 @@ class PdfDocument extends Document implements DocListener {
         }
         // a new current line is constructed
         line = new PdfLine(indentLeft(), indentRight(), alignment, leading);
-    }
-
-    /**
-     * Gets the current vertical page position.
-     *
-     * @param ensureNewLine Tells whether a new line shall be enforced. This may cause side effects
-     *                      for elements that do not terminate the lines they've started because
-     *                      those lines will get terminated.
-     * @return The current vertical page position.
-     */
-    float getVerticalPosition(boolean ensureNewLine) {
-        // ensuring that a new line has been started.
-        if (ensureNewLine) {
-            ensureNewLine();
-        }
-        return getDocumentTop() - currentHeight - indentation.indentTop;
     }
 
     /**

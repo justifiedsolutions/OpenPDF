@@ -85,9 +85,6 @@ public class PdfReader {
   private int objNum;
   private int objGen;
 
-  protected PdfReader() {
-  }
-
   /**
    * Gets a new file instance of the original PDF document.
    * 

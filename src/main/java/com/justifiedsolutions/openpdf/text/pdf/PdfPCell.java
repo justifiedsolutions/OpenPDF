@@ -59,7 +59,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Paragraph;
 import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import java.util.List;
 import java.util.Objects;
 
@@ -586,23 +585,6 @@ public class PdfPCell extends Rectangle {
      */
     public int getRotation() {
         return rotation;
-    }
-
-    /**
-     * Sets the rotation of the cell. Possible values are 0, 90, 180 and 270.
-     *
-     * @param rotation the rotation of the cell
-     */
-    public void setRotation(int rotation) {
-        rotation %= 360;
-        if (rotation < 0) {
-            rotation += 360;
-        }
-        if ((rotation % 90) != 0) {
-            throw new IllegalArgumentException(
-                    MessageLocalization.getComposedMessage("rotation.must.be.a.multiple.of.90"));
-        }
-        this.rotation = rotation;
     }
 
     /**

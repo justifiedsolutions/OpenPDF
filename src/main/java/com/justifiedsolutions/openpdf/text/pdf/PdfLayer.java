@@ -102,14 +102,6 @@ public class PdfLayer extends PdfDictionary implements PdfOCG {
     }
 
     /**
-     * Sets the name of this layer.
-     * @param name the name of this layer
-     */    
-    public void setName(String name) {
-        put(PdfName.NAME, new PdfString(name, PdfObject.TEXT_UNICODE));
-    }
-    
-    /**
      * Gets the dictionary representing the layer. It just returns <CODE>this</CODE>.
      * @return the dictionary representing the layer
      */    

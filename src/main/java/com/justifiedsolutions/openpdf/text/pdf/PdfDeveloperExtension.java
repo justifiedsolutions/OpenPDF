@@ -71,18 +71,6 @@ public class PdfDeveloperExtension {
     protected PdfName baseversion;
     /** The extension level within the baseversion. */
     protected int extensionLevel;
-    
-    /**
-     * Creates a PdfDeveloperExtension object.
-     * @param prefix    the prefix referring to the developer
-     * @param baseversion    the number of the base version
-     * @param extensionLevel    the extension level within the baseverion.
-     */
-    public PdfDeveloperExtension(PdfName prefix, PdfName baseversion, int extensionLevel) {
-        this.prefix = prefix;
-        this.baseversion = baseversion;
-        this.extensionLevel = extensionLevel;
-    }
 
     /**
      * Gets the prefix name.

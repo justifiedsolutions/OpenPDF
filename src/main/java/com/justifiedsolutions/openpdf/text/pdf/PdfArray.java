@@ -312,24 +312,4 @@ public class PdfArray extends PdfObject {
     public boolean contains(PdfObject object) {
         return arrayList.contains(object);
     }
-
-    /**
-     * Returns the <CODE>PdfObject</CODE> with the specified index.
-     * 
-     * A possible indirect references is not resolved, so the returned
-     * <CODE>PdfObject</CODE> may be either a direct object or an indirect
-     * reference, depending on how the object is stored in the
-     * <CODE>PdfArray</CODE>.
-     * 
-     * @param idx
-     *            The index of the <CODE>PdfObject</CODE> to be returned
-     * @return A <CODE>PdfObject</CODE>
-     */
-    public PdfObject getPdfObject(int idx) {
-        return arrayList.get(idx);
-    }
-
-    // DOWNCASTING GETTERS
-    // @author Mark A Storer (2/17/06)
-
 }

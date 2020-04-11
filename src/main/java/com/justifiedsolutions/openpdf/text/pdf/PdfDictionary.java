@@ -257,10 +257,6 @@ public class PdfDictionary extends PdfObject {
 
     // OTHER METHODS
 
-    public void merge(PdfDictionary other) {
-        hashMap.putAll(other.hashMap);
-    }
-
     public void mergeDifferent(PdfDictionary other) {
         for (PdfName key : other.hashMap.keySet()) {
             if (!hashMap.containsKey(key))

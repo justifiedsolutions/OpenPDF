@@ -38,16 +38,6 @@ public class RGBColor extends ExtendedColor {
      * @param floatRed
      * @param floatGreen
      * @param floatBlue
-     */
-    public RGBColor(float floatRed, float floatGreen, float floatBlue) {
-        this(floatRed, floatGreen, floatBlue, MAX_FLOAT_COLOR_VALUE);
-    }
-
-    /**
-     * Construct a RGB Color (values are floats from 0 to 1).
-     * @param floatRed
-     * @param floatGreen
-     * @param floatBlue
      * @param floatAlpha
      */
     public RGBColor(float floatRed, float floatGreen, float floatBlue, float floatAlpha) {

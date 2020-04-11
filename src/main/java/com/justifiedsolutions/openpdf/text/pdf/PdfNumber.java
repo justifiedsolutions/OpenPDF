@@ -97,17 +97,6 @@ public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
         this.value = value;
         setContent(String.valueOf(value));
     }
-    
-    /**
-     * Constructs a new <CODE>PdfNumber</CODE>-object of type long.
-     *
-     * @param value    value of the new <CODE>PdfNumber</CODE>-object
-     */
-    public PdfNumber(long value) {
-        super(NUMBER);
-        this.value = value;
-        setContent(String.valueOf(value));
-    }
 
     /**
      * Constructs a new <CODE>PdfNumber</CODE>-object of type real.

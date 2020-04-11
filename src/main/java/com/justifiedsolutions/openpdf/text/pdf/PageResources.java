@@ -71,10 +71,6 @@ class PageResources {
         return name;
     }
 
-    void addDefaultColor(PdfDictionary dic) {
-        colorDictionary.merge(dic);
-    }
-
     void addDefaultColorDiff(PdfDictionary dic) {
         colorDictionary.mergeDifferent(dic);
     }

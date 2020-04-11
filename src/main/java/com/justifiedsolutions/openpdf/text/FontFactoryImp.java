@@ -51,7 +51,6 @@ package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -357,61 +356,6 @@ public class FontFactoryImp {
             // this shouldn't happen
             throw new ExceptionConverter(de);
         }
-    }
-
-    /**
-     * Register all the fonts in a directory and possibly its subdirectories.
-     *
-     * @param dir                the directory
-     * @param scanSubdirectories recursively scan subdirectories if <code>true</true>
-     * @return the number of fonts registered
-     * @since 2.1.2
-     */
-    public int registerDirectory(String dir, boolean scanSubdirectories) {
-        int count = 0;
-        try {
-            File file = new File(dir);
-            if (!file.exists() || !file.isDirectory()) {
-                return 0;
-            }
-            String[] files = file.list();
-            if (files == null) {
-                return 0;
-            }
-            for (String file1 : files) {
-                try {
-                    file = new File(dir, file1);
-                    if (file.isDirectory()) {
-                        if (scanSubdirectories) {
-                            count += registerDirectory(file.getAbsolutePath(), true);
-                        }
-                    } else {
-                        String name = file.getPath();
-                        String suffix = name.length() < 4 ? null
-                                : name.substring(name.length() - 4).toLowerCase();
-                        if (".afm".equals(suffix) || ".pfm".equals(suffix)) {
-                            /* Only register Type 1 fonts with matching .pfb files */
-                            File pfb = new File(name.substring(0, name.length() - 4) + ".pfb");
-                            if (pfb.exists()) {
-                                register(name, null);
-                                ++count;
-                            }
-                        } else if (".ttf".equals(suffix) || ".otf".equals(suffix)) {
-                            register(name, file1);
-                            ++count;
-                        } else if (".ttc".equals(suffix)) {
-                            register(name, null);
-                            ++count;
-                        }
-                    }
-                } catch (Exception e) {
-                    //empty on purpose
-                }
-            }
-        } catch (Exception e) {
-            //empty on purpose
-        }
-        return count;
     }
 
     /**

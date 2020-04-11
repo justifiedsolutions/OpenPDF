@@ -155,15 +155,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetGrayStroke();
     }
-    
-    /**
-     * @see PdfContentByte#setRGBColorFillF(float, float, float)
-     */
-    public void setRGBColorFillF(float red, float green, float blue) {
-        checkNoColor();
-        super.setRGBColorFillF(red, green, blue);
-    }
-    
+
     /**
      * @see PdfContentByte#resetRGBColorFill()
      */
@@ -171,15 +163,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetRGBColorFill();
     }
-    
-    /**
-     * @see PdfContentByte#setRGBColorStrokeF(float, float, float)
-     */
-    public void setRGBColorStrokeF(float red, float green, float blue) {
-        checkNoColor();
-        super.setRGBColorStrokeF(red, green, blue);
-    }
-    
+
     /**
      * @see PdfContentByte#resetRGBColorStroke()
      */
@@ -188,22 +172,6 @@ public final class PdfPatternPainter extends PdfTemplate {
         super.resetRGBColorStroke();
     }
 
-    /**
-     * @see PdfContentByte#setRGBColorFill(int, int, int)
-     */
-    public void setRGBColorFill(int red, int green, int blue) {
-        checkNoColor();
-        super.setRGBColorFill(red, green, blue);
-    }
-    
-    /**
-     * @see PdfContentByte#setRGBColorStroke(int, int, int)
-     */
-    public void setRGBColorStroke(int red, int green, int blue) {
-        checkNoColor();
-        super.setRGBColorStroke(red, green, blue);
-    }
-    
     /**
      * @see PdfContentByte#setColorStroke(java.awt.Color)
      */
