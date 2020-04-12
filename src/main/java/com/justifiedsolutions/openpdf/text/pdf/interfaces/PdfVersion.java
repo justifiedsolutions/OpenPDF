@@ -49,8 +49,10 @@
 
 package com.justifiedsolutions.openpdf.text.pdf.interfaces;
 
-import com.justifiedsolutions.openpdf.text.pdf.PdfDeveloperExtension;
-import com.justifiedsolutions.openpdf.text.pdf.PdfName;
+import com.justifiedsolutions.openpdf.text.pdf.PdfDictionary;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The PDF version is described in the PDF Reference 1.7 p92
@@ -59,39 +61,17 @@ import com.justifiedsolutions.openpdf.text.pdf.PdfName;
  * in the book 'iText in Action' sections 2.1.3 (PDF Header)
  * and 3.3 (Version history).
  */
-
 public interface PdfVersion {
-    
+
     /**
-     * If the PDF Header hasn't been written yet,
-     * this changes the version as it will appear in the PDF Header.
-     * If the PDF header was already written to the OutputStream,
-     * this changes the version as it will appear in the Catalog.
-     * @param version    a character representing the PDF version
+     * If the PDF Header hasn't been written yet, this changes the version as it will appear in the PDF Header. If the
+     * PDF header was already written to the OutputStream, this changes the version as it will appear in the Catalog.
+     *
+     * @param version a character representing the PDF version
      */
     void setPdfVersion(char version);
-    /**
-     * If the PDF Header hasn't been written yet,
-     * this changes the version as it will appear in the PDF Header,
-     * but only if the parameter refers to a higher version.
-     * If the PDF header was already written to the OutputStream,
-     * this changes the version as it will appear in the Catalog.
-     * @param version    a character representing the PDF version
-     */
-    void setAtLeastPdfVersion(char version);
-    /**
-     * Sets the PDF version as it will appear in the Catalog.
-     * Note that this only has effect if you use a later version
-     * than the one that appears in the header; this method
-     * ignores the parameter if you try to set a lower version.
-     * @param version    the PDF name that will be used for the Version key in the catalog
-     */
-    void setPdfVersion(PdfName version);
-    /**
-     * Adds a developer extension to the Extensions dictionary
-     * in the Catalog.
-     * @param de    an object that contains the extensions prefix and dictionary
-     * @since    2.1.6
-     */
-    void addDeveloperExtension(PdfDeveloperExtension de);
+
+    void writeHeader(OutputStream os) throws IOException;
+
+    void addToCatalog(PdfDictionary catalog);
 }

@@ -30,6 +30,7 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+
 import java.util.Arrays;
 
 /***
@@ -244,12 +245,7 @@ public class IntHashtable implements Cloneable {
         }
         
         // extra methods for inner class Entry by Paulo
-        public int getKey() {
-            return key;
-        }
-        public int getValue() {
-            return value;
-        }
+
         protected Object clone() {
             Entry entry = new Entry(hash, key, value, (next != null) ? (Entry)next.clone() : null);
             return entry;

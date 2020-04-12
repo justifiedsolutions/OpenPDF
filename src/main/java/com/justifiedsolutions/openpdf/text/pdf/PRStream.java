@@ -58,25 +58,6 @@ public class PRStream extends PdfStream {
     protected PdfReader reader;
     protected int offset;
     protected int length;
-    
-    public PRStream(PRStream stream, PdfDictionary newDic) {
-        reader = stream.reader;
-        offset = stream.offset;
-        length = stream.length;
-        compressed = stream.compressed;
-        compressionLevel = stream.compressionLevel;
-        streamBytes = stream.streamBytes;
-        bytes = stream.bytes;
-        if (newDic != null)
-            putAll(newDic);
-        else
-            hashMap.putAll(stream.hashMap);
-    }
-
-    public PRStream(PRStream stream, PdfDictionary newDic, PdfReader reader) {
-        this(stream, newDic);
-        this.reader = reader;
-    }
 
     public PRStream(PdfReader reader, int offset) {
         this.reader = reader;

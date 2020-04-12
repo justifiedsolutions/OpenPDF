@@ -52,6 +52,7 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -439,6 +440,7 @@ class TrueTypeFont extends BaseFont {
      * @throws IOException the font file could not be read
      * @return the Postscript font name
      */
+    @SuppressWarnings("unused")
     String getBaseFont() throws DocumentException, IOException {
         int[] table_location;
         table_location = tables.get("name");
@@ -1335,18 +1337,6 @@ class TrueTypeFont extends BaseFont {
      */
     public String getPostscriptFontName() {
         return fontName;
-    }
-
-    /** Gets the full name of the font. If it is a True Type font
-     * each array element will have {Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be
-     * found in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"", "", "",
-     * font name}.
-     * @return the full name of the font
-     */
-    public String[][] getFullFontName() {
-        return fullName;
     }
 
     /** Gets the family name of the font. If it is a True Type font

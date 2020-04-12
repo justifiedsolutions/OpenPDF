@@ -71,11 +71,11 @@ import static com.justifiedsolutions.openpdf.text.Utilities.getISOBytes;
 /**
  * A <CODE>DocWriter</CODE> class for PDF.
  * <p>
- * When this <CODE>PdfWriter</CODE> is added to a certain <CODE>PdfDocument</CODE>, the PDF
- * representation of every Element added to this Document will be written to the outputstream.</P>
+ * When this <CODE>PdfWriter</CODE> is added to a certain <CODE>PdfDocument</CODE>, the PDF representation of every
+ * Element added to this Document will be written to the outputstream.</P>
  */
 
-public class PdfWriter implements PdfVersion, PdfXConformance {
+public class PdfWriter implements PdfXConformance {
 
     /**
      * The highest generation number possible.
@@ -221,7 +221,7 @@ public class PdfWriter implements PdfVersion, PdfXConformance {
     /**
      * Stores the version information for the header and the catalog.
      */
-    protected PdfVersionImp pdf_version = new PdfVersionImp();
+    protected PdfVersion pdfVersion = new PdfVersionImp();
     /**
      * Holds value of property fullCompression.
      */
@@ -619,31 +619,20 @@ public class PdfWriter implements PdfVersion, PdfXConformance {
         }
     }
 
-    /**
-     * Signals that the <CODE>Document</CODE> has been opened and that
-     * <CODE>Elements</CODE> can be added.
-     * <p>
-     * When this method is called, the PDF-document header is written to the outputstream.
-     */
-    void open() {
-        open = true;
-        try {
-            pdf_version.writeHeader(os);
-            body = new PdfBody(this);
-            if (pdfxConformance.isPdfX32002()) {
-                PdfDictionary sec = new PdfDictionary();
-                sec.put(PdfName.GAMMA, new PdfArray(new float[]{2.2f, 2.2f, 2.2f}));
-                sec.put(PdfName.MATRIX, new PdfArray(
-                        new float[]{0.4124f, 0.2126f, 0.0193f, 0.3576f, 0.7152f, 0.1192f, 0.1805f,
-                                0.0722f, 0.9505f}));
-                sec.put(PdfName.WHITEPOINT, new PdfArray(new float[]{0.9505f, 1f, 1.089f}));
-                PdfArray arr = new PdfArray(PdfName.CALRGB);
-                arr.add(sec);
-                setDefaultColorspace(PdfName.DEFAULTRGB, addToBody(arr).getIndirectReference());
-            }
-        } catch (IOException ioe) {
-            throw new ExceptionConverter(ioe);
+    public void setPDFXConformance(int pdfx) {
+        if (pdfxConformance.getPDFXConformance() == pdfx) {
+            return;
         }
+        if (pdf.isOpen()) {
+            throw new PdfXConformanceException(MessageLocalization.getComposedMessage(
+                    "pdfx.conformance.can.only.be.set.before.opening.the.document"));
+        }
+        if (pdfx == PDFA1A || pdfx == PDFA1B) {
+            pdfVersion.setPdfVersion(VERSION_1_4);
+        } else if (pdfx != PDFXNONE) {
+            pdfVersion.setPdfVersion(VERSION_1_3);
+        }
+        pdfxConformance.setPDFXConformance(pdfx);
     }
 
     /**
@@ -772,50 +761,42 @@ public class PdfWriter implements PdfVersion, PdfXConformance {
         }
     }
 
-    public void setAtLeastPdfVersion(char version) {
-        pdf_version.setAtLeastPdfVersion(version);
-    }
-
     /**
-     * @since 2.1.6
+     * Signals that the <CODE>Document</CODE> has been opened and that
+     * <CODE>Elements</CODE> can be added.
+     * <p>
+     * When this method is called, the PDF-document header is written to the outputstream.
      */
-    public void addDeveloperExtension(PdfDeveloperExtension de) {
-        pdf_version.addDeveloperExtension(de);
-    }
-
-    /**
-     * Returns the version information.
-     */
-    PdfVersionImp getPdfVersion() {
-        return pdf_version;
-    }
-
-    public void setPdfVersion(char version) {
-        pdf_version.setPdfVersion(version);
-    }
-
-    public void setPdfVersion(PdfName version) {
-        pdf_version.setPdfVersion(version);
+    void open() {
+        open = true;
+        try {
+            pdfVersion.writeHeader(os);
+            body = new PdfBody(this);
+            if (pdfxConformance.isPdfX32002()) {
+                PdfDictionary sec = new PdfDictionary();
+                sec.put(PdfName.GAMMA, new PdfArray(new float[]{2.2f, 2.2f, 2.2f}));
+                sec.put(PdfName.MATRIX, new PdfArray(
+                        new float[]{0.4124f, 0.2126f, 0.0193f, 0.3576f, 0.7152f, 0.1192f, 0.1805f,
+                                0.0722f, 0.9505f}));
+                sec.put(PdfName.WHITEPOINT, new PdfArray(new float[]{0.9505f, 1f, 1.089f}));
+                PdfArray arr = new PdfArray(PdfName.CALRGB);
+                arr.add(sec);
+                setDefaultColorspace(PdfName.DEFAULTRGB, addToBody(arr).getIndirectReference());
+            }
+        } catch (IOException ioe) {
+            throw new ExceptionConverter(ioe);
+        }
     }
 
     public int getPDFXConformance() {
         return pdfxConformance.getPDFXConformance();
     }
 
-    public void setPDFXConformance(int pdfx) {
-        if (pdfxConformance.getPDFXConformance() == pdfx) {
-            return;
-        }
-        if (pdf.isOpen()) {
-            throw new PdfXConformanceException(MessageLocalization.getComposedMessage(
-                    "pdfx.conformance.can.only.be.set.before.opening.the.document"));
-        }
-        if (pdfx == PDFA1A || pdfx == PDFA1B) {
-            setPdfVersion(VERSION_1_4);
-        } else if (pdfx != PDFXNONE) {
-            setPdfVersion(VERSION_1_3);
-        }
-        pdfxConformance.setPDFXConformance(pdfx);
+    /**
+     * Returns the version information.
+     */
+    PdfVersion getPdfVersion() {
+        return pdfVersion;
     }
 
     public boolean isPdfX() {
@@ -1222,7 +1203,7 @@ public class PdfWriter implements PdfVersion, PdfXConformance {
          * @return a PdfIndirectReference
          */
         private PdfIndirectReference getPdfIndirectReference() {
-            return new PdfIndirectReference(0, getIndirectReferenceNumber());
+            return new PdfIndirectReference(getIndirectReferenceNumber());
         }
 
         private int getIndirectReferenceNumber() {

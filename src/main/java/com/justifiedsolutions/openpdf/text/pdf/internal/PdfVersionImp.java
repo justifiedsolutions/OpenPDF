@@ -50,123 +50,76 @@
 package com.justifiedsolutions.openpdf.text.pdf.internal;
 
 import com.justifiedsolutions.openpdf.text.Utilities;
-import com.justifiedsolutions.openpdf.text.pdf.OutputStreamCounter;
-import com.justifiedsolutions.openpdf.text.pdf.PdfDeveloperExtension;
 import com.justifiedsolutions.openpdf.text.pdf.PdfDictionary;
 import com.justifiedsolutions.openpdf.text.pdf.PdfName;
 import com.justifiedsolutions.openpdf.text.pdf.PdfWriter;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
+
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * Stores the PDF version information,
- * knows how to write a PDF Header,
- * and how to add the version to the catalog (if necessary).
+ * Stores the PDF version information, knows how to write a PDF Header, and how to add the version to the catalog (if
+ * necessary).
  */
 
 public class PdfVersionImp implements PdfVersion {
-    
-    /** Contains different strings that are part of the header. */
+
+    /**
+     * Contains different strings that are part of the header.
+     */
     public static final byte[][] HEADER = {
-        Utilities.getISOBytes("\n"),
-        Utilities.getISOBytes("%PDF-"),
-        Utilities.getISOBytes("\n%\u00e2\u00e3\u00cf\u00d3\n")
+            Utilities.getISOBytes("\n"),
+            Utilities.getISOBytes("%PDF-"),
+            Utilities.getISOBytes("\n%\u00e2\u00e3\u00cf\u00d3\n")
     };
-    
-    /** Indicates if the header was already written. */
-    protected boolean headerWasWritten = false;
-    /** Indicates if we are working in append mode. */
-    protected boolean appendmode = false;
-    /** The version that was or will be written to the header. */
-    protected char header_version = PdfWriter.VERSION_1_5;
-    /** The version that will be written to the catalog. */
-    protected PdfName catalog_version = null;
     /**
      * The extensions dictionary.
-     * @since    2.1.6
+     *
+     * @since 2.1.6
      */
     protected PdfDictionary extensions = null;
-    
     /**
-     * @see PdfVersion#setPdfVersion(char)
+     * Indicates if the header was already written.
      */
+    private boolean headerWasWritten = false;
+    /**
+     * The version that was or will be written to the header.
+     */
+    private char header_version = PdfWriter.VERSION_1_5;
+    /**
+     * The version that will be written to the catalog.
+     */
+    private PdfName catalog_version = null;
+
+    @Override
     public void setPdfVersion(char version) {
-        if (headerWasWritten || appendmode) {
+        if (headerWasWritten) {
             setPdfVersion(getVersionAsName(version));
-        }
-        else {
+        } else {
             this.header_version = version;
-        }
-    }
-    
-    /**
-     * @see PdfVersion#setAtLeastPdfVersion(char)
-     */
-    public void setAtLeastPdfVersion(char version) {
-        if (version > header_version) {
-            setPdfVersion(version);
-        }
-    }
-    
-    /**
-     * @see PdfVersion#setPdfVersion(PdfName)
-     */
-    public void setPdfVersion(PdfName version) {
-        if (catalog_version == null || catalog_version.compareTo(version) < 0) {
-            this.catalog_version = version;
         }
     }
 
     /**
      * Writes the header to the OutputStreamCounter.
-     * @throws IOException 
+     *
+     * @throws IOException
      */
-    public void writeHeader(OutputStreamCounter os) throws IOException {
-        if (appendmode) {
-            os.write(HEADER[0]);
-        }
-        else {
-            os.write(HEADER[1]);
-            os.write(getVersionAsByteArray(header_version));
-            os.write(HEADER[2]);
-            headerWasWritten = true;
-        }
-    }
-    
-    /**
-     * Returns the PDF version as a name.
-     * @param version    the version character.
-     */
-    public PdfName getVersionAsName(char version) {
-        switch(version) {
-        case PdfWriter.VERSION_1_2:
-            return PdfWriter.PDF_VERSION_1_2;
-        case PdfWriter.VERSION_1_3:
-            return PdfWriter.PDF_VERSION_1_3;
-        case PdfWriter.VERSION_1_4:
-            return PdfWriter.PDF_VERSION_1_4;
-        case PdfWriter.VERSION_1_5:
-            return PdfWriter.PDF_VERSION_1_5;
-        case PdfWriter.VERSION_1_6:
-            return PdfWriter.PDF_VERSION_1_6;
-        case PdfWriter.VERSION_1_7:
-            return PdfWriter.PDF_VERSION_1_7;
-        default:
-            return PdfWriter.PDF_VERSION_1_4;
-        }
-    }
-    
-    /**
-     * Returns the version as a byte[].
-     * @param version the version character
-     */
-    public byte[] getVersionAsByteArray(char version) {
-        return Utilities.getISOBytes(getVersionAsName(version).toString().substring(1));
+    @Override
+    public void writeHeader(OutputStream os) throws IOException {
+        os.write(HEADER[1]);
+        os.write(getVersionAsByteArray(header_version));
+        os.write(HEADER[2]);
+        headerWasWritten = true;
     }
 
-    /** Adds the version to the Catalog dictionary. */
+    /**
+     * Adds the version to the Catalog dictionary.
+     */
+    @Override
     public void addToCatalog(PdfDictionary catalog) {
-        if(catalog_version != null) {
+        if (catalog_version != null) {
             catalog.put(PdfName.VERSION, catalog_version);
         }
         if (extensions != null) {
@@ -174,24 +127,43 @@ public class PdfVersionImp implements PdfVersion {
         }
     }
 
-    /**
-     * @since    2.1.6
-     */
-    public void addDeveloperExtension(PdfDeveloperExtension de) {
-        if (extensions == null) {
-            extensions = new PdfDictionary();
+    private void setPdfVersion(PdfName version) {
+        if (catalog_version == null || catalog_version.compareTo(version) < 0) {
+            this.catalog_version = version;
         }
-        else {
-            PdfDictionary extension = extensions.getAsDict(de.getPrefix());
-            if (extension != null) {
-                int diff = de.getBaseversion().compareTo(extension.getAsName(PdfName.BASEVERSION));
-                if (diff < 0)
-                    return;
-                diff = de.getExtensionLevel() - extension.getAsNumber(PdfName.EXTENSIONLEVEL).intValue();
-                if (diff <= 0)
-                    return;
-            }
-        }
-        extensions.put(de.getPrefix(), de.getDeveloperExtensions());
     }
+
+    /**
+     * Returns the PDF version as a name.
+     *
+     * @param version the version character.
+     */
+    private PdfName getVersionAsName(char version) {
+        switch (version) {
+            case PdfWriter.VERSION_1_2:
+                return PdfWriter.PDF_VERSION_1_2;
+            case PdfWriter.VERSION_1_3:
+                return PdfWriter.PDF_VERSION_1_3;
+            case PdfWriter.VERSION_1_4:
+                return PdfWriter.PDF_VERSION_1_4;
+            case PdfWriter.VERSION_1_5:
+                return PdfWriter.PDF_VERSION_1_5;
+            case PdfWriter.VERSION_1_6:
+                return PdfWriter.PDF_VERSION_1_6;
+            case PdfWriter.VERSION_1_7:
+                return PdfWriter.PDF_VERSION_1_7;
+            default:
+                return PdfWriter.PDF_VERSION_1_4;
+        }
+    }
+
+    /**
+     * Returns the version as a byte[].
+     *
+     * @param version the version character
+     */
+    private byte[] getVersionAsByteArray(char version) {
+        return Utilities.getISOBytes(getVersionAsName(version).toString().substring(1));
+    }
+
 }

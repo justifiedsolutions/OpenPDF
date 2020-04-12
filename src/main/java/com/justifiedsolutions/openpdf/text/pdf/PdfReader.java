@@ -53,6 +53,7 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.exceptions.InvalidPdfException;
 import com.justifiedsolutions.openpdf.text.exceptions.UnsupportedPdfException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -791,46 +792,6 @@ public class PdfReader {
         return false;
     }
     return true;
-  }
-
-  protected static PdfDictionary duplicatePdfDictionary(PdfDictionary original,
-      PdfDictionary copy, PdfReader newReader) {
-    if (copy == null)
-      copy = new PdfDictionary();
-    for (Object o : original.getKeys()) {
-      PdfName key = (PdfName) o;
-      copy.put(key, duplicatePdfObject(original.get(key), newReader));
-    }
-    return copy;
-  }
-
-  protected static PdfObject duplicatePdfObject(PdfObject original,
-      PdfReader newReader) {
-    if (original == null)
-      return null;
-    switch (original.type()) {
-    case PdfObject.DICTIONARY: {
-      return duplicatePdfDictionary((PdfDictionary) original, null, newReader);
-    }
-    case PdfObject.STREAM: {
-      PRStream org = (PRStream) original;
-      PRStream stream = new PRStream(org, null, newReader);
-      duplicatePdfDictionary(org, stream, newReader);
-      return stream;
-    }
-    case PdfObject.ARRAY: {
-      PdfArray arr = new PdfArray();
-      ((PdfArray) original).getElements().forEach(pdfObject -> arr.add(duplicatePdfObject(pdfObject, newReader)));
-      return arr;
-    }
-    case PdfObject.INDIRECT: {
-      PRIndirectReference org = (PRIndirectReference) original;
-      return new PRIndirectReference(newReader, org.getNumber(),
-          org.getGeneration());
-    }
-    default:
-      return original;
-    }
   }
 
 }

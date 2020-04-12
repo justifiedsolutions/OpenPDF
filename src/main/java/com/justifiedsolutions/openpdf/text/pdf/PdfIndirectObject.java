@@ -51,6 +51,7 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.Utilities;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -64,9 +65,6 @@ import java.io.OutputStream;
  * <I>generation number</I>, and the <B>obj</B> keyword.<BR>
  * This object is described in the 'Portable Document Format Reference Manual version 1.7'
  * section 3.2.9 (page 63-65).
- *
- * @see        PdfObject
- * @see        PdfIndirectReference
  */
 
 public class PdfIndirectObject {
@@ -135,7 +133,7 @@ public class PdfIndirectObject {
  */
     
     public PdfIndirectReference getIndirectReference() {
-        return new PdfIndirectReference(object.type(), number, generation);
+        return new PdfIndirectReference(number, generation);
     }
     
 /**

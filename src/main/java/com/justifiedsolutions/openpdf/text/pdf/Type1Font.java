@@ -52,6 +52,7 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.fonts.FontsResourceAnchor;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -717,18 +718,6 @@ class Type1Font extends BaseFont
      */
     public String getPostscriptFontName() {
         return FontName;
-    }
-    
-    /** Gets the full name of the font. If it is a True Type font
-     * each array element will have {Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be
-     * found in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"", "", "",
-     * font name}.
-     * @return the full name of the font
-     */
-    public String[][] getFullFontName() {
-        return new String[][]{{"", "", "", FullName}};
     }
 
     /** Gets the family name of the font. If it is a True Type font

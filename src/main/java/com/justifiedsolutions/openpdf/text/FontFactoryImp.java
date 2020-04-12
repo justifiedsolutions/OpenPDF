@@ -50,13 +50,11 @@
 package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
-import java.awt.Color;
+
+import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -236,127 +234,6 @@ public class FontFactoryImp {
         return fontStyle;
     }
 
-
-    /**
-     * Register a font by giving explicitly the font family and name.
-     *
-     * @param familyName the font family
-     * @param fullName   the font name
-     * @param path       the font path
-     */
-    public void registerFamily(String familyName, String fullName, String path) {
-        if (path != null) {
-            trueTypeFonts.put(fullName, path);
-        }
-        List<String> tmp = fontFamilies.get(familyName);
-        if (tmp == null) {
-            tmp = new ArrayList<>();
-            tmp.add(fullName);
-            fontFamilies.put(familyName, tmp);
-        } else {
-            int fullNameLength = fullName.length();
-            boolean inserted = false;
-            for (int j = 0; j < tmp.size(); ++j) {
-                if (tmp.get(j).length() >= fullNameLength) {
-                    tmp.add(j, fullName);
-                    inserted = true;
-                    break;
-                }
-            }
-            if (!inserted) {
-                tmp.add(fullName);
-            }
-        }
-    }
-
-    /**
-     * Register a ttf- or a ttc-file.
-     *
-     * @param path the path to a ttf- or ttc-file
-     */
-
-    public void register(String path) {
-        register(path, null);
-    }
-
-    /**
-     * Register a font file and use an alias for the font contained in it.
-     *
-     * @param path  the path to a font file
-     * @param alias the alias you want to use for the font
-     */
-
-    public void register(String path, String alias) {
-        try {
-            if (path.toLowerCase().endsWith(".ttf") || path.toLowerCase().endsWith(".otf")
-                    || path.toLowerCase().indexOf(".ttc,") > 0) {
-                Object[] allNames = BaseFont.getAllFontNames(path, BaseFont.WINANSI, null);
-                trueTypeFonts.put(((String) allNames[0]).toLowerCase(), path);
-                if (alias != null) {
-                    trueTypeFonts.put(alias.toLowerCase(), path);
-                }
-                // register all the font names with all the locales
-                String[][] names = (String[][]) allNames[2]; //full name
-                for (String[] name1 : names) {
-                    trueTypeFonts.put(name1[3].toLowerCase(), path);
-                }
-                String familyName = null;
-                names = (String[][]) allNames[1]; //family name
-                for (int k = 0; k < TTFamilyOrder.length; k += 3) {
-                    for (String[] name : names) {
-                        if (name.length == 4 && TTFamilyOrder.length > k + 2
-                                && TTFamilyOrder[k].equals(name[0])
-                                && TTFamilyOrder[k + 1].equals(name[1])
-                                && TTFamilyOrder[k + 2].equals(name[2])) {
-                            familyName = name[3].toLowerCase();
-                            k = TTFamilyOrder.length;
-                            break;
-                        }
-                    }
-                }
-                if (familyName != null) {
-                    String lastName = "";
-                    names = (String[][]) allNames[2]; //full name
-                    for (String[] name : names) {
-                        for (int k = 0; k < TTFamilyOrder.length; k += 3) {
-                            if (name.length == 4 && TTFamilyOrder.length > k + 2
-                                    && TTFamilyOrder[k].equals(name[0])
-                                    && TTFamilyOrder[k + 1].equals(name[1])
-                                    && TTFamilyOrder[k + 2].equals(name[2])) {
-                                String fullName = name[3];
-                                if (fullName.equals(lastName)) {
-                                    continue;
-                                }
-                                lastName = fullName;
-                                registerFamily(familyName, fullName, path);
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else if (path.toLowerCase().endsWith(".ttc")) {
-                if (alias != null) {
-                    System.err.println(
-                            "class FontFactory: You can't define an alias for a true type collection.");
-                }
-                String[] names = BaseFont.enumerateTTCNames(path);
-                for (int i = 0; i < names.length; i++) {
-                    register(path + "," + i);
-                }
-            } else if (path.toLowerCase().endsWith(".afm") || path.toLowerCase().endsWith(".pfm")) {
-                BaseFont bf = BaseFont.createFont(path, BaseFont.CP1252, false);
-                String fullName = bf.getFullFontName()[0][3].toLowerCase();
-                String familyName = bf.getFamilyFontName()[0][3].toLowerCase();
-                String psName = bf.getPostscriptFontName().toLowerCase();
-                registerFamily(familyName, fullName, null);
-                trueTypeFonts.put(psName, path);
-                trueTypeFonts.put(fullName, path);
-            }
-        } catch (DocumentException | IOException de) {
-            // this shouldn't happen
-            throw new ExceptionConverter(de);
-        }
-    }
 
     /**
      * Checks if a certain font is registered.

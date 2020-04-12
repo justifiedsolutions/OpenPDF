@@ -55,7 +55,6 @@ import com.justifiedsolutions.openpdf.text.*;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -99,8 +98,7 @@ public class PdfPTable implements LargeElement{
     protected float totalWidth = 0;
     protected float[] relativeWidths;
     protected float[] absoluteWidths;
-    protected PdfPTableEvent tableEvent;
-    
+
     /**
      * Holds value of property headerRows.
      */
@@ -271,7 +269,6 @@ public class PdfPTable implements LargeElement{
         totalWidth = sourceTable.totalWidth;
         totalHeight = sourceTable.totalHeight;
         currentRowIdx = 0;
-        tableEvent = sourceTable.tableEvent;
         currentRow = new PdfPCell[sourceTable.currentRow.length];
         isColspan = sourceTable.isColspan;
         splitRows = sourceTable.splitRows;
@@ -529,8 +526,7 @@ public class PdfPTable implements LargeElement{
             colEnd = totalCols;
         else
             colEnd = Math.min(colEnd, totalCols);
-        
-        float yPosStart = yPos;
+
         for (int k = rowStart; k < rowEnd; ++k) {
             PdfPRow row = rows.get(k);
             if (row != null) {
@@ -538,20 +534,7 @@ public class PdfPTable implements LargeElement{
                 yPos -= row.getMaxHeights();
             }
         }
-        
-        if (tableEvent != null && colStart == 0 && colEnd == totalCols) {
-            float[] heights = new float[rowEnd - rowStart + 1];
-            heights[0] = yPosStart;
-            for (int k = rowStart; k < rowEnd; ++k) {
-                PdfPRow row = rows.get(k);
-                float hr = 0;
-                if (row != null)
-                    hr = row.getMaxHeights();
-                heights[k - rowStart + 1] = heights[k - rowStart] - hr;
-            }
-            tableEvent.tableLayout(this, getEventWidths(xPos, rowStart, rowEnd, headersInEvent), heights, headersInEvent ? headerRows : 0, rowStart, canvases);
-        }
-        
+
         return yPos;
     }
     
@@ -1016,42 +999,6 @@ public class PdfPTable implements LargeElement{
         return row;
     }
 
-    float [][] getEventWidths(float xPos, int firstRow, int lastRow, boolean includeHeaders) {
-        if (includeHeaders) {
-            firstRow = Math.max(firstRow, headerRows);
-            lastRow = Math.max(lastRow, headerRows);
-        }
-        float[][] widths = new float[(includeHeaders ? headerRows : 0) + lastRow - firstRow][];
-        if (isColspan) {
-            int n = 0;
-            if (includeHeaders) {
-                for (int k = 0; k < headerRows; ++k) {
-                    PdfPRow row = rows.get(k);
-                    if (row == null)
-                        ++n;
-                    else
-                        widths[n++] = row.getEventWidth(xPos);
-                }
-            }
-            for (; firstRow < lastRow; ++firstRow) {
-                    PdfPRow row = rows.get(firstRow);
-                    if (row == null)
-                        ++n;
-                    else
-                        widths[n++] = row.getEventWidth(xPos);
-            }
-        }
-        else {
-            int numCols = getNumberOfColumns();
-            float[] width = new float[numCols + 1];
-            width[0] = xPos;
-            for (int k = 0; k < numCols; ++k)
-                width[k + 1] = width[k] + absoluteWidths[k];
-            Arrays.fill(widths, width);
-        }
-        return widths;
-    }
-
 
     /**
      * Tells you if the first header needs to be skipped
@@ -1230,27 +1177,18 @@ public class PdfPTable implements LargeElement{
         return this.footerRows;
     }
 
-    /**
-     * @since    iText 2.0.8
-     * @see LargeElement#flushContent()
-     */
+    @Override
     public void flushContent() {
         deleteBodyRows();
         setSkipFirstHeader(true);
     }
 
-    /**
-     * @since    iText 2.0.8
-     * @see LargeElement#isComplete()
-     */
+    @Override
     public boolean isComplete() {
         return complete;
     }
 
-    /**
-     * @since    iText 2.0.8
-     * @see LargeElement#setComplete(boolean)
-     */
+    @Override
     public void setComplete(boolean complete) {
         this.complete = complete;
     }

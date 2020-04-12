@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * <CODE>PdfDictionary</CODE> is the Pdf dictionary object.
@@ -234,15 +233,6 @@ public class PdfDictionary extends PdfObject {
     }
 
     /**
-     * Get all keys that are set.
-     *
-     * @return <CODE>true</CODE> if it is, otherwise <CODE>false</CODE>.
-     */
-    public Set<PdfName> getKeys() {
-        return hashMap.keySet();
-    }
-
-    /**
      * Returns the number of <VAR>key</VAR>-<VAR>value</VAR> mappings in this
      * <CODE>PdfDictionary</CODE>.
      *
@@ -307,27 +297,6 @@ public class PdfDictionary extends PdfObject {
         if (orig != null && orig.isNumber())
             number = (PdfNumber) orig;
         return number;
-    }
-
-    /**
-     * Returns a <CODE>PdfObject</CODE> as a <CODE>PdfName</CODE>,
-     * resolving indirect references.
-     *
-     * The object associated with the <CODE>PdfName</CODE> given is retrieved
-     * and resolved to a direct object.
-     * If it is a <CODE>PdfName</CODE>, it is cast down and returned as such.
-     * Otherwise <CODE>null</CODE> is returned.
-     *
-     * @param key A <CODE>PdfName</CODE>
-     * @return the associated <CODE>PdfName</CODE> object,
-     *   or <CODE>null</CODE>
-     */
-    public PdfName getAsName(PdfName key) {
-        PdfName name = null;
-        PdfObject orig = getDirectObject(key);
-        if (orig != null && orig.isName())
-            name = (PdfName) orig;
-        return name;
     }
 
 }

@@ -54,11 +54,8 @@ import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Table;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.PdfPTable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 /**
  * A <CODE>Section</CODE> is a part of a <CODE>Document</CODE> containing other
@@ -612,10 +609,7 @@ public class Section extends ArrayList<Element> implements LargeElement {
         this.addedCompletely = addedCompletely;
     }
 
-    /**
-     * @see LargeElement#flushContent()
-     * @since iText 2.0.8
-     */
+    @Override
     public void flushContent() {
         setNotAddedYet(false);
         title = null;
@@ -635,18 +629,12 @@ public class Section extends ArrayList<Element> implements LargeElement {
         }
     }
 
-    /**
-     * @see LargeElement#isComplete()
-     * @since iText 2.0.8
-     */
+    @Override
     public boolean isComplete() {
         return complete;
     }
 
-    /**
-     * @see LargeElement#setComplete(boolean)
-     * @since iText 2.0.8
-     */
+    @Override
     public void setComplete(boolean complete) {
         this.complete = complete;
     }

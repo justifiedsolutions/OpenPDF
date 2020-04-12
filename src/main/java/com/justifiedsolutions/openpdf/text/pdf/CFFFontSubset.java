@@ -50,13 +50,7 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This Class subsets a CFF Type Font. The subset is preformed for CID fonts and NON CID fonts.
@@ -1224,6 +1218,7 @@ public class CFFFontSubset extends CFFFont {
     /**
      * Function Copies the header from the original fileto the output list
      */
+    @SuppressWarnings("unused")
     protected void CopyHeader()
     {
         seek(0);

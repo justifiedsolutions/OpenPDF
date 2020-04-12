@@ -53,7 +53,8 @@ import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Rectangle;
-import java.awt.Color;
+
+import java.awt.*;
 
 /**
  * A row in a PdfPTable.
@@ -484,24 +485,6 @@ public class PdfPRow {
     }
 
     //end add
-
-    float[] getEventWidth(float xPos) {
-        int n = 0;
-        for (PdfPCell cell1 : cells) {
-            if (cell1 != null)
-                ++n;
-        }
-        float[] width = new float[n + 1];
-        n = 0;
-        width[n++] = xPos;
-        for (PdfPCell cell : cells) {
-            if (cell != null) {
-                width[n] = width[n - 1] + cell.getWidth();
-                ++n;
-            }
-        }
-        return width;
-    }
 
     /**
      * Splits a row to newHeight.
