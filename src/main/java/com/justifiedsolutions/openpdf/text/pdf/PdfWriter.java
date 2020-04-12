@@ -49,14 +49,7 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
-import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfVersionImp;
-import com.justifiedsolutions.openpdf.text.pdf.internal.PdfXConformanceImp;
+import com.justifiedsolutions.openpdf.text.*;
 
 import java.awt.*;
 import java.io.BufferedOutputStream;
@@ -75,7 +68,7 @@ import static com.justifiedsolutions.openpdf.text.Utilities.getISOBytes;
  * Element added to this Document will be written to the outputstream.</P>
  */
 
-public class PdfWriter implements PdfXConformance {
+public class PdfWriter {
 
     /**
      * The highest generation number possible.
@@ -161,10 +154,6 @@ public class PdfWriter implements PdfXConformance {
      */
     public static final float NO_SPACE_CHAR_RATIO = 10000000f;
     /**
-     * Stores the PDF/X level.
-     */
-    private final PdfXConformanceImp pdfxConformance = new PdfXConformanceImp();
-    /**
      * The outputstream of this writer.
      */
     protected OutputStreamCounter os;
@@ -218,10 +207,6 @@ public class PdfWriter implements PdfXConformance {
      * A number referring to the previous Cross-Reference Table.
      */
     protected int prevxref = 0;
-    /**
-     * Stores the version information for the header and the catalog.
-     */
-    protected PdfVersion pdfVersion = new PdfVersionImp();
     /**
      * Holds value of property fullCompression.
      */
@@ -509,18 +494,6 @@ public class PdfWriter implements PdfXConformance {
     }
 
     /**
-     * Sets extra keys to the catalog.
-     *
-     * @return the catalog to change
-     */
-    private PdfDictionary getExtraCatalog() {
-        if (extraCatalog == null) {
-            extraCatalog = new PdfDictionary();
-        }
-        return this.extraCatalog;
-    }
-
-    /**
      * Use this method to get a reference to a page existing or not. If the page does not exist yet
      * the reference will be created in advance. If on closing the document, a page number greater
      * than the total number of pages was requested, an exception is thrown.
@@ -619,22 +592,6 @@ public class PdfWriter implements PdfXConformance {
         }
     }
 
-    public void setPDFXConformance(int pdfx) {
-        if (pdfxConformance.getPDFXConformance() == pdfx) {
-            return;
-        }
-        if (pdf.isOpen()) {
-            throw new PdfXConformanceException(MessageLocalization.getComposedMessage(
-                    "pdfx.conformance.can.only.be.set.before.opening.the.document"));
-        }
-        if (pdfx == PDFA1A || pdfx == PDFA1B) {
-            pdfVersion.setPdfVersion(VERSION_1_4);
-        } else if (pdfx != PDFXNONE) {
-            pdfVersion.setPdfVersion(VERSION_1_3);
-        }
-        pdfxConformance.setPDFXConformance(pdfx);
-    }
-
     /**
      * Signals that the <CODE>Document</CODE> was closed and that no other
      * <CODE>Elements</CODE> will be added.
@@ -664,11 +621,6 @@ public class PdfWriter implements PdfXConformance {
                 PdfIndirectReference rootRef = root.writePageTree();
                 // make the catalog-object and add it to the body
                 PdfDictionary catalog = getCatalog(rootRef);
-                // [C10] make pdfx conformant
-                if (isPdfX()) {
-                    pdfxConformance.completeInfoDictionary(getInfo());
-                    pdfxConformance.completeExtraCatalog(getExtraCatalog());
-                }
                 // [C11] Output Intents
                 if (extraCatalog != null) {
                     catalog.mergeDifferent(extraCatalog);
@@ -770,37 +722,32 @@ public class PdfWriter implements PdfXConformance {
     void open() {
         open = true;
         try {
-            pdfVersion.writeHeader(os);
+            writeHeader(os);
             body = new PdfBody(this);
-            if (pdfxConformance.isPdfX32002()) {
-                PdfDictionary sec = new PdfDictionary();
-                sec.put(PdfName.GAMMA, new PdfArray(new float[]{2.2f, 2.2f, 2.2f}));
-                sec.put(PdfName.MATRIX, new PdfArray(
-                        new float[]{0.4124f, 0.2126f, 0.0193f, 0.3576f, 0.7152f, 0.1192f, 0.1805f,
-                                0.0722f, 0.9505f}));
-                sec.put(PdfName.WHITEPOINT, new PdfArray(new float[]{0.9505f, 1f, 1.089f}));
-                PdfArray arr = new PdfArray(PdfName.CALRGB);
-                arr.add(sec);
-                setDefaultColorspace(PdfName.DEFAULTRGB, addToBody(arr).getIndirectReference());
-            }
         } catch (IOException ioe) {
             throw new ExceptionConverter(ioe);
         }
     }
 
-    public int getPDFXConformance() {
-        return pdfxConformance.getPDFXConformance();
-    }
-
     /**
-     * Returns the version information.
+     * Adds a <CODE>BaseFont</CODE> to the document but not to the page resources. It is used for
+     * templates.
+     *
+     * @param bf the <CODE>BaseFont</CODE> to add
+     * @return an <CODE>Object[]</CODE> where position 0 is a <CODE>PdfName</CODE> and position 1 is
+     * an <CODE>PdfIndirectReference</CODE>
      */
-    PdfVersion getPdfVersion() {
-        return pdfVersion;
-    }
 
-    public boolean isPdfX() {
-        return pdfxConformance.isPdfX();
+    FontDetails addSimple(BaseFont bf) {
+        if (bf.getFontType() == BaseFont.FONT_TYPE_DOCUMENT) {
+            return new FontDetails(new PdfName("F" + (fontNumber++)), null, bf);
+        }
+        FontDetails ret = documentFonts.get(bf);
+        if (ret == null) {
+            ret = new FontDetails(new PdfName("F" + (fontNumber++)), body.getPdfIndirectReference(), bf);
+            documentFonts.put(bf, ret);
+        }
+        return ret;
     }
 
     /**
@@ -822,27 +769,11 @@ public class PdfWriter implements PdfXConformance {
         return compressionLevel;
     }
 
-    /**
-     * Adds a <CODE>BaseFont</CODE> to the document but not to the page resources. It is used for
-     * templates.
-     *
-     * @param bf the <CODE>BaseFont</CODE> to add
-     * @return an <CODE>Object[]</CODE> where position 0 is a <CODE>PdfName</CODE> and position 1 is
-     * an <CODE>PdfIndirectReference</CODE>
-     */
-
-    FontDetails addSimple(BaseFont bf) {
-        if (bf.getFontType() == BaseFont.FONT_TYPE_DOCUMENT) {
-            return new FontDetails(new PdfName("F" + (fontNumber++)), null, bf);
+    PdfObject[] addSimpleExtGState(PdfDictionary gstate) {
+        if (!documentExtGState.containsKey(gstate)) {
+            documentExtGState.put(gstate, new PdfObject[]{new PdfName("GS" + (documentExtGState.size() + 1)), getPdfIndirectReference()});
         }
-        FontDetails ret = documentFonts.get(bf);
-        if (ret == null) {
-            PdfXConformanceImp.checkPDFXConformance(this, PdfXConformanceImp.PDFXKEY_FONT, bf);
-            ret = new FontDetails(new PdfName("F" + (fontNumber++)), body.getPdfIndirectReference(),
-                    bf);
-            documentFonts.put(bf, ret);
-        }
-        return ret;
+        return documentExtGState.get(gstate);
     }
 
     int getNewObjectNumber(PdfReader reader, int number) {
@@ -905,15 +836,9 @@ public class PdfWriter implements PdfXConformance {
         }
     }
 
-    PdfObject[] addSimpleExtGState(PdfDictionary gstate) {
-        if (!documentExtGState.containsKey(gstate)) {
-            PdfXConformanceImp
-                    .checkPDFXConformance(this, PdfXConformanceImp.PDFXKEY_GSTATE, gstate);
-            documentExtGState.put(gstate,
-                    new PdfObject[]{new PdfName("GS" + (documentExtGState.size() + 1)),
-                            getPdfIndirectReference()});
-        }
-        return documentExtGState.get(gstate);
+    private void writeHeader(OutputStream os) throws IOException {
+        os.write(Utilities.getISOBytes("%PDF-1.5"));
+        os.write(Utilities.getISOBytes("\n%\u00e2\u00e3\u00cf\u00d3\n"));
     }
 
     private void addASEvent(PdfName event, PdfName category) {
@@ -1024,26 +949,6 @@ public class PdfWriter implements PdfXConformance {
      */
     PdfDictionary getDefaultColorspace() {
         return defaultColorspace;
-    }
-
-    /**
-     * Use this method to sets the default colorspace that will be applied to all the document. The
-     * colorspace is only applied if another colorspace with the same name is not present in the
-     * content.
-     * <p>
-     * The colorspace is applied immediately when creating templates and at the page end for the
-     * main document content.
-     *
-     * @param key the name of the colorspace. It can be <CODE>PdfName.DEFAULTGRAY</CODE>,
-     *            <CODE>PdfName.DEFAULTRGB</CODE> or <CODE>PdfName.DEFAULTCMYK</CODE>
-     * @param cs  the colorspace. A <CODE>null</CODE> or <CODE>PdfNull</CODE> removes any colorspace
-     *            with the same name
-     */
-    private void setDefaultColorspace(PdfName key, PdfObject cs) {
-        if (cs == null || cs.isNull()) {
-            defaultColorspace.remove(key);
-        }
-        defaultColorspace.put(key, cs);
     }
 
     ColorDetails addSimplePatternColorspace(Color color) {

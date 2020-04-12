@@ -50,15 +50,11 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.Utilities;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /** Represents a True Type font with Unicode encoding. All the character
  * in the font can be used directly by using the encoding Identity-H or
@@ -390,23 +386,6 @@ class TrueTypeFontUnicode extends TrueTypeFont implements Comparator{
         PdfObject pobj = null;
         PdfIndirectObject obj = null;
         PdfIndirectReference cidset = null;
-        if (writer.getPDFXConformance() == PdfWriter.PDFA1A || writer.getPDFXConformance() == PdfWriter.PDFA1B) {
-            PdfStream stream;
-            if (metrics.length == 0) {
-                stream = new PdfStream(new byte[]{(byte)0x80});
-            }
-            else {
-                int top = metrics[metrics.length - 1][0];
-                byte[] bt = new byte[top / 8 + 1];
-                for (int[] metric : metrics) {
-                    int v = metric[0];
-                    bt[v / 8] |= rotbits[v % 8];
-                }
-                stream = new PdfStream(bt);
-                stream.flateCompress(compressionLevel);
-            }
-            cidset = writer.addToBody(stream).getIndirectReference();
-        }
         // sivan: cff
         if (cff) {
             byte[] b = readCffFont();

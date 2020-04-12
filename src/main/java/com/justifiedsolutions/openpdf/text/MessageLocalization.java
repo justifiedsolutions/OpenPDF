@@ -46,14 +46,11 @@
  * you aren't using an obsolete version:
  * https://github.com/LibrePDF/OpenPDF
  */
-package com.justifiedsolutions.openpdf.text.error_messages;
+package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;

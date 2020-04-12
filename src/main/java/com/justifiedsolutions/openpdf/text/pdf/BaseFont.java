@@ -50,7 +50,7 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 
 import java.io.IOException;
 import java.io.InputStream;

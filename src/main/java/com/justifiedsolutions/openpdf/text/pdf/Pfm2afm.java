@@ -140,15 +140,11 @@
  ********************************************************************/
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 /**
  * Converts a PFM file into an AFM file.

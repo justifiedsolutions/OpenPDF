@@ -1,7 +1,7 @@
 /*
- * $Id: PdfVersion.java 3811 2009-03-23 18:15:13Z blowagie $
+ * $Id: IllegalPdfSyntaxException.java 3820 2009-03-25 10:30:01Z blowagie $
  *
- * Copyright 2006 Bruno Lowagie
+ * Copyright 2009 by Bruno Lowagie.
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * The Original Code is 'iText, a free JAVA-PDF library'.
  *
  * The Initial Developer of the Original Code is Bruno Lowagie. Portions created by
- * the Initial Developer are Copyright (C) 1999, 2000, 2001, 2002 by Bruno Lowagie.
+ * the Initial Developer are Copyright (C) 1999-2009 by Bruno Lowagie.
  * All Rights Reserved.
  * Co-Developer of the code is Paulo Soares. Portions created by the Co-Developer
- * are Copyright (C) 2000, 2001, 2002 by Paulo Soares. All Rights Reserved.
+ * are Copyright (C) 2000-2009 by Paulo Soares. All Rights Reserved.
  *
  * Contributor(s): all the names of the contributors are added in the source code
  * where applicable.
@@ -47,31 +47,22 @@
  * https://github.com/LibrePDF/OpenPDF
  */
 
-package com.justifiedsolutions.openpdf.text.pdf.interfaces;
-
-import com.justifiedsolutions.openpdf.text.pdf.PdfDictionary;
-
-import java.io.IOException;
-import java.io.OutputStream;
+package com.justifiedsolutions.openpdf.text.pdf;
 
 /**
- * The PDF version is described in the PDF Reference 1.7 p92
- * (about the PDF Header) and page 139 (the version entry in
- * the Catalog). You'll also find info about setting the version
- * in the book 'iText in Action' sections 2.1.3 (PDF Header)
- * and 3.3 (Version history).
+ * Typed exception used when creating PDF syntax that isn't valid.
+ * @since 2.1.6
  */
-public interface PdfVersion {
+public class IllegalPdfSyntaxException extends IllegalArgumentException {
+
+    /** Serial version ID */
+    private static final long serialVersionUID = -643024246596031671L;
 
     /**
-     * If the PDF Header hasn't been written yet, this changes the version as it will appear in the PDF Header. If the
-     * PDF header was already written to the OutputStream, this changes the version as it will appear in the Catalog.
-     *
-     * @param version a character representing the PDF version
+     * Creates an exception saying the PDF syntax isn't correct.
+     * @param    message    some extra info about the exception
      */
-    void setPdfVersion(char version);
-
-    void writeHeader(OutputStream os) throws IOException;
-
-    void addToCatalog(PdfDictionary catalog);
+    public IllegalPdfSyntaxException(String message) {
+        super(message);
+    }
 }

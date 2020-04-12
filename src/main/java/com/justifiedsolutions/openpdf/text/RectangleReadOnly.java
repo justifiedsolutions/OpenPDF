@@ -49,8 +49,7 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * A <CODE>RectangleReadOnly</CODE> is the representation of a geometric figure.

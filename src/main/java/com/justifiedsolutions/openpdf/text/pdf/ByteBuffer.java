@@ -50,8 +50,9 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.Utilities;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;

@@ -52,7 +52,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.text.Font;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.*;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 
 import java.awt.*;
@@ -530,21 +529,6 @@ class PdfDocument extends Document implements DocListener {
 
             // [U1] page size and rotation
             int rotation = getPageSize().getRotation();
-
-            // [C10]
-            if (writer.isPdfX()) {
-                if (thisBoxSize.containsKey("art") && thisBoxSize.containsKey("trim")) {
-                    throw new PdfXConformanceException(MessageLocalization.getComposedMessage(
-                            "only.one.of.artbox.or.trimbox.can.exist.in.the.page"));
-                }
-                if (!thisBoxSize.containsKey("art") && !thisBoxSize.containsKey("trim")) {
-                    if (thisBoxSize.containsKey("crop")) {
-                        thisBoxSize.put("trim", thisBoxSize.get("crop"));
-                    } else {
-                        thisBoxSize.put("trim", new PdfRectangle(getPageSize(), getPageSize().getRotation()));
-                    }
-                }
-            }
 
             // [M1]
             pageResources.addDefaultColorDiff(writer.getDefaultColorspace());
@@ -1218,10 +1202,6 @@ class PdfDocument extends Document implements DocListener {
             catalog.put(PdfName.PAGEMODE, PdfName.USEOUTLINES);
             catalog.put(PdfName.OUTLINES, rootOutline.indirectReference());
         }
-
-        // [C2] version
-        writer.getPdfVersion().addToCatalog(catalog);
-
         return catalog;
     }
 

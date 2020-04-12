@@ -50,7 +50,6 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.*;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

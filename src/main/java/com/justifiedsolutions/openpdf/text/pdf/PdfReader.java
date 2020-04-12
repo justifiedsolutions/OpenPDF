@@ -50,9 +50,7 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import com.justifiedsolutions.openpdf.text.exceptions.InvalidPdfException;
-import com.justifiedsolutions.openpdf.text.exceptions.UnsupportedPdfException;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

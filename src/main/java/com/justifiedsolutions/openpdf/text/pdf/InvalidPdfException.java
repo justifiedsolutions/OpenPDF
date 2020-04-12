@@ -1,7 +1,7 @@
 /*
- * $Id: PdfXConformance.java 3117 2008-01-31 05:53:22Z xlv $
+ * $Id: InvalidPdfException.java 3665 2009-01-26 22:32:15Z xlv $
  *
- * Copyright 2006 Bruno Lowagie
+ * Copyright 2009 Bruno Lowagie
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * The Original Code is 'iText, a free JAVA-PDF library'.
  *
  * The Initial Developer of the Original Code is Bruno Lowagie. Portions created by
- * the Initial Developer are Copyright (C) 1999, 2000, 2001, 2002 by Bruno Lowagie.
+ * the Initial Developer are Copyright (C) 1999-2009 by Bruno Lowagie.
  * All Rights Reserved.
  * Co-Developer of the code is Paulo Soares. Portions created by the Co-Developer
- * are Copyright (C) 2000, 2001, 2002 by Paulo Soares. All Rights Reserved.
+ * are Copyright (C) 2000-2009 by Paulo Soares. All Rights Reserved.
  *
  * Contributor(s): all the names of the contributors are added in the source code
  * where applicable.
@@ -47,27 +47,25 @@
  * https://github.com/LibrePDF/OpenPDF
  */
 
-package com.justifiedsolutions.openpdf.text.pdf.interfaces;
+package com.justifiedsolutions.openpdf.text.pdf;
 
-public interface PdfXConformance {
-    
-    /**
-     * Sets the PDF/X conformance level.
-     * Allowed values are PDFX1A2001, PDFX32002, PDFA1A and PDFA1B.
-     * It must be called before opening the document.
-     * @param pdfxConformance the conformance level
-     */
-    void setPDFXConformance(int pdfxConformance);
+import java.io.IOException;
+
+/**
+ * Typed exception used when opening an existing PDF document.
+ * Gets thrown when the document isn't a valid PDF document.
+ * @since 2.1.5
+ */
+public class InvalidPdfException extends IOException {
+
+    /** a serial version UID */
+    private static final long serialVersionUID = -2319614911517026938L;
 
     /**
-     * Getter for the PDF/X Conformance value.
-     * @return the pdfxConformance
+     * Creates an instance of a NoPdfException.
+     * @param    message    the reason why the document isn't a PDF document according to iText.
      */
-    int getPDFXConformance();
-    
-    /**
-     * Checks if the PDF/X Conformance is necessary.
-     * @return true if the PDF has to be in conformance with any of the PDF/X specifications
-     */
-    boolean isPdfX();
+    public InvalidPdfException(String message) {
+        super(message);
+    }
 }

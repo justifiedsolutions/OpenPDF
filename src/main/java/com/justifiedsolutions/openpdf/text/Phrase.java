@@ -49,8 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text;
 
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

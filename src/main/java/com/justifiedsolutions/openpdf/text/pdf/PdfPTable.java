@@ -52,7 +52,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.pdf.content.Cell;
 import com.justifiedsolutions.openpdf.pdf.content.Table;
 import com.justifiedsolutions.openpdf.text.*;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 import java.util.ArrayList;
 import java.util.List;

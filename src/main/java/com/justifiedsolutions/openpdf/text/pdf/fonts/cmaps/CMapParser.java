@@ -30,12 +30,12 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf.fonts.cmaps;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.PushbackInputStream;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;

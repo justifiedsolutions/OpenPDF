@@ -49,7 +49,8 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;

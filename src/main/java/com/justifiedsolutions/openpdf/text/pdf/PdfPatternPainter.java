@@ -46,9 +46,10 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-import java.awt.Color;
+
+import java.awt.*;
 
 /**
  * Implements the pattern.
