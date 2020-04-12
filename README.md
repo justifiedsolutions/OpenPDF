@@ -62,10 +62,6 @@ Justified Solutions OpenPDF is open source software with a LGPL and MPL license.
 
 ### Testing Dependencies: ###
  - JUnit 5
- - AssertJ
- - Hamcrest
- - Mockito
- - Apache Commons IO
 
 ## Credits ##
 Significant [Contributors to OpenPDF](https://github.com/LibrePDF/OpenPDF/graphs/contributors) on GitHub:
