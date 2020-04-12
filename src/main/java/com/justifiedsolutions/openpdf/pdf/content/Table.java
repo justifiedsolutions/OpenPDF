@@ -12,8 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A Table is a type of {@link Content} that can be added to a PDF {@link
- * com.justifiedsolutions.openpdf.pdf.Document}.
+ * A Table is a type of {@link Content} that can be added to a PDF {@link com.justifiedsolutions.openpdf.pdf.Document}.
  */
 public class Table implements Content {
 
@@ -24,10 +23,21 @@ public class Table implements Content {
     private float spacingBefore = 0;
     private float spacingAfter = 0;
 
+    /**
+     * Creates a Table with <code>relativeColumnWidths.length</code> number of columns, having the widths set relative
+     * to each other based on the values in the array.
+     *
+     * @param relativeColumnWidths the relative widths of the columns
+     */
     public Table(float[] relativeColumnWidths) {
         this.relativeColumnWidths = relativeColumnWidths;
     }
 
+    /**
+     * Creates a Table with the specified number of columns.
+     *
+     * @param numberOfColumns the number of columns
+     */
     public Table(int numberOfColumns) {
         relativeColumnWidths = new float[numberOfColumns];
         Arrays.fill(relativeColumnWidths, 1);
@@ -52,8 +62,8 @@ public class Table implements Content {
     }
 
     /**
-     * Specifies whether the entire Table should be kept together on the same page. The default
-     * value is <code>false</code>.
+     * Specifies whether the entire Table should be kept together on the same page. The default value is
+     * <code>false</code>.
      *
      * @return true if the table should be kept together on the same page
      */
@@ -71,8 +81,8 @@ public class Table implements Content {
     }
 
     /**
-     * Gets the percentage of the page width that the table should occupy. A value of 100 would go
-     * from left margin to right margin. The default value is <code>80</code>.
+     * Gets the percentage of the page width that the table should occupy. A value of 100 would go from left margin to
+     * right margin. The default value is <code>80</code>.
      *
      * @return the width percentage
      */
@@ -81,8 +91,8 @@ public class Table implements Content {
     }
 
     /**
-     * Sets the percentage of the page width that the table should occupy. A value of 100 would go
-     * from left margin to right margin.
+     * Sets the percentage of the page width that the table should occupy. A value of 100 would go from left margin to
+     * right margin.
      *
      * @param widthPercentage the width percentage
      */
@@ -138,8 +148,8 @@ public class Table implements Content {
     }
 
     /**
-     * Creates a new {@link Cell} with the specified {@link Content} and adds it to the Table. The
-     * Content must be either a {@link Phrase} or a {@link Paragraph}.
+     * Creates a new {@link Cell} with the specified {@link Content} and adds it to the Table. The Content must be
+     * either a {@link Phrase} or a {@link Paragraph}.
      *
      * @param content the content for the cell
      * @return a new cell
@@ -152,7 +162,7 @@ public class Table implements Content {
     }
 
     /**
-     * Gets a {@link Collections#unmodifiableList(List)} of the {@link Cell}s in this Table.
+     * Gets a {@linkplain Collections#unmodifiableList(List) unmodifiable list} of the {@link Cell}s in this Table.
      *
      * @return the cells
      */

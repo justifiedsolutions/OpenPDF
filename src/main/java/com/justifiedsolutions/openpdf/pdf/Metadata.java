@@ -7,7 +7,9 @@
 package com.justifiedsolutions.openpdf.pdf;
 
 /**
- * Enumerates the supported metadata fields in a PDF document. From PDF 32000-1:2008, Table 317.
+ * Enumerates the supported metadata fields in a PDF document.
+ *
+ * @see "PDF 32000-1:2008, Table 317"
  */
 public enum Metadata {
     /**
@@ -27,18 +29,18 @@ public enum Metadata {
      */
     AUTHOR,
     /**
-     * If the document was converted to PDF from another format, the name of the conforming product
-     * that created the original document from which it was converted.
+     * If the document was converted to PDF from another format, the name of the conforming product that created the
+     * original document from which it was converted.
      */
     CREATOR,
     /**
-     * If the document was converted to PDF from another format, the name of the conforming product
-     * that converted it to PDF.
+     * If the document was converted to PDF from another format, the name of the conforming product that converted it to
+     * PDF.
      */
     PRODUCER,
     /**
-     * The date and time the document was created, in human-readable form. The value of this field
-     * is ignored and replaced with a date generated at the time the file is being written.
+     * The date and time the document was created, in human-readable form. The value of this field is ignored and
+     * replaced with a date generated at the time the file is being written.
      */
     CREATE_DATE
 }

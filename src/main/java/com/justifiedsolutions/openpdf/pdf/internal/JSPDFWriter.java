@@ -11,19 +11,16 @@ import com.justifiedsolutions.openpdf.pdf.Margin;
 import com.justifiedsolutions.openpdf.pdf.Metadata;
 import com.justifiedsolutions.openpdf.pdf.PageSize;
 import com.justifiedsolutions.openpdf.pdf.content.Chunk;
-import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.content.Phrase;
-import com.justifiedsolutions.openpdf.pdf.content.Table;
-import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.Meta;
-import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.RectangleReadOnly;
+import com.justifiedsolutions.openpdf.pdf.content.*;
+import com.justifiedsolutions.openpdf.text.*;
 import com.justifiedsolutions.openpdf.text.pdf.PdfPTable;
 import com.justifiedsolutions.openpdf.text.pdf.PdfWriter;
+
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Objects;
 
 public class JSPDFWriter {
 
@@ -35,10 +32,11 @@ public class JSPDFWriter {
      *
      * @param model        the document model
      * @param outputStream the output stream to write to
+     * @throws NullPointerException if either argument is <code>null</code>
      */
     public JSPDFWriter(com.justifiedsolutions.openpdf.pdf.Document model, OutputStream outputStream) {
-        this.model = model;
-        this.outputStream = outputStream;
+        this.model = Objects.requireNonNull(model);
+        this.outputStream = Objects.requireNonNull(outputStream);
     }
 
     /**

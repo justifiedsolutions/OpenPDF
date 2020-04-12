@@ -52,7 +52,8 @@ package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.pdf.font.PDFFont;
 import com.justifiedsolutions.openpdf.text.pdf.BaseFont;
-import java.awt.Color;
+
+import java.awt.*;
 
 /**
  * If you are using True Type fonts, you can declare the paths of the different ttf- and ttc-files
@@ -187,8 +188,59 @@ public final class FontFactory {
     public static Font getFont(com.justifiedsolutions.openpdf.pdf.font.Font font) {
         if (font instanceof PDFFont) {
             PDFFont pdfFont = (PDFFont) font;
-            return getFont(pdfFont.getName().getName(),pdfFont.getSize(),pdfFont.getColor());
+            return getFont(getFontName(pdfFont.getName()), pdfFont.getSize(), pdfFont.getColor());
         }
         return new Font();
+    }
+
+    private static String getFontName(PDFFont.FontName fontName) {
+        String result;
+        switch (fontName) {
+            case COURIER:
+                result = BaseFont.COURIER;
+                break;
+            case COURIER_BOLD:
+                result = BaseFont.COURIER_BOLD;
+                break;
+            case COURIER_OBLIQUE:
+                result = BaseFont.COURIER_OBLIQUE;
+                break;
+            case COURIER_BOLD_OBLIQUE:
+                result = BaseFont.COURIER_BOLDOBLIQUE;
+                break;
+            case HELVETICA:
+                result = BaseFont.HELVETICA;
+                break;
+            case HELVETICA_BOLD:
+                result = BaseFont.HELVETICA_BOLD;
+                break;
+            case HELVETICA_OBLIQUE:
+                result = BaseFont.HELVETICA_OBLIQUE;
+                break;
+            case HELVETICA_BOLD_OBLIQUE:
+                result = BaseFont.HELVETICA_BOLDOBLIQUE;
+                break;
+            case TIMES_ROMAN:
+                result = BaseFont.TIMES_ROMAN;
+                break;
+            case TIMES_BOLD:
+                result = BaseFont.TIMES_BOLD;
+                break;
+            case TIMES_ITALIC:
+                result = BaseFont.TIMES_ITALIC;
+                break;
+            case TIMES_BOLD_ITALIC:
+                result = BaseFont.TIMES_BOLDITALIC;
+                break;
+            case SYMBOL:
+                result = BaseFont.SYMBOL;
+                break;
+            case ZAPFDINGBATS:
+                result = BaseFont.ZAPFDINGBATS;
+                break;
+            default:
+                result = null;
+        }
+        return result;
     }
 }

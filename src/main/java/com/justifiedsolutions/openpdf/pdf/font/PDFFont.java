@@ -6,7 +6,7 @@
 
 package com.justifiedsolutions.openpdf.pdf.font;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Objects;
 
 /**
@@ -15,15 +15,15 @@ import java.util.Objects;
 public class PDFFont implements Font {
 
     /**
-     * The default font name.
+     * The default font name (Helvetica).
      */
     public static final FontName DEFAULT_NAME = FontName.HELVETICA;
     /**
-     * The default font size.
+     * The default font size (12).
      */
     public static final float DEFAULT_SIZE = 12f;
     /**
-     * The default font color.
+     * The default font color (Black).
      */
     public static final Color DEFAULT_COLOR = Color.BLACK;
 
@@ -120,29 +120,19 @@ public class PDFFont implements Font {
      * Represents the 14 font names native to a PDF document.
      */
     public enum FontName {
-        COURIER("Courier"),
-        COURIER_BOLD("Courier-Bold"),
-        COURIER_OBLIQUE("Courier-Oblique"),
-        COURIER_BOLD_OBLIQUE("Courier-BoldOblique"),
-        HELVETICA("Helvetica"),
-        HELVETICA_BOLD("Helvetica-Bold"),
-        HELVETICA_OBLIQUE("Helvetica-Oblique"),
-        HELVETICA_BOLD_OBLIQUE("Helvetica-BoldOblique"),
-        TIMES_ROMAN("Times-Roman"),
-        TIMES_BOLD("Times-Bold"),
-        TIMES_ITALIC("Times-Italic"),
-        TIMES_BOLD_ITALIC("Times-BoldItalic"),
-        SYMBOL("Symbol"),
-        ZAPFDINGBATS("ZapfDingbats");
-
-        private final String name;
-
-        FontName(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
+        COURIER,
+        COURIER_BOLD,
+        COURIER_OBLIQUE,
+        COURIER_BOLD_OBLIQUE,
+        HELVETICA,
+        HELVETICA_BOLD,
+        HELVETICA_OBLIQUE,
+        HELVETICA_BOLD_OBLIQUE,
+        TIMES_ROMAN,
+        TIMES_BOLD,
+        TIMES_ITALIC,
+        TIMES_BOLD_ITALIC,
+        SYMBOL,
+        ZAPFDINGBATS()
     }
 }

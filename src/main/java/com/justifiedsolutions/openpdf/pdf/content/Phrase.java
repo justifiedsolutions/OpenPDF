@@ -7,6 +7,7 @@
 package com.justifiedsolutions.openpdf.pdf.content;
 
 import com.justifiedsolutions.openpdf.pdf.font.Font;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,7 +104,7 @@ public class Phrase implements TextContent {
     }
 
     /**
-     * Get an {@link Collections#unmodifiableList(List)} of {@link Chunk}s for the Phrase.
+     * Get an {@linkplain Collections#unmodifiableList(List) unmodifiable list} of {@link Chunk}s for the Phrase.
      *
      * @return the list of Chunks
      */
