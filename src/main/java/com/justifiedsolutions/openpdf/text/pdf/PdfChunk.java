@@ -49,28 +49,21 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Chunk;
+import com.justifiedsolutions.openpdf.text.Font;
+import com.justifiedsolutions.openpdf.text.Utilities;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.Font;
-import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.SplitCharacter;
-import com.justifiedsolutions.openpdf.text.Utilities;
 
 /**
  * A <CODE>PdfChunk</CODE> is the PDF translation of a <CODE>Chunk</CODE>.
  * <P>
  * A <CODE>PdfChunk</CODE> is a <CODE>PdfString</CODE> in a certain
  * <CODE>PdfFont</CODE> and <CODE>Color</CODE>.
- *
- * @see        PdfString
- * @see        Chunk
- * @see        Font
  */
 
-public class PdfChunk {
+class PdfChunk {
 
     private static final char[] singleSpace = {' '};
     private static final PdfChunk[] thisChunk = new PdfChunk[1];
@@ -82,16 +75,10 @@ public class PdfChunk {
     private static final Map<String, Object> keysNoStroke = new HashMap<>();
     
     static {
-        keysAttributes.put(Chunk.ACTION, null);
         keysAttributes.put(Chunk.UNDERLINE, null);
-        keysAttributes.put(Chunk.REMOTEGOTO, null);
-        keysAttributes.put(Chunk.LOCALGOTO, null);
-        keysAttributes.put(Chunk.LOCALDESTINATION, null);
         keysAttributes.put(Chunk.GENERICTAG, null);
         keysAttributes.put(Chunk.NEWPAGE, null);
-        keysAttributes.put(Chunk.IMAGE, null);
         keysAttributes.put(Chunk.BACKGROUND, null);
-        keysAttributes.put(Chunk.PDFANNOTATION, null);
         keysAttributes.put(Chunk.SKEW, null);
         keysAttributes.put(Chunk.HSCALE, null);
         keysAttributes.put(Chunk.SEPARATOR, null);
@@ -106,10 +93,10 @@ public class PdfChunk {
     // membervariables
 
     /** The value of this object. */
-    protected String value = PdfObject.NOTHING;
+    protected String value;
     
     /** The encoding. */
-    protected String encoding = BaseFont.WINANSI;
+    protected String encoding;
     
     
 /** The font for this <CODE>PdfChunk</CODE>. */
@@ -136,18 +123,6 @@ public class PdfChunk {
     
 /** <CODE>true</CODE> if the chunk split was cause by a newline. */
     protected boolean newlineSplit;
-    
-/** The image in this <CODE>PdfChunk</CODE>, if it has one */
-    protected Image image;
-    
-/** The offset in the x direction for the image */
-    protected float offsetX;
-    
-/** The offset in the y direction for the image */
-    protected float offsetY;
-
-/** Indicates if the height and offset of the Image has to be taken into account */
-    protected boolean changeLeading = false;
 
     // constructors
     
@@ -165,15 +140,6 @@ public class PdfChunk {
         this.attributes = other.attributes;
         this.noStroke = other.noStroke;
         this.baseFont = other.baseFont;
-        Object[] obj = (Object[]) attributes.get(Chunk.IMAGE);
-        if (obj == null)
-            image = null;
-        else {
-            image = (Image)obj[0];
-            offsetX = (Float) obj[1];
-            offsetY = (Float) obj[2];
-            changeLeading = (Boolean) obj[3];
-        }
         encoding = font.getFont().getEncoding();
         splitCharacter = (SplitCharacter)noStroke.get(Chunk.SPLITCHARACTER);
         if (splitCharacter == null)
@@ -240,18 +206,6 @@ public class PdfChunk {
         // the color can't be stored in a PdfFont
         noStroke.put(Chunk.COLOR, f.getColor());
         noStroke.put(Chunk.ENCODING, font.getFont().getEncoding());
-        Object[] obj = (Object[]) attributes.get(Chunk.IMAGE);
-        if (obj == null) {
-            image = null;
-        }
-        else {
-            attributes.remove(Chunk.HSCALE); // images are scaled in other ways
-            image = (Image)obj[0];
-            offsetX = (Float) obj[1];
-            offsetY = (Float) obj[2];
-            changeLeading = (Boolean) obj[3];
-        }
-        font.setImage(image);
         Float hs = (Float)attributes.get(Chunk.HSCALE);
         if (hs != null)
             font.setHorizontalScaling(hs);
@@ -269,7 +223,7 @@ public class PdfChunk {
      * @param c the CID code
      * @return the Unicode equivalent
      */    
-    public int getUnicodeEquivalent(int c) {
+    int getUnicodeEquivalent(int c) {
         return baseFont.getUnicodeEquivalent(c);
     }
 
@@ -294,18 +248,6 @@ public class PdfChunk {
     
     PdfChunk split(float width) {
         newlineSplit = false;
-        if (image != null) {
-            if (image.getScaledWidth() > width) {
-                PdfChunk pc = new PdfChunk(Chunk.OBJECT_REPLACEMENT_CHARACTER, this);
-                value = "";
-                attributes = new HashMap<>();
-                image = null;
-                font = PdfFont.getDefaultFont();
-                return pc;
-            }
-            else
-                return null;
-        }
         HyphenationEvent hyphenationEvent = (HyphenationEvent)noStroke.get(Chunk.HYPHENATION);
         int currentPosition = 0;
         int splitPosition = -1;
@@ -317,9 +259,9 @@ public class PdfChunk {
         float lastSpaceWidth = 0;
         int length = value.length();
         char[] valueArray = value.toCharArray();
-        char character = 0;
+        char character;
         BaseFont ft = font.getFont();
-        boolean surrogate = false;
+        boolean surrogate;
         if (ft.getFontType() == BaseFont.FONT_TYPE_CJK && ft.getUnicodeEquivalent(' ') != ' ') {
             while (currentPosition < length) {
                 // the width of every character is added to the currentWidth
@@ -343,7 +285,7 @@ public class PdfChunk {
                 if (currentWidth > width)
                     break;
                 // if a split-character is encountered, the splitPosition is altered
-                if (splitCharacter.isSplitCharacter(0, currentPosition, length, valueArray, thisChunk))
+                if (splitCharacter.isSplitCharacter(currentPosition, valueArray, thisChunk))
                     splitPosition = currentPosition + 1;
                 currentPosition++;
             }
@@ -379,7 +321,7 @@ public class PdfChunk {
                 if (currentWidth > width)
                     break;
                 // if a split-character is encountered, the splitPosition is altered
-                if (splitCharacter.isSplitCharacter(0, currentPosition, length, valueArray, null))
+                if (splitCharacter.isSplitCharacter(currentPosition, valueArray, null))
                     splitPosition = currentPosition + 1;
                 currentPosition++;
             }
@@ -395,7 +337,7 @@ public class PdfChunk {
             value = "";
             return new PdfChunk(returnValue, this);
         }
-        if (lastSpace > splitPosition && splitCharacter.isSplitCharacter(0, 0, 1, singleSpace, null))
+        if (lastSpace > splitPosition && splitCharacter.isSplitCharacter(0, singleSpace, null))
             splitPosition = lastSpace;
         if (hyphenationEvent != null && lastSpace >= 0 && lastSpace < currentPosition) {
             int wordIdx = getWord(value, lastSpace);
@@ -424,19 +366,6 @@ public class PdfChunk {
  */
     
     PdfChunk truncate(float width) {
-        if (image != null) {
-            if (image.getScaledWidth() > width) {
-                PdfChunk pc = new PdfChunk("", this);
-                value = "";
-                attributes.remove(Chunk.IMAGE);
-                image = null;
-                font = PdfFont.getDefaultFont();
-                return pc;
-            }
-            else
-                return null;
-        }
-        
         int currentPosition = 0;
         float currentWidth = 0;
         
@@ -451,7 +380,6 @@ public class PdfChunk {
         // or until the totalWidth is reached
         int length = value.length();
         boolean surrogate = false;
-        char character;
         while (currentPosition < length) {
             // the width of every character is added to the currentWidth
             surrogate = Utilities.isSurrogatePair(value, currentPosition);
@@ -525,7 +453,7 @@ public class PdfChunk {
  * @return <CODE>true</CODE> if the <CODE>PdfChunk</CODE> split was caused by a newline.
  */
     
-    public boolean isNewlineSplit()
+    boolean isNewlineSplit()
     {
         return newlineSplit;
     }
@@ -538,11 +466,8 @@ public class PdfChunk {
  * @return the calculated width
  */
     
-    public float getWidthCorrected(float charSpacing, float wordSpacing)
+    float getWidthCorrected(float charSpacing, float wordSpacing)
     {
-        if (image != null) {
-            return image.getScaledWidth() + charSpacing;
-        }
         int numberOfSpaces = 0;
         int idx = -1;
         while ((idx = value.indexOf(' ', idx + 1)) >= 0)
@@ -554,7 +479,7 @@ public class PdfChunk {
      * Gets the text displacement relative to the baseline.
      * @return a displacement in points
      */
-    public float getTextRise() {
+    float getTextRise() {
         Float f = (Float) getAttribute(Chunk.SUBSUPSCRIPT);
         if (f != null) {
             return f;
@@ -567,7 +492,7 @@ public class PdfChunk {
  * @return the width of the space trimmed, otherwise 0
  */
     
-    public float trimLastSpace()
+    float trimLastSpace()
     {
         BaseFont ft = font.getFont();
         if (ft.getFontType() == BaseFont.FONT_TYPE_CJK && ft.getUnicodeEquivalent(' ') != ' ') {
@@ -584,22 +509,19 @@ public class PdfChunk {
         }
         return 0;
     }    
-    public float trimFirstSpace()
+    void trimFirstSpace()
     {
         BaseFont ft = font.getFont();
         if (ft.getFontType() == BaseFont.FONT_TYPE_CJK && ft.getUnicodeEquivalent(' ') != ' ') {
             if (value.length() > 1 && value.startsWith("\u0001")) {
                 value = value.substring(1);
-                return font.width('\u0001');
             }
         }
         else {
             if (value.length() > 1 && value.startsWith(" ")) {
                 value = value.substring(1);
-                return font.width(' ');
             }
         }
-        return 0;
     }
     
 /**
@@ -681,76 +603,6 @@ public class PdfChunk {
             attributes.put(Chunk.TAB, new Object[]{o[0], o[1], o[2], newValue});
         }
     }
-    
-/**
- * Checks if there is an image in the <CODE>PdfChunk</CODE>.
- * @return <CODE>true</CODE> if an image is present
- */
-    
-    boolean isImage()
-    {
-        return image != null;
-    }
-    
-/**
- * Gets the image in the <CODE>PdfChunk</CODE>.
- * @return the image or <CODE>null</CODE>
- */
-    
-    Image getImage()
-    {
-        return image;
-    }
-    
-/**
- * Sets the image offset in the x direction
- * @param  offsetX the image offset in the x direction
- */
-    
-    void setImageOffsetX(float offsetX)
-    {
-        this.offsetX = offsetX;
-    }
-    
-/**
- * Gets the image offset in the x direction
- * @return the image offset in the x direction
- */
-    
-    float getImageOffsetX()
-    {
-        return offsetX;
-    }
-    
-/**
- * Sets the image offset in the y direction
- * @param  offsetY the image offset in the y direction
- */
-    
-    void setImageOffsetY(float offsetY)
-    {
-        this.offsetY = offsetY;
-    }
-    
-/**
- * Gets the image offset in the y direction
- * @return Gets the image offset in the y direction
- */
-    
-    float getImageOffsetY()
-    {
-        return offsetY;
-    }
-    
-/**
- * sets the value.
- * @param value content of the Chunk
- */
-    
-    void setValue(String value)
-    {
-        this.value = value;
-    }
 
     /**
      * @see java.lang.Object#toString()
@@ -766,16 +618,6 @@ public class PdfChunk {
     
     boolean isSpecialEncoding() {
         return encoding.equals(CJKFont.CJK_ENCODING) || encoding.equals(BaseFont.IDENTITY_H);
-    }
-    
-    /**
-     * Gets the encoding of this string.
-     *
-     * @return        a <CODE>String</CODE>
-     */
-    
-    String getEncoding() {
-        return encoding;
     }
 
     int length() {
@@ -795,8 +637,8 @@ public class PdfChunk {
         return total;
     }
     
-    boolean isExtSplitCharacter(int start, int current, int end, char[] cc, PdfChunk[] ck) {
-        return splitCharacter.isSplitCharacter(start, current, end, cc, ck);
+    boolean isExtSplitCharacter(int current, char[] cc, PdfChunk[] ck) {
+        return splitCharacter.isSplitCharacter(current, cc, ck);
     }
     
 /**
@@ -820,10 +662,6 @@ public class PdfChunk {
         return string;
     }
 
-    public boolean changeLeading() {
-        return changeLeading;
-    }
-    
     float getCharWidth(int c) {
         if (noPrint(c))
             return 0;
@@ -834,7 +672,7 @@ public class PdfChunk {
         return font.width(c);
     }
     
-    public static boolean noPrint(int c) {
+    static boolean noPrint(int c) {
         return ((c >= 0x200b && c <= 0x200f) || (c >= 0x202a && c <= 0x202e));
     }
     

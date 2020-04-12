@@ -49,17 +49,16 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.ExceptionConverter;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 
 
 /** Reads a Truetype font
@@ -68,75 +67,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
  */
 class TrueTypeFont extends BaseFont {
 
-    /**
-     * The code pages possible for a True Type font.
-     */
-    static final String[] codePages = {
-            "1252 Latin 1",
-            "1250 Latin 2: Eastern Europe",
-            "1251 Cyrillic",
-            "1253 Greek",
-            "1254 Turkish",
-            "1255 Hebrew",
-            "1256 Arabic",
-            "1257 Windows Baltic",
-            "1258 Vietnamese",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "874 Thai",
-            "932 JIS/Japan",
-            "936 Chinese: Simplified chars--PRC and Singapore",
-            "949 Korean Wansung",
-            "950 Chinese: Traditional chars--Taiwan and Hong Kong",
-            "1361 Korean Johab",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "Macintosh Character Set (US Roman)",
-            "OEM Character Set",
-            "Symbol Character Set",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "869 IBM Greek",
-            "866 MS-DOS Russian",
-            "865 MS-DOS Nordic",
-            "864 Arabic",
-            "863 MS-DOS Canadian French",
-            "862 Hebrew",
-            "861 MS-DOS Icelandic",
-            "860 MS-DOS Portuguese",
-            "857 IBM Turkish",
-            "855 IBM Cyrillic; primarily Russian",
-            "852 Latin 2",
-            "775 MS-DOS Baltic",
-            "737 Greek; former 437 G",
-            "708 Arabic; ASMO 708",
-            "850 WE/Latin 1",
-            "437 US"};
- 
     protected boolean justNames = false;
     /** Contains the location of the several tables. The key is the name of
      * the table and the value is an <CODE>int[2]</CODE> where position 0
@@ -510,6 +440,7 @@ class TrueTypeFont extends BaseFont {
      * @throws IOException the font file could not be read
      * @return the Postscript font name
      */
+    @SuppressWarnings("unused")
     String getBaseFont() throws DocumentException, IOException {
         int[] table_location;
         table_location = tables.get("name");
@@ -638,7 +569,7 @@ class TrueTypeFont extends BaseFont {
         
         try {
             if (ttfAfm == null)
-                rf = new RandomAccessFileOrArray(fileName, preload, Document.plainRandomAccess);
+                rf = new RandomAccessFileOrArray(fileName, preload, false);
             else
                 rf = new RandomAccessFileOrArray(ttfAfm);
             if (ttcIndex.length() > 0) {
@@ -1015,24 +946,7 @@ class TrueTypeFont extends BaseFont {
             }
         }
     }
-    
-    /** Gets the kerning between two Unicode chars.
-     * @param char1 the first char
-     * @param char2 the second char
-     * @return the kerning to be applied
-     */
-    public int getKerning(int char1, int char2) {
-        int[] metrics = getMetricsTT(char1);
-        if (metrics == null)
-            return 0;
-        int c1 = metrics[0];
-        metrics = getMetricsTT(char2);
-        if (metrics == null)
-            return 0;
-        int c2 = metrics[0];
-        return kerning.get((c1 << 16) + c2);
-    }
-    
+
     /** Gets the width from the font according to the unicode char <CODE>c</CODE>.
      * If the <CODE>name</CODE> is null it's a symbolic font.
      * @param c the unicode char
@@ -1425,30 +1339,6 @@ class TrueTypeFont extends BaseFont {
         return fontName;
     }
 
-    /** Gets the full name of the font. If it is a True Type font
-     * each array element will have {Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be
-     * found in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"", "", "",
-     * font name}.
-     * @return the full name of the font
-     */
-    public String[][] getFullFontName() {
-        return fullName;
-    }
-    
-    /** Gets all the entries of the Names-Table. If it is a True Type font
-     * each array element will have {Name ID, Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be
-     * found in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"", "", "",
-     * font name}.
-     * @return the full name of the font
-     */
-    public String[][] getAllNameEntries() {
-        return allNameEntries;
-    }
-    
     /** Gets the family name of the font. If it is a True Type font
      * each array element will have {Platform ID, Platform Encoding ID,
      * Language ID, font name}. The interpretation of this values can be
@@ -1459,13 +1349,6 @@ class TrueTypeFont extends BaseFont {
      */
     public String[][] getFamilyFontName() {
         return familyName;
-    }
-    
-    /** Checks if the font has any kerning pairs.
-     * @return <CODE>true</CODE> if the font has any kerning pairs
-     */    
-    public boolean hasKernPairs() {
-        return kerning.size() > 0;
     }
 
     protected int[] getRawCharBBox(int c, String name) {

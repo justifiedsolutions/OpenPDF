@@ -8,17 +8,17 @@ package com.justifiedsolutions.openpdf.pdf.content;
 
 import com.justifiedsolutions.openpdf.pdf.HorizontalAlignment;
 import com.justifiedsolutions.openpdf.pdf.VerticalAlignment;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A Cell represents a cell in a {@link Table}. A Cell is created by methods on the Table and must
- * be instantiated with the content embedded in the Cell. When adding a {@link Phrase} to a Cell,
- * the leading is ignored. The leading is honored when adding a {@link Paragraph} to a Cell. When
- * adding a Paragraph to a Cell, if the Paragraph has a {@link HorizontalAlignment} set, it will
- * override the HorizontalAlignment of the Cell.
+ * A Cell represents a cell in a {@link Table}. A Cell is created by methods on the Table and must be instantiated with
+ * the content embedded in the Cell. When adding a {@link Phrase} to a Cell, the leading is ignored. The leading is
+ * honored when adding a {@link Paragraph} to a Cell. When adding a Paragraph to a Cell, if the Paragraph has a {@link
+ * HorizontalAlignment} set, it will override the HorizontalAlignment of the Cell.
  */
 public class Cell {
 
@@ -43,8 +43,8 @@ public class Cell {
     }
 
     /**
-     * Creates a new Cell with the specified content. The {@link Content} must be a {@link Phrase}
-     * or a {@link Paragraph}.
+     * Creates a new Cell with the specified content. The {@link Content} must be a {@link Phrase} or a {@link
+     * Paragraph}.
      *
      * @param content the cell content
      * @throws IllegalArgumentException if the content isn't the correct type.
@@ -64,8 +64,7 @@ public class Cell {
     }
 
     /**
-     * Sets the content of the Cell. The {@link Content} must be a {@link Phrase} or a {@link
-     * Paragraph}.
+     * Sets the content of the Cell. The {@link Content} must be a {@link Phrase} or a {@link Paragraph}.
      *
      * @param content the cell content
      * @throws IllegalArgumentException if the content isn't the correct type.
@@ -134,8 +133,7 @@ public class Cell {
     }
 
     /**
-     * Gets the {@link VerticalAlignment} of the contents of the cell. The default is {@link
-     * VerticalAlignment#TOP}.
+     * Gets the {@link VerticalAlignment} of the contents of the cell. The default is {@link VerticalAlignment#TOP}.
      *
      * @return the vertical alignment
      */
@@ -171,8 +169,8 @@ public class Cell {
     }
 
     /**
-     * Sets the padding for all four sides of the cell. This is a convenience method for setting all
-     * four <code>set*Padding</code> methods individually.
+     * Sets the padding for all four sides of the cell. This is a convenience method for setting all four
+     * <code>set*Padding</code> methods individually.
      *
      * @param padding the amount of padding
      */
@@ -256,7 +254,7 @@ public class Cell {
     }
 
     /**
-     * Gets the {@link Collections#unmodifiableList(List)} of {@link Border}s configured for the
+     * Gets the {@linkplain Collections#unmodifiableList(List) unmodifiable list} of {@link Border}s configured for the
      * cell. The default is {@link Border#ALL}.
      *
      * @return the cell borders
@@ -266,7 +264,7 @@ public class Cell {
     }
 
     /**
-     * Sets the {@link Border}s of the Cell.
+     * Sets the {@link Border}s of the Cell. Call this method with no arguments to have no Borders on the Cell.
      *
      * @param borders the borders
      */
@@ -278,8 +276,8 @@ public class Cell {
     }
 
     /**
-     * Gets the grey fill for the cell. The values range from 0.0 (Black) to 1.0 (White). The
-     * default value is 1.0 (White).
+     * Gets the grey fill for the cell. The values range from 0.0 (Black) to 1.0 (White). The default value is 1.0
+     * (White).
      *
      * @return the grey fill
      */

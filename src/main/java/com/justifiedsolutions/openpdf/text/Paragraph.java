@@ -131,15 +131,6 @@ public class Paragraph extends Phrase {
     }
 
     /**
-     * Constructs a <CODE>Paragraph</CODE> with a certain leading.
-     *
-     * @param leading the leading
-     */
-    public Paragraph(float leading) {
-        super(leading);
-    }
-
-    /**
      * Constructs a <CODE>Paragraph</CODE> with a certain <CODE>Chunk</CODE>.
      *
      * @param chunk a <CODE>Chunk</CODE>
@@ -149,56 +140,12 @@ public class Paragraph extends Phrase {
     }
 
     /**
-     * Constructs a <CODE>Paragraph</CODE> with a certain <CODE>Chunk</CODE> and a certain leading.
-     *
-     * @param leading the leading
-     * @param chunk   a <CODE>Chunk</CODE>
-     */
-    public Paragraph(float leading, Chunk chunk) {
-        super(leading, chunk);
-    }
-
-    /**
      * Constructs a <CODE>Paragraph</CODE> with a certain <CODE>String</CODE>.
      *
      * @param string a <CODE>String</CODE>
      */
     public Paragraph(String string) {
         super(string);
-    }
-
-    /**
-     * Constructs a <CODE>Paragraph</CODE> with a certain <CODE>String</CODE> and a certain
-     * <CODE>Font</CODE>.
-     *
-     * @param string a <CODE>String</CODE>
-     * @param font   a <CODE>Font</CODE>
-     */
-    public Paragraph(String string, Font font) {
-        super(string, font);
-    }
-
-    /**
-     * Constructs a <CODE>Paragraph</CODE> with a certain <CODE>String</CODE> and a certain
-     * leading.
-     *
-     * @param leading the leading
-     * @param string  a <CODE>String</CODE>
-     */
-    public Paragraph(float leading, String string) {
-        super(leading, string);
-    }
-
-    /**
-     * Constructs a <CODE>Paragraph</CODE> with a certain leading, <CODE>String</CODE> and
-     * <CODE>Font</CODE>.
-     *
-     * @param leading the leading
-     * @param string  a <CODE>String</CODE>
-     * @param font    a <CODE>Font</CODE>
-     */
-    public Paragraph(float leading, String string, Font font) {
-        super(leading, string, font);
     }
 
     /**
@@ -277,7 +224,7 @@ public class Paragraph extends Phrase {
             super.add(o);
             List<Chunk> chunks = getChunks();
             if (!chunks.isEmpty()) {
-                Chunk tmp = ((Chunk) chunks.get(chunks.size() - 1));
+                Chunk tmp = chunks.get(chunks.size() - 1);
                 super.add(new Chunk("\n", tmp.getFont()));
             } else {
                 super.add(Chunk.NEWLINE);
@@ -352,17 +299,6 @@ public class Paragraph extends Phrase {
      */
     public float getMultipliedLeading() {
         return multipliedLeading;
-    }
-
-    /**
-     * Sets the variable leading. The resultant leading will be multipliedLeading*maxFontSize where
-     * maxFontSize is the size of the biggest font in the line.
-     *
-     * @param multipliedLeading the variable leading
-     */
-    public void setMultipliedLeading(float multipliedLeading) {
-        this.leading = 0;
-        this.multipliedLeading = multipliedLeading;
     }
 
     /**

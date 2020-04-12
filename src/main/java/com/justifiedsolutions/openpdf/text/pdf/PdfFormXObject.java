@@ -56,11 +56,8 @@ package com.justifiedsolutions.openpdf.text.pdf;
 public class PdfFormXObject extends PdfStream {
     
     // public static final variables
-    
-/** This is a PdfNumber representing 0. */
-    public static final PdfNumber ZERO = new PdfNumber(0);
-    
-/** This is a PdfNumber representing 1. */
+
+    /** This is a PdfNumber representing 1. */
     public static final PdfNumber ONE = new PdfNumber(1);
     
 /** This is the 1 - matrix. */
@@ -84,14 +81,12 @@ public class PdfFormXObject extends PdfStream {
         put(PdfName.FORMTYPE, ONE);
         if (template.getLayer() != null)
             put(PdfName.OC, template.getLayer().getRef());
-        if (template.getGroup() != null)
-            put(PdfName.GROUP, template.getGroup());
         PdfArray matrix = template.getMatrix();
         if (matrix == null)
             put(PdfName.MATRIX, MATRIX);
         else
             put(PdfName.MATRIX, matrix);
-        bytes = template.toPdf(null);
+        bytes = template.toPdf();
         put(PdfName.LENGTH, new PdfNumber(bytes.length));
         flateCompress(compressionLevel);
     }

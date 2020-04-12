@@ -50,13 +50,7 @@ package com.justifiedsolutions.openpdf.text.pdf;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This Class subsets a CFF Type Font. The subset is preformed for CID fonts and NON CID fonts.
@@ -1183,7 +1177,7 @@ public class CFFFontSubset extends CFFFont {
             // Build and copy the new private dict
             CreateNonCIDPrivate(Font,Subr);
             // Copy the new LSubrs index
-            CreateNonCIDSubrs(Font,PrivateBase,Subr);
+            CreateNonCIDSubrs(PrivateBase,Subr);
         }
         
         // copy the charstring index
@@ -1224,6 +1218,7 @@ public class CFFFontSubset extends CFFFont {
     /**
      * Function Copies the header from the original fileto the output list
      */
+    @SuppressWarnings("unused")
     protected void CopyHeader()
     {
         seek(0);
@@ -1574,34 +1569,7 @@ public class CFFFontSubset extends CFFFont {
         // return the size
         return OffsetSize;
     }
-    
-    /**
-     * Function computes the size of an index
-     * @param indexOffset The offset for the computed index
-     * @return The size of the index
-     */
-    protected int countEntireIndexRange(int indexOffset) 
-    {
-        // Go to the beginning of the index 
-        seek(indexOffset);
-        // Read the count field
-        int count = getCard16();
-        // If count==0 -> size=2
-        if (count==0) 
-            return 2;
-        else 
-        {
-            // Read the offsize field
-            int indexOffSize = getCard8();
-            // Go to the last element of the offset array
-            seek(indexOffset+2+1+count*indexOffSize);
-            // The size of the object array is the value of the last element-1
-            int size = getOffset(indexOffSize)-1;
-            // Return the size of the entire index
-            return 2+1+(count+1)*indexOffSize+size;
-        }
-    }
-    
+
     /**
      * The function creates a private dict for a font that was not CID
      * All the keys are copied as is except for the subrs key 
@@ -1631,12 +1599,11 @@ public class CFFFontSubset extends CFFFont {
     
     /**
      * the function marks the beginning of the subrs index and adds the subsetted subrs
-     * index to the output list. 
-     * @param Font the font
+     * index to the output list.
      * @param PrivateBase IndexBaseItem for the private that's referencing to the subrs
      * @param Subrs OffsetItem for the subrs
      */
-    void CreateNonCIDSubrs(int Font,IndexBaseItem PrivateBase,OffsetItem Subrs)
+    void CreateNonCIDSubrs(IndexBaseItem PrivateBase, OffsetItem Subrs)
     {
         // Mark the beginning of the Subrs index
         OutputList.addLast(new SubrMarkerItem(Subrs,PrivateBase));

@@ -9,18 +9,14 @@ package com.justifiedsolutions.openpdf.pdf;
 import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.internal.JSPDFWriter;
+
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
- * Represents a PDF document. A document can contain both {@link Metadata} and {@link Content}. It
- * initialized with both a {@link PageSize} and a {@link Margin}. A Document can contain either a
- * list of {@link Chapter}s or other {@link Content}, such as {@link Paragraph}s, but not both.
+ * Represents a PDF document. A document can contain {@link Metadata} {@link Chapter}s, and {@link Content}. It
+ * initialized with both a {@link PageSize} and a {@link Margin}. A Document can contain either a list of {@link
+ * Chapter}s or {@link Content}, such as {@link Paragraph}s, but not both.
  */
 public class Document {
 
@@ -32,9 +28,17 @@ public class Document {
     private Header header;
     private Footer footer;
 
+    /**
+     * Creates a new instance of a Document with the specified {@link PageSize} and {@link Margin}. These values are
+     * fixed throughout the Document.
+     *
+     * @param pageSize the size of the pages
+     * @param margin   the page margins
+     * @throws NullPointerException if either arguement is <code>null</code>
+     */
     public Document(PageSize pageSize, Margin margin) {
-        this.pageSize = pageSize;
-        this.margin = margin;
+        this.pageSize = Objects.requireNonNull(pageSize);
+        this.margin = Objects.requireNonNull(margin);
     }
 
     /**
@@ -56,8 +60,7 @@ public class Document {
     }
 
     /**
-     * Sets the specific piece of metadata. A <code>null</code> value will remove the metadata from
-     * the document.
+     * Sets the specific piece of metadata. A <code>null</code> value will remove the metadata from the document.
      *
      * @param metadata the metadata to set
      * @param value    the value of the metadata. <code>null</code> removes the metadata
@@ -76,8 +79,7 @@ public class Document {
      * Gets the metadata value.
      *
      * @param metadata the metadata to get
-     * @return the value of the metadata. <code>null</code> means there is no value for that @{@link
-     * Metadata}
+     * @return the value of the metadata. <code>null</code> means there is no value for that @{@link Metadata}
      * @throws NullPointerException if metadata is <code>null</code>
      */
     public String getMetadata(Metadata metadata) {
@@ -86,7 +88,7 @@ public class Document {
     }
 
     /**
-     * Gets a {@link Collections#unmodifiableMap(Map)} of the metadata.
+     * Gets a {@linkplain Collections#unmodifiableMap(Map) unmodifiable map} of the metadata.
      *
      * @return the metadata
      */
@@ -140,7 +142,7 @@ public class Document {
     }
 
     /**
-     * Gets a {@link Collections#unmodifiableList(List)} of the chapters.
+     * Gets a {@linkplain Collections#unmodifiableList(List) unmodifiable list} of the chapters.
      *
      * @return the chapters
      */
@@ -178,7 +180,7 @@ public class Document {
     }
 
     /**
-     * Gets a {@link Collections#unmodifiableList(List)} of the content.
+     * Gets a {@linkplain Collections#unmodifiableList(List) unmodifiable list} of the content.
      *
      * @return the content.
      */
@@ -206,8 +208,10 @@ public class Document {
      * Writes the contents of the Document to the specified {@link OutputStream}.
      *
      * @param out the OutputStream to write the PDF to
+     * @throws NullPointerException if the OutputStream is <code>null</code>
      */
     public void write(OutputStream out) {
+        Objects.requireNonNull(out);
         JSPDFWriter writer = new JSPDFWriter(this, out);
         writer.write();
     }

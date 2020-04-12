@@ -49,61 +49,72 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Element;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * <CODE>PdfLine</CODE> defines an array with <CODE>PdfChunk</CODE>-objects
  * that fit into 1 line.
  */
 
-public class PdfLine {
-    
+class PdfLine {
+
     // membervariables
-    
-    /** The arraylist containing the chunks. */
-    protected ArrayList<PdfChunk> line;
-    
-    /** The left indentation of the line. */
-    protected float left;
-    
-    /** The width of the line. */
-    protected float width;
-    
-    /** The alignment of the line. */
-    protected int alignment;
-    
-    /** The height of the line. */
-    protected float height;
-    
-    /** The listsymbol (if necessary). */
-    protected Chunk listSymbol = null;
-    
-    /** The listsymbol (if necessary). */
-    protected float symbolIndent;
-    
-    /** <CODE>true</CODE> if the chunk splitting was caused by a newline. */
-    protected boolean newlineSplit = false;
-    
-    /** The original width. */
-    protected float originalWidth;
-    
-    protected boolean isRTL = false;
-    
+
+    /**
+     * The arraylist containing the chunks.
+     */
+    private ArrayList<PdfChunk> line;
+
+    /**
+     * The left indentation of the line.
+     */
+    private float left;
+
+    /**
+     * The width of the line.
+     */
+    private float width;
+
+    /**
+     * The alignment of the line.
+     */
+    private int alignment;
+
+    /**
+     * The height of the line.
+     */
+    private float height;
+
+    /**
+     * The listsymbol (if necessary).
+     */
+    private Chunk listSymbol = null;
+
+    /**
+     * <CODE>true</CODE> if the chunk splitting was caused by a newline.
+     */
+    private boolean newlineSplit = false;
+
+    /**
+     * The original width.
+     */
+    private float originalWidth;
+
     // constructors
-    
+
     /**
      * Constructs a new <CODE>PdfLine</CODE>-object.
      *
-     * @param    left        the limit of the line at the left
-     * @param    right        the limit of the line at the right
-     * @param    alignment    the alignment of the line
-     * @param    height        the height of the line
+     * @param left      the limit of the line at the left
+     * @param right     the limit of the line at the right
+     * @param alignment the alignment of the line
+     * @param height    the height of the line
      */
-    
+
     PdfLine(float left, float right, int alignment, float height) {
         this.left = left;
         this.width = right - left;
@@ -112,51 +123,63 @@ public class PdfLine {
         this.height = height;
         this.line = new ArrayList<>();
     }
-    
+
     /**
      * Creates a PdfLine object.
-     * @param left                the left offset
-     * @param originalWidth        the original width of the line
-     * @param remainingWidth    bigger than 0 if the line isn't completely filled
-     * @param alignment            the alignment of the line
-     * @param newlineSplit        was the line splitted (or does the paragraph end with this line)
-     * @param line                an array of PdfChunk objects
-     * @param isRTL                do you have to read the line from Right to Left?
+     *
+     * @param left           the left offset
+     * @param originalWidth  the original width of the line
+     * @param remainingWidth bigger than 0 if the line isn't completely filled
+     * @param alignment      the alignment of the line
+     * @param newlineSplit   was the line splitted (or does the paragraph end with this line)
+     * @param line           an array of PdfChunk objects
      */
-    PdfLine(float left, float originalWidth, float remainingWidth, int alignment, boolean newlineSplit, ArrayList<PdfChunk> line, boolean isRTL) {
+    PdfLine(float left, float originalWidth, float remainingWidth, int alignment, boolean newlineSplit, ArrayList<PdfChunk> line) {
         this.left = left;
         this.originalWidth = originalWidth;
         this.width = remainingWidth;
         this.alignment = alignment;
         this.line = line;
         this.newlineSplit = newlineSplit;
-        this.isRTL = isRTL;
     }
-    
+
     // methods
-    
+
+    /**
+     * Get the string representation of what is in this line.
+     *
+     * @return a <CODE>String</CODE>
+     */
+    @Override
+    public String toString() {
+        StringBuilder tmp = new StringBuilder();
+        for (Object o : line) {
+            tmp.append(o.toString());
+        }
+        return tmp.toString();
+    }
+
     /**
      * Adds a <CODE>PdfChunk</CODE> to the <CODE>PdfLine</CODE>.
      *
-     * @param        chunk        the <CODE>PdfChunk</CODE> to add
-     * @return        <CODE>null</CODE> if the chunk could be added completely; if not
-     *                a <CODE>PdfChunk</CODE> containing the part of the chunk that could
-     *                not be added is returned
+     * @param chunk the <CODE>PdfChunk</CODE> to add
+     * @return <CODE>null</CODE> if the chunk could be added completely; if not
+     * a <CODE>PdfChunk</CODE> containing the part of the chunk that could not be added is returned
      */
-    
+
     PdfChunk add(PdfChunk chunk) {
         // nothing happens if the chunk is null.
         if (chunk == null || chunk.toString().equals("")) {
             return null;
         }
-        
+
         // we split the chunk to be added
         PdfChunk overflow = chunk.split(width);
         newlineSplit = (chunk.isNewlineSplit() || overflow == null);
         //        if (chunk.isNewlineSplit() && alignment == Element.ALIGN_JUSTIFIED)
         //            alignment = Element.ALIGN_LEFT;
         if (chunk.isTab()) {
-            Object[] tab = (Object[])chunk.getAttribute(Chunk.TAB);
+            Object[] tab = (Object[]) chunk.getAttribute(Chunk.TAB);
             float tabPosition = (Float) tab[1];
             boolean newline = (Boolean) tab[2];
             if (newline && tabPosition < originalWidth - width) {
@@ -167,7 +190,7 @@ public class PdfLine {
             addToLine(chunk);
         }
         // if the length of the chunk > 0 we add it to the line
-        else if (chunk.length() > 0 || chunk.isImage()) {
+        else if (chunk.length() > 0) {
             if (overflow != null)
                 chunk.trimLastSpace();
             width -= chunk.width();
@@ -189,71 +212,51 @@ public class PdfLine {
                     addToLine(overflow);
                 return null;
             }
-        }
-        else {
+        } else {
             width += line.get(line.size() - 1).trimLastSpace();
         }
         return overflow;
     }
-    
-    private void addToLine(PdfChunk chunk) {
-        if (chunk.changeLeading && chunk.isImage()) {
-            float f = chunk.getImage().getScaledHeight() + chunk.getImageOffsetY() + chunk.getImage().getBorderWidthTop();
-            if (f > height) height = f;
-        }
-        line.add(chunk);
-    }
-    
+
     // methods to retrieve information
-    
+
     /**
      * Returns the number of chunks in the line.
      *
-     * @return    a value
+     * @return a value
      */
-    
-    public int size() {
+
+    int size() {
         return line.size();
     }
-    
+
     /**
      * Returns an iterator of <CODE>PdfChunk</CODE>s.
      *
-     * @return    an <CODE>Iterator</CODE>
+     * @return an <CODE>Iterator</CODE>
      */
-    
-    public Iterator iterator() {
+
+    Iterator<PdfChunk> iterator() {
         return line.iterator();
     }
-    
+
     /**
      * Returns the height of the line.
      *
-     * @return    a value
+     * @return a value
      */
-    
+
     float height() {
         return height;
     }
-    
+
     /**
      * Returns the left indentation of the line taking the alignment of the line into account.
      *
-     * @return    a value
+     * @return a value
      */
-    
     float indentLeft() {
-        if (isRTL) {
-            switch (alignment) {
-                case Element.ALIGN_LEFT:
-                    return left + width;
-                case Element.ALIGN_CENTER:
-                    return left + (width / 2f);
-                default:
-                    return left;
-            }
-        }
-        else if (this.getSeparatorCount() == 0) {
+        if (this.getSeparatorCount() == 0) {
             switch (alignment) {
                 case Element.ALIGN_RIGHT:
                     return left + width;
@@ -263,52 +266,38 @@ public class PdfLine {
         }
         return left;
     }
-    
+
     /**
      * Checks if this line has to be justified.
      *
-     * @return    <CODE>true</CODE> if the alignment equals <VAR>ALIGN_JUSTIFIED</VAR> and there is some width left.
+     * @return <CODE>true</CODE> if the alignment equals <VAR>ALIGN_JUSTIFIED</VAR> and there is some width left.
      */
-    
-    public boolean hasToBeJustified() {
+    boolean hasToBeJustified() {
         return ((alignment == Element.ALIGN_JUSTIFIED || alignment == Element.ALIGN_JUSTIFIED_ALL) && width != 0);
     }
-    
+
     /**
-     * Resets the alignment of this line.
-     * <P>
-     * The alignment of the last line of for instance a <CODE>Paragraph</CODE>
-     * that has to be justified, has to be reset to <VAR>ALIGN_LEFT</VAR>.
+     * Adds extra indentation to the left (for Paragraph.setFirstLineIndent).
      */
-    
-    public void resetAlignment() {
-        if (alignment == Element.ALIGN_JUSTIFIED) {
-            alignment = Element.ALIGN_LEFT;
-        }
-    }
-    
-    /** Adds extra indentation to the left (for Paragraph.setFirstLineIndent). */
     void setExtraIndent(float extra) {
         left += extra;
         width -= extra;
     }
-    
+
     /**
      * Returns the width that is left, after a maximum of characters is added to the line.
      *
-     * @return    a value
+     * @return a value
      */
-    
     float widthLeft() {
         return width;
     }
-    
+
     /**
      * Returns the number of space-characters in this line.
      *
-     * @return    a value
+     * @return a value
      */
-    
     int numberOfSpaces() {
         String string = toString();
         int length = string.length();
@@ -320,67 +309,45 @@ public class PdfLine {
         }
         return numberOfSpaces;
     }
-    
+
     /**
      * Returns the listsymbol of this line.
      *
-     * @return    a <CODE>PdfChunk</CODE> if the line has a listsymbol; <CODE>null</CODE> otherwise
+     * @return a <CODE>PdfChunk</CODE> if the line has a listsymbol; <CODE>null</CODE> otherwise
      */
-    
-    public Chunk listSymbol() {
+    Chunk listSymbol() {
         return listSymbol;
     }
-    
-    /**
-     * Return the indentation needed to show the listsymbol.
-     *
-     * @return    a value
-     */
-    
-    public float listIndent() {
-        return symbolIndent;
-    }
-    
-    /**
-     * Get the string representation of what is in this line.
-     *
-     * @return    a <CODE>String</CODE>
-     */
-    
-    public String toString() {
-        StringBuilder tmp = new StringBuilder();
-        for (Object o : line) {
-            tmp.append(o.toString());
-        }
-        return tmp.toString();
-    }
-    
+
     /**
      * Returns the length of a line in UTF32 characters
-     * @return    the length in UTF32 characters
-     * @since    2.1.2
+     *
+     * @return the length in UTF32 characters
+     * @since 2.1.2
      */
-    public int GetLineLengthUtf32() {
+    int GetLineLengthUtf32() {
         int total = 0;
         for (Object o : line) {
             total += ((PdfChunk) o).lengthUtf32();
         }
         return total;
     }
-    
+
     /**
      * Checks if a newline caused the line split.
+     *
      * @return <CODE>true</CODE> if a newline caused the line split
      */
-    public boolean isNewlineSplit() {
+    boolean isNewlineSplit() {
         return newlineSplit && (alignment != Element.ALIGN_JUSTIFIED_ALL);
     }
-    
+
     /**
      * Gets the index of the last <CODE>PdfChunk</CODE> with metric attributes
+     *
      * @return the last <CODE>PdfChunk</CODE> with metric attributes
      */
-    public int getLastStrokeChunk() {
+    int getLastStrokeChunk() {
         int lastIdx = line.size() - 1;
         for (; lastIdx >= 0; --lastIdx) {
             PdfChunk chunk = line.get(lastIdx);
@@ -389,31 +356,34 @@ public class PdfLine {
         }
         return lastIdx;
     }
-    
+
     /**
      * Gets a <CODE>PdfChunk</CODE> by index.
+     *
      * @param idx the index
      * @return the <CODE>PdfChunk</CODE> or null if beyond the array
      */
-    public PdfChunk getChunk(int idx) {
+    PdfChunk getChunk(int idx) {
         if (idx < 0 || idx >= line.size())
             return null;
         return line.get(idx);
     }
-    
+
     /**
      * Gets the original width of the line.
+     *
      * @return the original width of the line
      */
-    public float getOriginalWidth() {
+    float getOriginalWidth() {
         return originalWidth;
     }
 
     /**
-     * Gets the difference between the "normal" leading and the maximum
-     * size (for instance when there are images in the chunk).
-     * @return    an extra leading for images
-     * @since    2.1.5
+     * Gets the difference between the "normal" leading and the maximum size (for instance when there are images in the
+     * chunk).
+     *
+     * @return an extra leading for images
+     * @since 2.1.5
      */
     float[] getMaxSize() {
         float normal_leading = 0;
@@ -421,23 +391,16 @@ public class PdfLine {
         PdfChunk chunk;
         for (Object o : line) {
             chunk = (PdfChunk) o;
-            if (!chunk.isImage()) {
-                normal_leading = Math.max(chunk.font().size(), normal_leading);
-            } else {
-                image_leading = Math.max(chunk.getImage().getScaledHeight() + chunk.getImageOffsetY(), image_leading);
-            }
+            normal_leading = Math.max(chunk.font().size(), normal_leading);
         }
         return new float[]{normal_leading, image_leading};
     }
-    
-    boolean isRTL() {
-        return isRTL;
-    }
-    
+
     /**
      * Gets the number of separators in the line.
-     * @return    the number of separators in the line
-     * @since    2.1.2
+     *
+     * @return the number of separators in the line
+     * @since 2.1.2
      */
     int getSeparatorCount() {
         int s = 0;
@@ -453,57 +416,39 @@ public class PdfLine {
         }
         return s;
     }
-    
+
     /**
-     * Gets a width corrected with a charSpacing and wordSpacing.
-     * @param charSpacing
-     * @param wordSpacing
-     * @return a corrected width
+     * Gets the maximum size of the ascender for all the fonts used in this line.
+     *
+     * @return maximum size of all the ascenders used in this line
      */
-    public float getWidthCorrected(float charSpacing, float wordSpacing) {
-        float total = 0;
+    float getAscender() {
+        float ascender = 0;
         for (Object o : line) {
             PdfChunk ck = (PdfChunk) o;
-            total += ck.getWidthCorrected(charSpacing, wordSpacing);
+            PdfFont font = ck.font();
+            ascender = Math.max(ascender, font.getFont().getFontDescriptor(BaseFont.ASCENT, font.size()));
         }
-        return total;
+        return ascender;
     }
-    
-/**
- * Gets the maximum size of the ascender for all the fonts used
- * in this line.
- * @return maximum size of all the ascenders used in this line
- */
-   public float getAscender() {
-       float ascender = 0;
-       for (Object o : line) {
-           PdfChunk ck = (PdfChunk) o;
-           if (ck.isImage())
-               ascender = Math.max(ascender, ck.getImage().getScaledHeight() + ck.getImageOffsetY());
-           else {
-               PdfFont font = ck.font();
-               ascender = Math.max(ascender, font.getFont().getFontDescriptor(BaseFont.ASCENT, font.size()));
-           }
-       }
-       return ascender;
-   }
 
-/**
- * Gets the biggest descender for all the fonts used 
- * in this line.  Note that this is a negative number.
- * @return maximum size of all the ascenders used in this line
- */
-    public float getDescender() {
+    /**
+     * Gets the biggest descender for all the fonts used in this line.  Note that this is a negative number.
+     *
+     * @return maximum size of all the ascenders used in this line
+     */
+    float getDescender() {
         float descender = 0;
         for (Object o : line) {
             PdfChunk ck = (PdfChunk) o;
-            if (ck.isImage())
-                descender = Math.min(descender, ck.getImageOffsetY());
-            else {
-                PdfFont font = ck.font();
-                descender = Math.min(descender, font.getFont().getFontDescriptor(BaseFont.DESCENT, font.size()));
-            }
+            PdfFont font = ck.font();
+            descender = Math.min(descender,
+                    font.getFont().getFontDescriptor(BaseFont.DESCENT, font.size()));
         }
         return descender;
+    }
+
+    private void addToLine(PdfChunk chunk) {
+        line.add(chunk);
     }
 }

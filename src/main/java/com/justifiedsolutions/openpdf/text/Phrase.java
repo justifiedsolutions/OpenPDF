@@ -49,12 +49,10 @@
 
 package com.justifiedsolutions.openpdf.text;
 
+import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,7 +82,7 @@ import java.util.Objects;
  * @see        Paragraph
  */
 
-public class Phrase extends ArrayList<Element> implements TextElementArray {
+public class Phrase extends ArrayList<Element> implements Element {
 
     // constants
     private static final long serialVersionUID = 2643594602455068231L;
@@ -143,46 +141,12 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
     }
 
     /**
-     * Constructs a <CODE>Phrase</CODE> with a certain <CODE>Chunk</CODE>
-     * and a certain leading.
-     *
-     * @param    leading    the leading
-     * @param    chunk        a <CODE>Chunk</CODE>
-     */
-    public Phrase(float leading, Chunk chunk) {
-        this.leading = leading;
-        super.add(chunk);
-        font = chunk.getFont();
-        setHyphenation(chunk.getHyphenation());
-    }
-
-    /**
      * Constructs a <CODE>Phrase</CODE> with a certain <CODE>String</CODE>.
      *
      * @param    string        a <CODE>String</CODE>
      */
     public Phrase(String string) {
         this(Float.NaN, string, new Font());
-    }
-
-    /**
-     * Constructs a <CODE>Phrase</CODE> with a certain <CODE>String</CODE> and a certain <CODE>Font</CODE>.
-     *
-     * @param    string        a <CODE>String</CODE>
-     * @param    font        a <CODE>Font</CODE>
-     */
-    public Phrase(String string, Font font) {
-        this(Float.NaN, string, font);
-    }
-
-    /**
-     * Constructs a <CODE>Phrase</CODE> with a certain leading and a certain <CODE>String</CODE>.
-     *
-     * @param    leading    the leading
-     * @param    string        a <CODE>String</CODE>
-     */
-    public Phrase(float leading, String string) {
-        this(leading, string, new Font());
     }
 
     /**
@@ -288,18 +252,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
         }
     }
 
-    /**
-     * Adds a <CODE>Chunk</CODE>, <CODE>Anchor</CODE> or another <CODE>Phrase</CODE>
-     * to this <CODE>Phrase</CODE>.
-     *
-     * @param    o    an object of type <CODE>Chunk</CODE>, <CODE>Anchor</CODE> or <CODE>Phrase</CODE>
-     * @return    a boolean
-     * @throws    ClassCastException    when you try to add something that isn't a <CODE>Chunk</CODE>, <CODE>Anchor</CODE> or <CODE>Phrase</CODE>
-     */
-    public boolean add(String o) {
-        if (o == null) return false;
-        return super.add(new Chunk(o, font));
-    }
     public boolean add(Element element) {
         if (element == null) return false;
         try {
@@ -320,15 +272,8 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
                         }
                     }
                     return success;
-                case Element.MARKED:
-                case Element.ANCHOR:
-                case Element.ANNOTATION:
-                case Element.FOOTNOTE:
-                case Element.TABLE: // case added by David Freels
                 case Element.PTABLE: // case added by mr. Karen Vardanyan
                     // This will only work for PDF!!! Not for RTF/HTML
-                case Element.LIST:
-                case Element.YMARK:
                     return super.add(element);
                     default:
                         throw new ClassCastException(String.valueOf(element.type()));
@@ -391,15 +336,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
         return super.add(newChunk);
     }
 
-    /**
-     * Adds a <CODE>Object</CODE> to the <CODE>Paragraph</CODE>.
-     *
-     * @param    object        the object to add.
-     */
-    protected void addSpecial(Object object) {
-        super.add((Element) object);
-    }
-
     // other methods that change the member variables
 
     /**
@@ -453,18 +389,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
     }
 
     /**
-     * Returns the content as a String object.
-     * This method differs from toString because toString will return an ArrayList with the toString value of the Chunks in this Phrase.
-     */
-    public String getContent() {
-        StringBuilder buf = new StringBuilder();
-        for (Object o : getChunks()) {
-            buf.append(o.toString());
-        }
-        return buf.toString();
-    }
-
-    /**
      * Checks is this <CODE>Phrase</CODE> contains no or 1 empty <CODE>Chunk</CODE>.
      *
      * @return    <CODE>false</CODE> if the <CODE>Phrase</CODE>
@@ -498,71 +422,6 @@ public class Phrase extends ArrayList<Element> implements TextElementArray {
      */
     public void setHyphenation(HyphenationEvent hyphenation) {
         this.hyphenation = hyphenation;
-    }
-
-    // kept for historical reasons; people should use FontSelector
-    // eligible for deprecation, but the methods are mentioned in the book p277.
-
-    /**
-     * Constructs a Phrase that can be used in the static getInstance() method.
-     * @param    dummy    a dummy parameter
-     */
-    private Phrase(boolean dummy) {
-    }
-
-    /**
-     * Gets a special kind of Phrase that changes some characters into corresponding symbols.
-     * @param string
-     * @return a newly constructed Phrase
-     */
-    public static final Phrase getInstance(String string) {
-        return getInstance(16, string, new Font());
-    }
-
-    /**
-     * Gets a special kind of Phrase that changes some characters into corresponding symbols.
-     * @param leading
-     * @param string
-     * @return a newly constructed Phrase
-     */
-    public static final Phrase getInstance(int leading, String string) {
-        return getInstance(leading, string, new Font());
-    }
-
-    /**
-     * Gets a special kind of Phrase that changes some characters into corresponding symbols.
-     * @param leading
-     * @param string
-     * @param font
-     * @return a newly constructed Phrase
-     */
-    public static final Phrase getInstance(int leading, String string, Font font) {
-        Phrase p = new Phrase(true);
-        p.setLeading(leading);
-        p.font = font;
-        if (font.getFamily() != Font.SYMBOL && font.getFamily() != Font.ZAPFDINGBATS && font.getBaseFont() == null) {
-            int index;
-            while((index = SpecialSymbol.index(string)) > -1) {
-                if (index > 0) {
-                    String firstPart = string.substring(0, index);
-                    p.add(new Chunk(firstPart, font));
-                    string = string.substring(index);
-                }
-                Font symbol = new Font(Font.SYMBOL, font.getSize(), font.getStyle(), font.getColor());
-                StringBuilder buf = new StringBuilder();
-                buf.append(SpecialSymbol.getCorrespondingSymbol(string.charAt(0)));
-                string = string.substring(1);
-                while (SpecialSymbol.index(string) == 0) {
-                    buf.append(SpecialSymbol.getCorrespondingSymbol(string.charAt(0)));
-                    string = string.substring(1);
-                }
-                p.add(new Chunk(buf.toString(), symbol));
-            }
-        }
-        if (string != null && string.length() != 0) {
-            p.add(new Chunk(string, font));
-        }
-        return p;
     }
 
     /**

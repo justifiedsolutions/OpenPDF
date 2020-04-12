@@ -1,7 +1,7 @@
 /*
- * $Id: TextElementArray.java 3373 2008-05-12 16:21:24Z xlv $
+ * $Id: IllegalPdfSyntaxException.java 3820 2009-03-25 10:30:01Z blowagie $
  *
- * Copyright (c) 1999, 2000, 2001, 2002 Bruno Lowagie.
+ * Copyright 2009 by Bruno Lowagie.
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * The Original Code is 'iText, a free JAVA-PDF library'.
  *
  * The Initial Developer of the Original Code is Bruno Lowagie. Portions created by
- * the Initial Developer are Copyright (C) 1999, 2000, 2001, 2002 by Bruno Lowagie.
+ * the Initial Developer are Copyright (C) 1999-2009 by Bruno Lowagie.
  * All Rights Reserved.
  * Co-Developer of the code is Paulo Soares. Portions created by the Co-Developer
- * are Copyright (C) 2000, 2001, 2002 by Paulo Soares. All Rights Reserved.
+ * are Copyright (C) 2000-2009 by Paulo Soares. All Rights Reserved.
  *
  * Contributor(s): all the names of the contributors are added in the source code
  * where applicable.
@@ -47,19 +47,22 @@
  * https://github.com/LibrePDF/OpenPDF
  */
 
-package com.justifiedsolutions.openpdf.text;
+package com.justifiedsolutions.openpdf.text.pdf;
 
 /**
- * Interface for a text element to which other objects can be added.
+ * Typed exception used when creating PDF syntax that isn't valid.
+ * @since 2.1.6
  */
+public class IllegalPdfSyntaxException extends IllegalArgumentException {
 
-public interface TextElementArray extends Element {
-    
-  /**
-   * Adds an object to the <CODE>TextElementArray</CODE>.
-   *
-   * @param    o            an object that has to be added
-   * @return    <CODE>true</CODE> if the addition succeeded; <CODE>false</CODE> otherwise
-   */
-  boolean add(Element o);
+    /** Serial version ID */
+    private static final long serialVersionUID = -643024246596031671L;
+
+    /**
+     * Creates an exception saying the PDF syntax isn't correct.
+     * @param    message    some extra info about the exception
+     */
+    public IllegalPdfSyntaxException(String message) {
+        super(message);
+    }
 }

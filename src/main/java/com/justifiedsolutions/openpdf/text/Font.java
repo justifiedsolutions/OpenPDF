@@ -217,69 +217,6 @@ public class Font implements Comparable {
 
     /**
      * Constructs a Font.
-     *
-     * @param bf    the external font
-     * @param size  the size of this font
-     * @param style the style of this font
-     */
-    public Font(BaseFont bf, float size, int style) {
-        this(bf, size, style, null);
-    }
-
-    /**
-     * Constructs a Font.
-     *
-     * @param bf   the external font
-     * @param size the size of this font
-     */
-    public Font(BaseFont bf, float size) {
-        this(bf, size, UNDEFINED, null);
-    }
-
-    /**
-     * Constructs a Font.
-     *
-     * @param bf the external font
-     */
-    public Font(BaseFont bf) {
-        this(bf, UNDEFINED, UNDEFINED, null);
-    }
-
-    /**
-     * Constructs a Font.
-     *
-     * @param family the family to which this font belongs
-     * @param size   the size of this font
-     * @param style  the style of this font
-     */
-
-    public Font(int family, float size, int style) {
-        this(family, size, style, null);
-    }
-
-    /**
-     * Constructs a Font.
-     *
-     * @param family the family to which this font belongs
-     * @param size   the size of this font
-     */
-
-    public Font(int family, float size) {
-        this(family, size, UNDEFINED, null);
-    }
-
-    /**
-     * Constructs a Font.
-     *
-     * @param family the family to which this font belongs
-     */
-
-    public Font(int family) {
-        this(family, UNDEFINED, UNDEFINED, null);
-    }
-
-    /**
-     * Constructs a Font.
      */
 
     public Font() {
@@ -287,32 +224,6 @@ public class Font implements Comparable {
     }
 
     // implementation of the Comparable interface
-
-    /**
-     * Translates a <CODE>String</CODE> -value of a certain family into the index that is used for
-     * this family in this class.
-     *
-     * @param family A <CODE>String</CODE> representing a certain font-family
-     * @return the corresponding index
-     */
-    public static int getFamilyIndex(String family) {
-        if (family.equalsIgnoreCase(FontFactory.COURIER)) {
-            return COURIER;
-        }
-        if (family.equalsIgnoreCase(FontFactory.HELVETICA)) {
-            return HELVETICA;
-        }
-        if (family.equalsIgnoreCase(FontFactory.TIMES_ROMAN)) {
-            return TIMES_ROMAN;
-        }
-        if (family.equalsIgnoreCase(FontFactory.SYMBOL)) {
-            return SYMBOL;
-        }
-        if (family.equalsIgnoreCase(FontFactory.ZAPFDINGBATS)) {
-            return ZAPFDINGBATS;
-        }
-        return UNDEFINED;
-    }
 
     // FAMILY
 
@@ -368,16 +279,6 @@ public class Font implements Comparable {
         return family;
     }
 
-    /**
-     * Sets the family using a <CODE>String</CODE> ("Courier", "Helvetica", "Times New Roman",
-     * "Symbol" or "ZapfDingbats").
-     *
-     * @param family A <CODE>String</CODE> representing a certain font-family.
-     */
-    public void setFamily(String family) {
-        this.family = getFamilyIndex(family);
-    }
-
     // SIZE
 
     /**
@@ -427,15 +328,6 @@ public class Font implements Comparable {
     }
 
     /**
-     * Sets the size.
-     *
-     * @param size The new size of the font.
-     */
-    public void setSize(float size) {
-        this.size = size;
-    }
-
-    /**
      * Gets the size that can be used with the calculated <CODE>BaseFont
      * </CODE>.
      *
@@ -481,52 +373,6 @@ public class Font implements Comparable {
     }
 
     /**
-     * Gets the style that can be used with the calculated <CODE>BaseFont
-     * </CODE>.
-     *
-     * @return the style that can be used with the calculated <CODE>BaseFont
-     * </CODE>
-     */
-    public int getCalculatedStyle() {
-        int style = this.style;
-        if (style == UNDEFINED) {
-            style = NORMAL;
-        }
-        if (baseFont != null) {
-            return style;
-        }
-        if (family == SYMBOL || family == ZAPFDINGBATS) {
-            return style;
-        } else {
-            return style & (~BOLDITALIC);
-        }
-    }
-
-    /**
-     * checks if this font is Bold.
-     *
-     * @return a <CODE>boolean</CODE>
-     */
-    public boolean isBold() {
-        if (style == UNDEFINED) {
-            return false;
-        }
-        return (style & BOLD) == BOLD;
-    }
-
-    /**
-     * checks if this font is italic.
-     *
-     * @return a <CODE>boolean</CODE>
-     */
-    public boolean isItalic() {
-        if (style == UNDEFINED) {
-            return false;
-        }
-        return (style & ITALIC) == ITALIC;
-    }
-
-    /**
      * checks if this font is underlined.
      *
      * @return a <CODE>boolean</CODE>
@@ -559,27 +405,6 @@ public class Font implements Comparable {
      */
     public Color getColor() {
         return color;
-    }
-
-    /**
-     * Sets the color.
-     *
-     * @param color the new color of the font
-     */
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
-    /**
-     * Sets the color.
-     *
-     * @param red   the red-value of the new color
-     * @param green the green-value of the new color
-     * @param blue  the blue-value of the new color
-     */
-    public void setColor(int red, int green, int blue) {
-        this.color = new Color(red, green, blue);
     }
 
     // BASEFONT

@@ -8,6 +8,7 @@ package com.justifiedsolutions.openpdf.pdf.content;
 
 import com.justifiedsolutions.openpdf.pdf.HorizontalAlignment;
 import com.justifiedsolutions.openpdf.pdf.font.Font;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -266,7 +267,7 @@ public class Paragraph implements TextContent {
     }
 
     /**
-     * Get an {@link Collections#unmodifiableList(List)} of {@link Content}s for the Paragraph.
+     * Get an {@linkplain Collections#unmodifiableList(List) unmodifiable list} of {@link Content}s for the Paragraph.
      *
      * @return the list of Content
      */

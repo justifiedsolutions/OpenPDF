@@ -49,7 +49,7 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 
 import java.util.Objects;
 
@@ -66,16 +66,12 @@ import java.util.Objects;
  */
 public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
 
-    // CLASS VARIABLES
-    
     /**
      * actual value of this <CODE>PdfNumber</CODE>, represented as a
      * <CODE>double</CODE>
      */
-    private double value;
-    
-    // CONSTRUCTORS
-    
+    private final double value;
+
     /**
      * Constructs a <CODE>PdfNumber</CODE>-object.
      *
@@ -102,17 +98,6 @@ public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
         this.value = value;
         setContent(String.valueOf(value));
     }
-    
-    /**
-     * Constructs a new <CODE>PdfNumber</CODE>-object of type long.
-     *
-     * @param value    value of the new <CODE>PdfNumber</CODE>-object
-     */
-    public PdfNumber(long value) {
-        super(NUMBER);
-        this.value = value;
-        setContent(String.valueOf(value));
-    }
 
     /**
      * Constructs a new <CODE>PdfNumber</CODE>-object of type real.
@@ -133,9 +118,7 @@ public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
     public PdfNumber(float value) {
         this((double)value);
     }
-    
-    // methods returning the value of this object
-    
+
     /**
      * Returns the primitive <CODE>int</CODE> value of this object.
      *
@@ -152,25 +135,6 @@ public class PdfNumber extends PdfObject implements Comparable<PdfNumber> {
      */
     public double doubleValue() {
         return value;
-    }
-    
-    /**
-     * Returns the primitive <CODE>float</CODE> value of this object.
-     *
-     * @return The value as <CODE>float</CODE>
-     */
-    public float floatValue() {
-        return (float)value;
-    }
-    
-    // other methods
-    
-    /**
-     * Increments the value of the <CODE>PdfNumber</CODE>-object by 1.
-     */
-    public void increment() {
-        value += 1.0;
-        setContent(ByteBuffer.formatDouble(value));
     }
 
     @Override

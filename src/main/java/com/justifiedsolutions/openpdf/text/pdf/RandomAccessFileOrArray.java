@@ -49,22 +49,11 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.net.URL;
-import java.nio.channels.FileChannel;
-
-import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.FontFactory;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+
+import java.io.*;
+import java.net.URL;
 
 /**
  * An implementation of a RandomAccessFile for input only
@@ -87,7 +76,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
     private int startOffset = 0;
 
     public RandomAccessFileOrArray(String filename) throws IOException {
-        this(filename, false, Document.plainRandomAccess);
+        this(filename, false, false);
     }
     
     public RandomAccessFileOrArray(String filename, boolean forceRead, boolean plainRandomAccess) throws IOException {
@@ -137,16 +126,6 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
             rf = new MappedRandomAccessFile(filename, "r");
     }
 
-    public RandomAccessFileOrArray(URL url) throws IOException {
-        try (InputStream is = url.openStream()) {
-            this.arrayIn = InputStreamToArray(is);
-        }
-    }
-
-    public RandomAccessFileOrArray(InputStream is) throws IOException {
-        this.arrayIn = InputStreamToArray(is);
-    }
-    
     public static byte[] InputStreamToArray(InputStream is) throws IOException {
         byte[] b = new byte[8192];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -219,11 +198,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
             return len + n;
         }
     }
-    
-    public int read(byte[] b) throws IOException {
-        return read(b, 0, b.length);
-    }
-    
+
     public void readFully(byte[] b) throws IOException {
         readFully(b, 0, b.length);
     }
@@ -237,11 +212,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
             n += count;
         } while (n < len);
     }
-    
-    public long skip(long n) throws IOException {
-        return skipBytes((int)n);
-    }
-    
+
     public int skipBytes(int n) throws IOException {
         if (n <= 0) {
             return 0;
@@ -288,11 +259,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
             reOpen();
         }
     }
-    
-    public boolean isOpen() {
-        return (filename == null || rf != null || trf != null);
-    }
-    
+
     public void close() throws IOException {
         isBack = false;
         if (rf != null) {
@@ -331,11 +298,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
         else
             arrayInPtr = pos;
     }
-    
-    public void seek(long pos) throws IOException {
-        seek((int)pos);
-    }
-    
+
     public int getFilePointer() throws IOException {
         insureOpen();
         int n = isBack ? 1 : 0;
@@ -448,35 +411,7 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
             throw new EOFException();
         return (char)((ch1 << 8) + ch2);
     }
-    
-    /**
-     * Reads a Unicode character from this stream in little-endian order.
-     * This method reads two
-     * bytes from the stream, starting at the current stream pointer.
-     * If the bytes read, in order, are
-     * <code>b1</code> and <code>b2</code>, where
-     * <code>0&nbsp;&lt;=&nbsp;b1,&nbsp;b2&nbsp;&lt;=&nbsp;255</code>,
-     * then the result is equal to:
-     * <blockquote><pre>
-     *     (char)((b2 &lt;&lt; 8) | b1)
-     * </pre></blockquote>
-     * <p>
-     * This method blocks until the two bytes are read, the end of the
-     * stream is detected, or an exception is thrown.
-     *
-     * @return     the next two bytes of this stream as a Unicode character.
-     * @exception  EOFException  if this stream reaches the end before reading
-     *               two bytes.
-     * @exception  IOException   if an I/O error occurs.
-     */
-    public final char readCharLE() throws IOException {
-        int ch1 = this.read();
-        int ch2 = this.read();
-        if ((ch1 | ch2) < 0)
-            throw new EOFException();
-        return (char)((ch2 << 8) + (ch1 << 0));
-    }
-    
+
     public int readInt() throws IOException {
         int ch1 = this.read();
         int ch2 = this.read();
@@ -517,73 +452,19 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
             throw new EOFException();
         return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + (ch1 << 0));
     }
-    
-    /**
-     * Reads an unsigned 32-bit integer from this stream. This method reads 4
-     * bytes from the stream, starting at the current stream pointer.
-     * If the bytes read, in order, are <code>b1</code>,
-     * <code>b2</code>, <code>b3</code>, and <code>b4</code>, where
-     * <code>0&nbsp;&lt;=&nbsp;b1, b2, b3, b4&nbsp;&lt;=&nbsp;255</code>,
-     * then the result is equal to:
-     * <blockquote><pre>
-     *     (b1 &lt;&lt; 24) | (b2 &lt;&lt; 16) + (b3 &lt;&lt; 8) + b4
-     * </pre></blockquote>
-     * <p>
-     * This method blocks until the four bytes are read, the end of the
-     * stream is detected, or an exception is thrown.
-     *
-     * @return     the next four bytes of this stream, interpreted as a
-     *             <code>long</code>.
-     * @exception  EOFException  if this stream reaches the end before reading
-     *               four bytes.
-     * @exception  IOException   if an I/O error occurs.
-     */
-    public final long readUnsignedInt() throws IOException {
-        long ch1 = this.read();
-        long ch2 = this.read();
-        long ch3 = this.read();
-        long ch4 = this.read();
-        if ((ch1 | ch2 | ch3 | ch4) < 0)
-            throw new EOFException();
-        return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
-    }
-    
-    public final long readUnsignedIntLE() throws IOException {
-        long ch1 = this.read();
-        long ch2 = this.read();
-        long ch3 = this.read();
-        long ch4 = this.read();
-        if ((ch1 | ch2 | ch3 | ch4) < 0)
-            throw new EOFException();
-        return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + (ch1 << 0));
-    }
-    
+
     public long readLong() throws IOException {
         return ((long)(readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
     }
-    
-    public final long readLongLE() throws IOException {
-        int i1 = readIntLE();
-        int i2 = readIntLE();
-        return ((long)i2 << 32) + (i1 & 0xFFFFFFFFL);
-    }
-    
+
     public float readFloat() throws IOException {
         return Float.intBitsToFloat(readInt());
     }
-    
-    public final float readFloatLE() throws IOException {
-        return Float.intBitsToFloat(readIntLE());
-    }
-    
+
     public double readDouble() throws IOException {
         return Double.longBitsToDouble(readLong());
     }
-    
-    public final double readDoubleLE() throws IOException {
-        return Double.longBitsToDouble(readLongLE());
-    }
-    
+
     public String readLine() throws IOException {
         StringBuilder input = new StringBuilder();
         int c = -1;
@@ -617,35 +498,5 @@ public class RandomAccessFileOrArray implements DataInput, Closeable {
     public String readUTF() throws IOException {
         return DataInputStream.readUTF(this);
     }
-    
-    /** Getter for property startOffset.
-     * @return Value of property startOffset.
-     *
-     */
-    public int getStartOffset() {
-        return this.startOffset;
-    }
-    
-    /** Setter for property startOffset.
-     * @param startOffset New value of property startOffset.
-     *
-     */
-    public void setStartOffset(int startOffset) {
-        this.startOffset = startOffset;
-    }
 
-    /**
-     * @since 2.0.8
-     */
-    public java.nio.ByteBuffer getNioByteBuffer() throws IOException {
-        if (filename != null) {
-            FileChannel channel;
-            if (plainRandomAccess)
-                channel = trf.getChannel();
-            else
-                channel = rf.getChannel();
-            return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-        }
-        return java.nio.ByteBuffer.wrap(arrayIn);
-    }
 }

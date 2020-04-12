@@ -50,15 +50,6 @@ public class CodespaceRange
     {
     }
 
-    /** Getter for property end.
-     * @return Value of property end.
-     *
-     */
-    public byte[] getEnd()
-    {
-        return this.end;
-    }
-
     /** Setter for property end.
      * @param endBytes New value of property end.
      *
@@ -66,15 +57,6 @@ public class CodespaceRange
     public void setEnd(byte[] endBytes)
     {
         end = endBytes;
-    }
-
-    /** Getter for property start.
-     * @return Value of property start.
-     *
-     */
-    public byte[] getStart()
-    {
-        return this.start;
     }
 
     /** Setter for property start.

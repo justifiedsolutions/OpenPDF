@@ -59,16 +59,6 @@ import java.io.OutputStream;
  * Objects may be labeled so that they can be referred to by other objects.<BR>
  * All these basic PDF objects are described in the 'Portable Document Format
  * Reference Manual version 1.3' Chapter 4 (pages 37-54).
- *
- * @see        PdfNull
- * @see        PdfBoolean
- * @see        PdfNumber
- * @see        PdfString
- * @see        PdfName
- * @see        PdfArray
- * @see        PdfDictionary
- * @see        PdfStream
- * @see        PdfIndirectReference
  */
 public abstract class PdfObject {
 
@@ -121,9 +111,6 @@ public abstract class PdfObject {
     /** The type of this <CODE>PdfObject</CODE> */
     protected int type;
 
-    /** Holds the indirect reference. */
-    protected PRIndirectReference indRef;
-
     // CONSTRUCTORS
 
     /**
@@ -170,7 +157,7 @@ public abstract class PdfObject {
      * 
      * @param writer for backwards compatibility
      * @param os     The <CODE>OutputStream</CODE> to write the bytes to.
-     * @throws IOException
+     * @throws IOException if unable to write to the output stream
      */
     public void toPdf(PdfWriter writer, OutputStream os) throws IOException {
         if (bytes != null)
@@ -225,39 +212,6 @@ public abstract class PdfObject {
     }
 
     /**
-     * Returns the length of the PDF representation of the <CODE>PdfObject</CODE>.
-     * <P>
-     * In some cases, namely for <CODE>PdfString</CODE> and <CODE>PdfStream</CODE>,
-     * this method differs from the method <CODE>length</CODE> because <CODE>length</CODE>
-     * returns the length of the actual content of the <CODE>PdfObject</CODE>.</P>
-     * <P>
-     * Remark: the actual content of an object is in most cases identical to its representation.
-     * The following statement is always true: length() &gt;= pdfLength().</P>
-     *
-     * @return        a length
-     */
-//    public int pdfLength() {
-//        return toPdf(null).length;
-//    }
-
-    /**
-     * Returns the length of the actual content of the <CODE>PdfObject</CODE>.
-     * <P>
-     * In some cases, namely for <CODE>PdfString</CODE> and <CODE>PdfStream</CODE>,
-     * this method differs from the method <CODE>pdfLength</CODE> because <CODE>pdfLength</CODE>
-     * returns the length of the PDF representation of the object, not of the actual content
-     * as does the method <CODE>length</CODE>.</P>
-     * <P>
-     * Remark: the actual content of an object is in some cases identical to its representation.
-     * The following statement is always true: length() &gt;= pdfLength().</P>
-     *
-     * @return The length as <CODE>int</CODE>
-     */
-    public int length() {
-        return toString().length();
-    }
-
-    /**
      * Changes the content of this <CODE>PdfObject</CODE>.
      *
      * @param content    the new content of this <CODE>PdfObject</CODE>
@@ -300,32 +254,12 @@ public abstract class PdfObject {
 
     /**
      * Checks if this <CODE>PdfObject</CODE> is of the type
-     * <CODE>PdfBoolean</CODE>.
-     *
-     * @return <CODE>true</CODE> or <CODE>false</CODE>
-     */
-    public boolean isBoolean() {
-        return (type == BOOLEAN);
-    }
-
-    /**
-     * Checks if this <CODE>PdfObject</CODE> is of the type
      * <CODE>PdfNumber</CODE>.
      *
      * @return <CODE>true</CODE> or <CODE>false</CODE>
      */
     public boolean isNumber() {
         return (type == NUMBER);
-    }
-
-    /**
-     * Checks if this <CODE>PdfObject</CODE> is of the type
-     * <CODE>PdfString</CODE>.
-     *
-     * @return <CODE>true</CODE> or <CODE>false</CODE>
-     */
-    public boolean isString() {
-        return (type == STRING);
     }
 
     /**
@@ -379,21 +313,4 @@ public abstract class PdfObject {
         return (type == INDIRECT);
     }
 
-    /**
-     * Get the indirect reference
-     * 
-     * @return A <CODE>PdfIndirectReference</CODE>
-     */
-    public PRIndirectReference getIndRef() {
-        return indRef;
-    }
-
-    /**
-     * Set the indirect reference
-     * 
-     * @param indRef New value as a <CODE>PdfIndirectReference</CODE>
-     */
-    public void setIndRef(PRIndirectReference indRef) {
-        this.indRef = indRef;
-    }
 }

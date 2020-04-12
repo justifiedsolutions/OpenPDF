@@ -29,10 +29,9 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 
 /***
  * <p>A hash map that uses primitive ints for the key rather than objects.</p>
@@ -108,79 +107,12 @@ public class IntHashtable implements Cloneable {
     }
 
     /***
-     * <p>Returns the number of keys in this hashtable.</p>
-     *
-     * @return  the number of keys in this hashtable.
-     */
-    public int size() {
-        return count;
-    }
-
-    /***
-     * <p>Tests if this hashtable maps no keys to values.</p>
-     *
-     * @return  <code>true</code> if this hashtable maps no keys to values;
-     *          <code>false</code> otherwise.
-     */
-    public boolean isEmpty() {
-        return count == 0;
-    }
-
-    /***
-     * <p>Tests if some key maps into the specified value in this hashtable.
-     * This operation is more expensive than the <code>containsKey</code>
-     * method.</p>
-     *
-     * <p>Note that this method is identical in functionality to containsValue,
-     * (which is part of the Map interface in the collections framework).</p>
-     *
-     * @param      value   a value to search for.
-     * @return     <code>true</code> if and only if some key maps to the
-     *             <code>value</code> argument in this hashtable as
-     *             determined by the <tt>equals</tt> method;
-     *             <code>false</code> otherwise.
-     * @throws  NullPointerException  if the value is <code>null</code>.
-     * @see        #containsKey(int)
-     * @see        #containsValue(int)
-     * @see        java.util.Map
-     */
-    public boolean contains(int value) {
-
-        Entry[] tab = table;
-        for (int i = tab.length; i-- > 0;) {
-            for (Entry e = tab[i]; e != null; e = e.next) {
-                if (e.value == value) {
-                    return true;
-                }
-            }
-        }
-        return false;
-     }
-
-    /***
-     * <p>Returns <code>true</code> if this HashMap maps one or more keys
-     * to this value.</p>
-     *
-     * <p>Note that this method is identical in functionality to contains
-     * (which predates the Map interface).</p>
-     *
-     * @param value value whose presence in this HashMap is to be tested.
-     * @return boolean <code>true</code> if the value is contained
-     * @see    java.util.Map
-     * @since JDK1.2
-     */
-    public boolean containsValue(int value) {
-        return contains(value);
-    }
-
-    /***
      * <p>Tests if the specified int is a key in this hashtable.</p>
      *
      * @param  key  possible key.
      * @return <code>true</code> if and only if the specified int is a
      *    key in this hashtable, as determined by the <tt>equals</tt>
      *    method; <code>false</code> otherwise.
-     * @see #contains(int)
      */
     public boolean containsKey(int key) {
         Entry[] tab = table;
@@ -201,7 +133,6 @@ public class IntHashtable implements Cloneable {
      * @return  the value to which the key is mapped in this hashtable;
      *          <code>null</code> if the key is not mapped to any value in
      *          this hashtable.
-     * @see     #put(int, int)
      */
     public int get(int key) {
         Entry[] tab = table;
@@ -259,7 +190,6 @@ public class IntHashtable implements Cloneable {
      * @return the previous value of the specified key in this hashtable,
      *         or <code>null</code> if it did not have one.
      * @throws  NullPointerException  if the key is <code>null</code>.
-     * @see     #get(int)
      */
     public int put(int key, int value) {
         // Makes sure the key is not already in the hashtable.
@@ -290,48 +220,6 @@ public class IntHashtable implements Cloneable {
     }
 
     /***
-     * <p>Removes the key (and its corresponding value) from this
-     * hashtable.</p>
-     *
-     * <p>This method does nothing if the key is not present in the
-     * hashtable.</p>
-     *
-     * @param   key   the key that needs to be removed.
-     * @return  the value to which the key had been mapped in this hashtable,
-     *          or <code>null</code> if the key did not have a mapping.
-     */
-    public int remove(int key) {
-        Entry[] tab = table;
-        int hash = key;
-        int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry e = tab[index], prev = null; e != null; prev = e, e = e.next) {
-            if (e.hash == hash && e.key == key) {
-                if (prev != null) {
-                    prev.next = e.next;
-                } else {
-                    tab[index] = e.next;
-                }
-                count--;
-                int oldValue = e.value;
-                e.value = 0;
-                return oldValue;
-            }
-        }
-        return 0;
-    }
-
-    /***
-     * <p>Clears this hashtable so that it contains no keys.</p>
-     */
-    public void clear() {
-        Entry[] tab = table;
-        for (int index = tab.length; --index >= 0;) {
-            tab[index] = null;
-        }
-        count = 0;
-    }
-    
-    /***
      * <p>Innerclass that acts as a datastructure to create a new entry in the
      * table.</p>
      */
@@ -357,62 +245,15 @@ public class IntHashtable implements Cloneable {
         }
         
         // extra methods for inner class Entry by Paulo
-        public int getKey() {
-            return key;
-        }
-        public int getValue() {
-            return value;
-        }
+
         protected Object clone() {
             Entry entry = new Entry(hash, key, value, (next != null) ? (Entry)next.clone() : null);
             return entry;
         }
     }
-    
-    // extra inner class by Paulo
-    static class IntHashtableIterator implements Iterator {
-        int index;
-        Entry[] table;
-        Entry entry;
-        
-        IntHashtableIterator(Entry[] table) {
-            this.table = table;
-            this.index = table.length;
-        }
-        public boolean hasNext() {
-            if (entry != null) {
-                return true;
-            }
-            while (index-- > 0) {
-                if ((entry = table[index]) != null) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        public Object next() {
-            if (entry == null) {
-                while ((index-- > 0) && ((entry = table[index]) == null));
-            }
-            if (entry != null) {
-                Entry e = entry;
-                entry = e.next;
-                return e;
-            }
-            throw new NoSuchElementException(MessageLocalization.getComposedMessage("inthashtableiterator"));
-        }
-        public void remove() {
-            throw new UnsupportedOperationException(MessageLocalization.getComposedMessage("remove.not.supported"));
-        }
-    }
-    
-// extra methods by Paulo Soares:
 
-    public Iterator getEntryIterator() {
-        return new IntHashtableIterator(table);
-    }
-    
+    // extra methods by Paulo Soares:
+
     public int[] toOrderedKeys() {
         int[] res = getKeys();
         Arrays.sort(res);
@@ -435,18 +276,7 @@ public class IntHashtable implements Cloneable {
         }
         return res;
     }
-    
-    public int getOneKey() {
-        if (count == 0)
-            return 0;
-        int index = table.length;
-        Entry entry = null;
-        while ((index-- > 0) && ((entry = table[index]) == null));
-        if (entry == null)
-            return 0;
-        return entry.key;
-    }
-    
+
     public Object clone() {
         try {
             IntHashtable t = (IntHashtable)super.clone();

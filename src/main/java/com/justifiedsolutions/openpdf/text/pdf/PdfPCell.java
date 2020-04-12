@@ -49,21 +49,14 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
-import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
-
 import com.justifiedsolutions.openpdf.pdf.content.Cell.Border;
-import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.Paragraph;
-import com.justifiedsolutions.openpdf.text.Phrase;
-import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.*;
+
 import java.util.List;
 import java.util.Objects;
+
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
 
 /**
  * A cell in a PdfPTable.
@@ -131,11 +124,6 @@ public class PdfPCell extends Rectangle {
     private int rowspan = 1;
 
     /**
-     * Holds value of property image.
-     */
-    private Image image;
-
-    /**
      * Holds value of property cellEvent.
      */
     private PdfPCellEvent cellEvent;
@@ -171,95 +159,6 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Constructs a <CODE>PdfPCell</CODE> with a <CODE>Phrase</CODE>. The default padding is 2.
-     *
-     * @param phrase the text
-     */
-    public PdfPCell(Phrase phrase) {
-        super(0, 0, 0, 0);
-        borderWidth = 0.5f;
-        border = BOX;
-        column.addText(this.phrase = phrase);
-        column.setLeading(0, 1);
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with an <CODE>Image</CODE>. The default padding is 0.
-     *
-     * @param image the <CODE>Image</CODE>
-     */
-    public PdfPCell(Image image) {
-        this(image, false);
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with an <CODE>Image</CODE>. The default padding is 0.25
-     * for a border width of 0.5.
-     *
-     * @param image the <CODE>Image</CODE>
-     * @param fit   <CODE>true</CODE> to fit the image to the cell
-     */
-    public PdfPCell(Image image, boolean fit) {
-        super(0, 0, 0, 0);
-        borderWidth = 0.5f;
-        border = BOX;
-        if (fit) {
-            this.image = image;
-            column.setLeading(0, 1);
-            setPadding(borderWidth / 2);
-        } else {
-            column.addText(this.phrase = new Phrase(new Chunk(image, 0, 0)));
-            column.setLeading(0, 1);
-            setPadding(0);
-        }
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with a <CODE>PdfPtable</CODE>. This constructor allows
-     * nested tables. The default padding is 0.
-     *
-     * @param table The <CODE>PdfPTable</CODE>
-     */
-    public PdfPCell(PdfPTable table) {
-        this(table, null);
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with a <CODE>PdfPtable</CODE>. This constructor allows
-     * nested tables.
-     *
-     * @param table The <CODE>PdfPTable</CODE>
-     * @param style The style to apply to the cell (you could use getDefaultCell())
-     * @since 2.1.0
-     */
-    public PdfPCell(PdfPTable table, PdfPCell style) {
-        super(0, 0, 0, 0);
-        borderWidth = 0.5f;
-        border = BOX;
-        column.setLeading(0, 1);
-        this.table = table;
-        table.setWidthPercentage(100);
-        table.setExtendLastRow(true);
-        column.addElement(table);
-        if (style != null) {
-            cloneNonPositionParameters(style);
-            verticalAlignment = style.verticalAlignment;
-            paddingLeft = style.paddingLeft;
-            paddingRight = style.paddingRight;
-            paddingTop = style.paddingTop;
-            paddingBottom = style.paddingBottom;
-            colspan = style.colspan;
-            rowspan = style.rowspan;
-            cellEvent = style.cellEvent;
-            useDescender = style.useDescender;
-            useBorderPadding = style.useBorderPadding;
-            rotation = style.rotation;
-        } else {
-            setPadding(0);
-        }
-    }
-
-    /**
      * Constructs a deep copy of a <CODE>PdfPCell</CODE>.
      *
      * @param cell the <CODE>PdfPCell</CODE> to duplicate
@@ -281,7 +180,6 @@ public class PdfPCell extends Rectangle {
         if (cell.table != null) {
             table = new PdfPTable(cell.table);
         }
-        image = Image.getInstance(cell.image);
         cellEvent = cell.cellEvent;
         useDescender = cell.useDescender;
         column = ColumnText.duplicate(cell.column);
@@ -318,7 +216,6 @@ public class PdfPCell extends Rectangle {
      */
     public void setPhrase(Phrase phrase) {
         table = null;
-        image = null;
         column.setText(this.phrase = phrase);
     }
 
@@ -511,81 +408,6 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Adjusts effective padding to include border widths.
-     *
-     * @param use adjust effective padding if true
-     */
-    public void setUseBorderPadding(boolean use) {
-        useBorderPadding = use;
-    }
-
-    /**
-     * Sets the leading fixed and variable. The resultant leading will be:
-     * fixedLeading+multipliedLeading*maxFontSize where maxFontSize is the size of the biggest font
-     * in the line.
-     *
-     * @param fixedLeading      the fixed leading
-     * @param multipliedLeading the variable leading
-     */
-    public void setLeading(float fixedLeading, float multipliedLeading) {
-        column.setLeading(fixedLeading, multipliedLeading);
-    }
-
-    /**
-     * Gets the fixed leading.
-     *
-     * @return the leading
-     */
-    public float getLeading() {
-        return column.getLeading();
-    }
-
-    /**
-     * Gets the variable leading.
-     *
-     * @return the leading
-     */
-    public float getMultipliedLeading() {
-        return column.getMultipliedLeading();
-    }
-
-    /**
-     * Sets the first paragraph line indent.
-     *
-     * @param indent the indent
-     */
-    public void setIndent(float indent) {
-        column.setIndent(indent);
-    }
-
-    /**
-     * Gets the first paragraph line indent.
-     *
-     * @return the indent
-     */
-    public float getIndent() {
-        return column.getIndent();
-    }
-
-    /**
-     * Gets the extra space between paragraphs.
-     *
-     * @return the extra space between paragraphs
-     */
-    public float getExtraParagraphSpace() {
-        return column.getExtraParagraphSpace();
-    }
-
-    /**
-     * Sets the extra space between paragraphs.
-     *
-     * @param extraParagraphSpace the extra space between paragraphs
-     */
-    public void setExtraParagraphSpace(float extraParagraphSpace) {
-        column.setExtraParagraphSpace(extraParagraphSpace);
-    }
-
-    /**
      * Set a fixed height for the cell. This will automatically unset minimumHeight, if set.
      *
      * @param fixedHeight New value of property fixedHeight.
@@ -634,52 +456,12 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Tells you whether the cell has a minimum height.
-     *
-     * @return true if a minimum height was set.
-     * @since 2.1.5
-     */
-    public boolean hasMinimumHeight() {
-        return getMinimumHeight() > 0;
-    }
-
-    /**
      * Getter for property noWrap.
      *
      * @return Value of property noWrap.
      */
     public boolean isNoWrap() {
         return noWrap;
-    }
-
-    /**
-     * Setter for property noWrap.
-     *
-     * @param noWrap New value of property noWrap.
-     */
-    public void setNoWrap(boolean noWrap) {
-        this.noWrap = noWrap;
-    }
-
-    /**
-     * Getter for property table.
-     *
-     * @return Value of property table.
-     * @since 2.x
-     */
-    public PdfPTable getTable() {
-        return table;
-    }
-
-    void setTable(PdfPTable table) {
-        this.table = table;
-        column.setText(null);
-        image = null;
-        if (table != null) {
-            table.setExtendLastRow(verticalAlignment == Element.ALIGN_TOP);
-            column.addElement(table);
-            table.setWidthPercentage(100);
-        }
     }
 
     /**
@@ -720,104 +502,6 @@ public class PdfPCell extends Rectangle {
         this.rowspan = rowspan;
     }
 
-    /**
-     * Sets the following paragraph lines indent.
-     *
-     * @param indent the indent
-     */
-    public void setFollowingIndent(float indent) {
-        column.setFollowingIndent(indent);
-    }
-
-    /**
-     * Gets the following paragraph lines indent.
-     *
-     * @return the indent
-     */
-    public float getFollowingIndent() {
-        return column.getFollowingIndent();
-    }
-
-    /**
-     * Sets the right paragraph lines indent.
-     *
-     * @param indent the indent
-     */
-    public void setRightIndent(float indent) {
-        column.setRightIndent(indent);
-    }
-
-    /**
-     * Gets the right paragraph lines indent.
-     *
-     * @return the indent
-     */
-    public float getRightIndent() {
-        return column.getRightIndent();
-    }
-
-    /**
-     * Gets the space/character extra spacing ratio for fully justified text.
-     *
-     * @return the space/character extra spacing ratio
-     */
-    public float getSpaceCharRatio() {
-        return column.getSpaceCharRatio();
-    }
-
-    /**
-     * Sets the ratio between the extra word spacing and the extra character spacing when the text
-     * is fully justified. Extra word spacing will grow <CODE>spaceCharRatio</CODE> times more than
-     * extra character spacing. If the ratio is <CODE>PdfWriter.NO_SPACE_CHAR_RATIO</CODE> then the
-     * extra character spacing will be zero.
-     *
-     * @param spaceCharRatio the ratio between the extra word spacing and the extra character
-     *                       spacing
-     */
-    public void setSpaceCharRatio(float spaceCharRatio) {
-        column.setSpaceCharRatio(spaceCharRatio);
-    }
-
-    /**
-     * Sets the run direction of the text content in the cell. May be either of:
-     * PdfWriter.RUN_DIRECTION_DEFAULT, PdfWriter.RUN_DIRECTION_NO_BIDI, PdfWriter.RUN_DIRECTION_LTR
-     * or PdfWriter.RUN_DIRECTION_RTL.
-     *
-     * @param runDirection
-     */
-    public void setRunDirection(int runDirection) {
-        column.setRunDirection(runDirection);
-    }
-
-    /**
-     * Gets the run direction of the text content in the cell
-     *
-     * @return One of the following values: PdfWriter.RUN_DIRECTION_DEFAULT,
-     * PdfWriter.RUN_DIRECTION_NO_BIDI, PdfWriter.RUN_DIRECTION_LTR or PdfWriter.RUN_DIRECTION_RTL.
-     */
-    public int getRunDirection() {
-        return column.getRunDirection();
-    }
-
-    /**
-     * Getter for property image.
-     *
-     * @return Value of property image.
-     */
-    public Image getImage() {
-        return image;
-    }
-
-    /**
-     * Setter for property image.
-     *
-     * @param image New value of property image.
-     */
-    public void setImage(Image image) {
-        column.setText(null);
-        table = null;
-        this.image = image;
-    }
 
     /**
      * Gets the cell event for this cell.
@@ -866,23 +550,6 @@ public class PdfPCell extends Rectangle {
     }
 
     /**
-     * Sets the rotation of the cell. Possible values are 0, 90, 180 and 270.
-     *
-     * @param rotation the rotation of the cell
-     */
-    public void setRotation(int rotation) {
-        rotation %= 360;
-        if (rotation < 0) {
-            rotation += 360;
-        }
-        if ((rotation % 90) != 0) {
-            throw new IllegalArgumentException(
-                    MessageLocalization.getComposedMessage("rotation.must.be.a.multiple.of.90"));
-        }
-        this.rotation = rotation;
-    }
-
-    /**
      * Consumes part of the content of the cell.
      *
      * @param height the hight of the part that has to be consumed
@@ -912,17 +579,6 @@ public class PdfPCell extends Rectangle {
      */
     public float getMaxHeight() {
         boolean pivoted = (getRotation() == 90 || getRotation() == 270);
-        Image img = getImage();
-        if (img != null) {
-            img.scalePercent(100);
-            float refWidth = pivoted ? img.getScaledHeight() : img.getScaledWidth();
-            float scale = (getRight() - getEffectivePaddingRight()
-                    - getEffectivePaddingLeft() - getLeft()) / refWidth;
-            img.scalePercent(scale * 100);
-            float refHeight = pivoted ? img.getScaledWidth() : img.getScaledHeight();
-            setBottom(
-                    getTop() - getEffectivePaddingTop() - getEffectivePaddingBottom() - refHeight);
-        } else {
             if ((pivoted && hasFixedHeight()) || getColumn() == null) {
                 setBottom(getTop() - getFixedHeight());
             } else {
@@ -958,7 +614,7 @@ public class PdfPCell extends Rectangle {
                     setBottom(yLine - getEffectivePaddingBottom());
                 }
             }
-        }
+
         float height = getHeight();
         if (hasFixedHeight()) {
             height = getFixedHeight();

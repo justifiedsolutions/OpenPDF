@@ -1,5 +1,7 @@
 /*
- * Copyright 2002 by Paulo Soares.
+ * $Id: UnsupportedPdfException.java 3665 2009-01-26 22:32:15Z xlv $
+ *
+ * Copyright 2009 Bruno Lowagie
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.
@@ -12,10 +14,10 @@
  * The Original Code is 'iText, a free JAVA-PDF library'.
  *
  * The Initial Developer of the Original Code is Bruno Lowagie. Portions created by
- * the Initial Developer are Copyright (C) 1999, 2000, 2001, 2002 by Bruno Lowagie.
+ * the Initial Developer are Copyright (C) 1999-2009 by Bruno Lowagie.
  * All Rights Reserved.
  * Co-Developer of the code is Paulo Soares. Portions created by the Co-Developer
- * are Copyright (C) 2000, 2001, 2002 by Paulo Soares. All Rights Reserved.
+ * are Copyright (C) 2000-2009 by Paulo Soares. All Rights Reserved.
  *
  * Contributor(s): all the names of the contributors are added in the source code
  * where applicable.
@@ -47,50 +49,24 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-/** Implements the signature dictionary.
+/**
+ * Typed exception used when opening an existing PDF document. Gets thrown when the document isn't a valid PDF document
+ * according to iText, but it's different from the InvalidPdfException in the sense that it may be an iText limitation
+ * (most of the times it isn't but you might have bumped into something that has been added to the PDF specs, but that
+ * isn't supported in iText yet).
  *
- * @author Paulo Soares (psoares@consiste.pt)
+ * @since 2.1.5
  */
-public class PdfSignature extends PdfDictionary {
+public class UnsupportedPdfException extends InvalidPdfException {
 
-    /** Creates new PdfSignature */
-    public PdfSignature(PdfName filter, PdfName subFilter) {
-        super(PdfName.SIG);
-        put(PdfName.FILTER, filter);
-        put(PdfName.SUBFILTER, subFilter);
-    }
-    
-    public void setByteRange(int[] range) {
-        PdfArray array = new PdfArray();
-        for (int i : range) array.add(new PdfNumber(i));
-        put(PdfName.BYTERANGE, array);
-    }
-    
-    public void setContents(byte[] contents) {
-        put(PdfName.CONTENTS, new PdfString(contents).setHexWriting(true));
-    }
-    
-    public void setCert(byte[] cert) {
-        put(PdfName.CERT, new PdfString(cert));
-    }
-    
-    public void setName(String name) {
-        put(PdfName.NAME, new PdfString(name, PdfObject.TEXT_UNICODE));
-    }
+    /** a serial version UID */
+    private static final long serialVersionUID = 2180764250839096628L;
 
-    public void setDate(PdfDate date) {
-        put(PdfName.M, date);
-    }
-
-    public void setLocation(String name) {
-        put(PdfName.LOCATION, new PdfString(name, PdfObject.TEXT_UNICODE));
-    }
-
-    public void setReason(String name) {
-        put(PdfName.REASON, new PdfString(name, PdfObject.TEXT_UNICODE));
-    }
-    
-    public void setContact(String name) {
-        put(PdfName.CONTACTINFO, new PdfString(name, PdfObject.TEXT_UNICODE));
+    /**
+     * Creates an instance of an UnsupportedPdfException.
+     * @param    message    the reason why the document isn't a PDF document according to iText.
+     */
+    public UnsupportedPdfException(String message) {
+        super(message);
     }
 }

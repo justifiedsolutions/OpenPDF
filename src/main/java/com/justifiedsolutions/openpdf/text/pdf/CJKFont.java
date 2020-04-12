@@ -50,15 +50,11 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -132,12 +128,10 @@ class CJKFont extends BaseFont {
      *            the name of the font
      * @param enc
      *            the encoding of the font
-     * @param emb
-     *            always <CODE>false</CODE>. CJK font and not embedded
      * @throws DocumentException
      *             on error
      */
-    CJKFont(String fontName, String enc, boolean emb) throws DocumentException {
+    CJKFont(String fontName, String enc) throws DocumentException {
         loadProperties();
         fontType = FONT_TYPE_CJK;
         String nameBase = getBaseName(fontName);
@@ -279,11 +273,6 @@ class CJKFont extends BaseFont {
 
     @Override
     int getRawWidth(int c, String name) {
-        return 0;
-    }
-
-    @Override
-    public int getKerning(int char1, int char2) {
         return 0;
     }
 
@@ -445,18 +434,15 @@ class CJKFont extends BaseFont {
     }
 
     /**
-     * Gets the full name of the font. If it is a True Type font each array
-     * element will have {Platform ID, Platform Encoding ID, Language ID, font
-     * name}. The interpretation of this values can be found in the Open Type
-     * specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"", "", "", font
-     * name}.
-     * 
+     * Gets the full name of the font. If it is a True Type font each array element will have {Platform ID, Platform
+     * Encoding ID, Language ID, font name}. The interpretation of this values can be found in the Open Type
+     * specification, chapter 2, in the 'name' table.<br> For the other fonts the array has a single element with {"",
+     * "", "", font name}.
+     *
      * @return the full name of the font
      */
-    @Override
-    public String[][] getFullFontName() {
-        return new String[][] { { "", "", "", fontName } };
+    private String[][] getFullFontName() {
+        return new String[][]{{"", "", "", fontName}};
     }
 
     /**
@@ -689,35 +675,11 @@ class CJKFont extends BaseFont {
         return c;
     }
 
-    @Override
     public int getCidCode(int c) {
         if (cidDirect) {
             return c;
         }
         return translationMap[c];
-    }
-
-    /**
-     * Checks if the font has any kerning pairs.
-     * 
-     * @return always <CODE>false</CODE>
-     */
-    @Override
-    public boolean hasKernPairs() {
-        return false;
-    }
-
-    /**
-     * Checks if a character exists in this font.
-     * 
-     * @param c
-     *            the character to check
-     * @return <CODE>true</CODE> if the character has a glyph,
-     *         <CODE>false</CODE> otherwise
-     */
-    @Override
-    public boolean charExists(int c) {
-        return translationMap[c] != 0;
     }
 
     @Override

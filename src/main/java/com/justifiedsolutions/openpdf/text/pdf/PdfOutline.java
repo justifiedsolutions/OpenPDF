@@ -49,15 +49,14 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.Chunk;
+import com.justifiedsolutions.openpdf.text.Font;
+import com.justifiedsolutions.openpdf.text.Paragraph;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.Font;
-import com.justifiedsolutions.openpdf.text.Paragraph;
 
 /**
  * <CODE>PdfOutline</CODE> is an object that represents a PDF outline entry.
@@ -88,10 +87,7 @@ public class PdfOutline extends PdfDictionary {
     protected List<PdfOutline> kids = new ArrayList<>();
     
     protected PdfWriter writer;
-    
-    /** Holds value of property tag. */
-    private String tag;
-    
+
     /** Holds value of property open. */
     private boolean open;
     
@@ -200,15 +196,7 @@ public class PdfOutline extends PdfDictionary {
         }
         return destination.addPage(pageReference);
     }
-    
-    /**
-     * Gets the destination for this outline.
-     * @return the destination
-     */
-    public PdfDestination getPdfDestination() {
-        return destination;
-    }
-    
+
     int getCount() {
         return count;
     }
@@ -276,90 +264,12 @@ public class PdfOutline extends PdfDictionary {
     public List<PdfOutline> getKids() {
         return kids;
     }
-    
-    /**
-     * Sets the kids of this outline
-     * @param kids
-     */
-    public void setKids(List<PdfOutline> kids) {
-        this.kids = kids;
-    }
-    
-    /** Getter for property tag.
-     * @return Value of property tag.
-     */
-    public String getTag() {
-        return tag;
-    }
-    
-    /** Setter for property tag.
-     * @param tag New value of property tag.
-     */
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-    
-    /**
-     * Gets the title of this outline
-     * @return the title as a String
-     */
-    public String getTitle() {
-        PdfString title = (PdfString)get(PdfName.TITLE);
-        return title.toString();
-    }
-    
-    /**
-     * Sets the title of this outline
-     * @param title
-     */
-    public void setTitle(String title) {
-        put(PdfName.TITLE, new PdfString(title, PdfObject.TEXT_UNICODE));
-    }
-    
+
     /** Getter for property open.
      * @return Value of property open.
      */
     public boolean isOpen() {
         return open;
     }
-    
-    /** Setter for property open.
-     * @param open New value of property open.
-     */
-    public void setOpen(boolean open) {
-        this.open = open;
-    }
-    
-    /** Getter for property color.
-     * @return Value of property color.
-     *
-     */
-    public Color getColor() {
-        return this.color;
-    }
-    
-    /** Setter for property color.
-     * @param color New value of property color.
-     *
-     */
-    public void setColor(Color color) {
-        this.color = color;
-    }
-    
-    /** Getter for property style.
-     * @return Value of property style.
-     *
-     */
-    public int getStyle() {
-        return this.style;
-    }
-    
-    /** Setter for property style.
-     * @param style New value of property style.
-     *
-     */
-    public void setStyle(int style) {
-        this.style = style;
-    }
-    
+
 }

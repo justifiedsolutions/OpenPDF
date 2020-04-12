@@ -49,8 +49,9 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.awt.Color;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+
+import java.awt.*;
 
 /**
  * A <CODE>PdfSpotColor</CODE> defines a ColorSpace

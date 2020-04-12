@@ -49,8 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.SplitCharacter;
-
 /**
  * The default class that is used to determine whether or not a character
  * is a split character. You can subclass this class to define your own
@@ -70,14 +68,12 @@ public class DefaultSplitCharacter implements SplitCharacter {
      * for the moment every character less than or equal to SPACE, the character '-'
      * and some specific unicode ranges are 'splitCharacters'.
      * 
-     * @param start start position in the array
      * @param current current position in the array
-     * @param end end position in the array
      * @param    cc        the character array that has to be checked
      * @param ck chunk array
      * @return    <CODE>true</CODE> if the character can be used to split a string, <CODE>false</CODE> otherwise
      */
-    public boolean isSplitCharacter(int start, int current, int end, char[] cc, PdfChunk[] ck) {
+    public boolean isSplitCharacter(int current, char[] cc, PdfChunk[] ck) {
         char c = getCurrentCharacter(current, cc, ck);
         if (c <= ' ' || c == '-' || c == '\u2010') {
             return true;

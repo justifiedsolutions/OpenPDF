@@ -46,12 +46,10 @@
  */
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.awt.Color;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Image;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.Rectangle;
+
+import java.awt.*;
 
 /**
  * Implements the pattern.
@@ -71,47 +69,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         super();
         type = TYPE_PATTERN;
     }
-    
-    /**
-     * Creates new PdfPattern
-     *
-     * @param wr the <CODE>PdfWriter</CODE>
-     */
-    
-    PdfPatternPainter(PdfWriter wr) {
-        super(wr);
-        type = TYPE_PATTERN;
-    }
-    
-    PdfPatternPainter(PdfWriter wr, Color defaultColor) {
-        this(wr);
-        stencil = true;
-        if (defaultColor == null)
-            this.defaultColor = Color.gray;
-        else
-            this.defaultColor = defaultColor;
-    }
-    
-    /**
-     * Sets the horizontal interval of this pattern.
-     *
-     * @param xstep the xstep in horizontal painting
-     */
-    
-    public void setXStep(float xstep) {
-        this.xstep = xstep;
-    }
-    
-    /**
-     * Sets the vertical interval of this pattern.
-     *
-     * @param ystep in vertical painting
-     */
-    
-    public void setYStep(float ystep) {
-        this.ystep = ystep;
-    }
-    
+
     /**
      * Returns the horizontal interval when repeating the pattern.
      * @return a value
@@ -135,27 +93,7 @@ public final class PdfPatternPainter extends PdfTemplate {
     public boolean isStencil() {
         return stencil;
     }
-    
-    /**
-     * Sets the transformation matrix for the pattern.
-     * @param a
-     * @param b
-     * @param c
-     * @param d
-     * @param e
-     * @param f
-     */
-    public void setPatternMatrix(float a, float b, float c, float d, float e, float f) {
-        setMatrix(a, b, c, d, e, f);
-    }
-    /**
-     * Gets the stream representing this pattern
-     * @return the stream representing this pattern
-     */
-    PdfPattern getPattern() {
-        return new PdfPattern(this);
-    }
-    
+
     /**
      * Gets the stream representing this pattern
      * @param    compressionLevel    the compression level of the stream
@@ -210,15 +148,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetGrayFill();
     }
-    
-    /**
-     * @see PdfContentByte#setGrayStroke(float)
-     */
-    public void setGrayStroke(float gray) {
-        checkNoColor();
-        super.setGrayStroke(gray);
-    }
-    
+
     /**
      * @see PdfContentByte#resetGrayStroke()
      */
@@ -226,15 +156,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetGrayStroke();
     }
-    
-    /**
-     * @see PdfContentByte#setRGBColorFillF(float, float, float)
-     */
-    public void setRGBColorFillF(float red, float green, float blue) {
-        checkNoColor();
-        super.setRGBColorFillF(red, green, blue);
-    }
-    
+
     /**
      * @see PdfContentByte#resetRGBColorFill()
      */
@@ -242,15 +164,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetRGBColorFill();
     }
-    
-    /**
-     * @see PdfContentByte#setRGBColorStrokeF(float, float, float)
-     */
-    public void setRGBColorStrokeF(float red, float green, float blue) {
-        checkNoColor();
-        super.setRGBColorStrokeF(red, green, blue);
-    }
-    
+
     /**
      * @see PdfContentByte#resetRGBColorStroke()
      */
@@ -258,80 +172,7 @@ public final class PdfPatternPainter extends PdfTemplate {
         checkNoColor();
         super.resetRGBColorStroke();
     }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorFillF(float, float, float, float)
-     */
-    public void setCMYKColorFillF(float cyan, float magenta, float yellow, float black) {
-        checkNoColor();
-        super.setCMYKColorFillF(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#resetCMYKColorFill()
-     */
-    public void resetCMYKColorFill() {
-        checkNoColor();
-        super.resetCMYKColorFill();
-    }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorStrokeF(float, float, float, float)
-     */
-    public void setCMYKColorStrokeF(float cyan, float magenta, float yellow, float black) {
-        checkNoColor();
-        super.setCMYKColorStrokeF(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#resetCMYKColorStroke()
-     */
-    public void resetCMYKColorStroke() {
-        checkNoColor();
-        super.resetCMYKColorStroke();
-    }
-    
-    /**
-     * @see PdfContentByte#addImage(Image, float, float, float, float, float, float)
-     */
-    public void addImage(Image image, float a, float b, float c, float d, float e, float f) throws DocumentException {
-        if (stencil && !image.isMask())
-            checkNoColor();
-        super.addImage(image, a, b, c, d, e, f);
-    }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorFill(int, int, int, int)
-     */
-    public void setCMYKColorFill(int cyan, int magenta, int yellow, int black) {
-        checkNoColor();
-        super.setCMYKColorFill(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#setCMYKColorStroke(int, int, int, int)
-     */
-    public void setCMYKColorStroke(int cyan, int magenta, int yellow, int black) {
-        checkNoColor();
-        super.setCMYKColorStroke(cyan, magenta, yellow, black);
-    }
-    
-    /**
-     * @see PdfContentByte#setRGBColorFill(int, int, int)
-     */
-    public void setRGBColorFill(int red, int green, int blue) {
-        checkNoColor();
-        super.setRGBColorFill(red, green, blue);
-    }
-    
-    /**
-     * @see PdfContentByte#setRGBColorStroke(int, int, int)
-     */
-    public void setRGBColorStroke(int red, int green, int blue) {
-        checkNoColor();
-        super.setRGBColorStroke(red, green, blue);
-    }
-    
+
     /**
      * @see PdfContentByte#setColorStroke(java.awt.Color)
      */

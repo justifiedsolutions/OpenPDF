@@ -49,15 +49,15 @@
  */
 
 package com.justifiedsolutions.openpdf.text.pdf;
+
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.Utilities;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.DocWriter;
 
 /**
  * Acts like a <CODE>StringBuffer</CODE> but works with <CODE>byte</CODE> arrays.
@@ -101,90 +101,7 @@ public class ByteBuffer extends OutputStream {
             size = 128;
         buf = new byte[size];
     }
-    
-    /**
-     * Sets the cache size.
-     * <P>
-     * This can only be used to increment the size.
-     * If the size that is passed through is smaller than the current size, nothing happens.
-     *
-     * @param   size    the size of the cache
-     */
-    
-    public static void setCacheSize(int size) {
-        if (size > 3276700) size = 3276700;
-        if (size <= byteCacheSize) return;
-        byte[][] tmpCache = new byte[size][];
-        System.arraycopy(byteCache, 0, tmpCache, 0, byteCacheSize);
-        byteCache = tmpCache;
-        byteCacheSize = size;
-    }
-    
-    /**
-     * You can fill the cache in advance if you want to.
-     *
-     * @param   decimals
-     */
-    
-    public static void fillCache(int decimals) {
-        int step = 1;
-        switch(decimals) {
-            case 0:
-                step = 100;
-                break;
-            case 1:
-                step = 10;
-                break;
-        }
-        for (int i = 1; i < byteCacheSize; i += step) {
-            if (byteCache[i] != null) continue;
-            byteCache[i] = convertToBytes(i);
-        }
-    }
-    
-    /**
-     * Converts an double (multiplied by 100 and cast to an int) into an array of bytes.
-     *
-     * @param   i   the int
-     * @return  a byte array
-     */
-    
-    private static byte[] convertToBytes(int i) {
-        int size = (int)Math.floor(Math.log(i) / Math.log(10));
-        if (i % 100 != 0) {
-            size += 2;
-        }
-        if (i % 10 != 0) {
-            size++;
-        }
-        if (i < 100) {
-            size++;
-            if (i < 10) {
-                size++;
-            }
-        }
-        size--;
-        byte[] cache = new byte[size];
-        size --;
-        if (i < 100) {
-            cache[0] = (byte)'0';
-        }
-        if (i % 10 != 0) {
-            cache[size--] = bytes[i % 10];
-        }
-        if (i % 100 != 0) {
-            cache[size--] = bytes[(i / 10) % 10];
-            cache[size--] = (byte)'.';
-        }
-        size = (int)Math.floor(Math.log(i) / Math.log(10)) - 1;
-        int add = 0;
-        while (add < size) {
-            cache[add] = bytes[(i / (int)Math.pow(10, size - add + 1)) % 10];
-            add++;
-        }
-        return cache;
-    }
-    
+
     /**
      * Appends an <CODE>int</CODE>. The size of the array will grow by one.
      * @param b the int to be appended
@@ -242,7 +159,7 @@ public class ByteBuffer extends OutputStream {
      */
     public ByteBuffer append(String str) {
         if (str != null)
-            return append(DocWriter.getISOBytes(str));
+            return append(Utilities.getISOBytes(str));
         return this;
     }
     
@@ -585,20 +502,7 @@ public class ByteBuffer extends OutputStream {
     public String toString() {
         return new String(buf, 0, count);
     }
-    
-    /**
-     * Converts the buffer's contents into a string, translating bytes into
-     * characters according to the specified character encoding.
-     *
-     * @param   enc  a character-encoding name.
-     * @return String translated from the buffer's contents.
-     * @throws UnsupportedEncodingException
-     *         If the named encoding is not supported.
-     */
-    public String toString(String enc) throws UnsupportedEncodingException {
-        return new String(buf, 0, count, enc);
-    }
-    
+
     /**
      * Writes the complete contents of this byte buffer output to
      * the specified output stream argument, as if by calling the output
@@ -618,8 +522,5 @@ public class ByteBuffer extends OutputStream {
     public void write(byte[] b, int off, int len) {
         append(b, off, len);
     }
-    
-    public byte[] getBuffer() {
-        return buf;
-    }
+
 }

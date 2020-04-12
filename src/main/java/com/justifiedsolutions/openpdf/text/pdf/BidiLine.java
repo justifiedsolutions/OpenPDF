@@ -48,583 +48,19 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import java.text.Bidi;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.justifiedsolutions.openpdf.text.Chunk;
 import com.justifiedsolutions.openpdf.text.Utilities;
 
-/** Does all the line bidirectional processing with PdfChunk assembly.
+import java.util.ArrayList;
+
+/**
+ * Does all the line bidirectional processing with PdfChunk assembly.
  *
  * @author Paulo Soares (psoares@consiste.pt)
  */
-public class BidiLine {
-    
-    protected int runDirection;
-    protected int pieceSize = 256;
-    protected char[] text = new char[pieceSize];
-    protected PdfChunk[] detailChunks = new PdfChunk[pieceSize];
-    protected int totalTextLength = 0;
+class BidiLine {
 
-    protected byte[] orderLevels = new byte[pieceSize];
-    protected int[] indexChars = new int[pieceSize];
-    
-    protected ArrayList<PdfChunk> chunks = new ArrayList<>();
-    protected int indexChunk = 0;
-    protected int indexChunkChar = 0;
-    protected int currentChar = 0;
-    
-    protected int storedRunDirection;
-    protected char[] storedText = new char[0];
-    protected PdfChunk[] storedDetailChunks = new PdfChunk[0];
-    protected int storedTotalTextLength = 0;
-
-    protected byte[] storedOrderLevels = new byte[0];
-    protected int[] storedIndexChars = new int[0];
-    
-    protected int storedIndexChunk = 0;
-    protected int storedIndexChunkChar = 0;
-    protected int storedCurrentChar = 0;
-    
-    protected boolean shortStore;
-    protected static final IntHashtable mirrorChars = new IntHashtable();
-    protected int arabicOptions;
-    
-    /** Creates new BidiLine */
-    public BidiLine() {
-    }
-    
-    public BidiLine(BidiLine org) {
-        runDirection = org.runDirection;
-        pieceSize = org.pieceSize;
-        text = org.text.clone();
-        detailChunks = org.detailChunks.clone();
-        totalTextLength = org.totalTextLength;
-
-        orderLevels = org.orderLevels.clone();
-        indexChars = org.indexChars.clone();
-
-        chunks = new ArrayList<>(org.chunks);
-        indexChunk = org.indexChunk;
-        indexChunkChar = org.indexChunkChar;
-        currentChar = org.currentChar;
-
-        storedRunDirection = org.storedRunDirection;
-        storedText = org.storedText.clone();
-        storedDetailChunks = org.storedDetailChunks.clone();
-        storedTotalTextLength = org.storedTotalTextLength;
-
-        storedOrderLevels = org.storedOrderLevels.clone();
-        storedIndexChars = org.storedIndexChars.clone();
-
-        storedIndexChunk = org.storedIndexChunk;
-        storedIndexChunkChar = org.storedIndexChunkChar;
-        storedCurrentChar = org.storedCurrentChar;
-
-        shortStore = org.shortStore;
-        arabicOptions = org.arabicOptions;
-    }
-    
-    public boolean isEmpty() {
-        return (currentChar >= totalTextLength && indexChunk >= chunks.size());
-    }
-    
-    public void clearChunks() {
-        chunks.clear();
-        totalTextLength = 0;
-        currentChar = 0;
-    }
-
-    public boolean getParagraph(int runDirection) {
-        this.runDirection = runDirection;
-        currentChar = 0;
-        totalTextLength = 0;
-        boolean hasText = false;
-        char c;
-        char uniC;
-        BaseFont bf;
-        for (; indexChunk < chunks.size(); ++indexChunk) {
-            PdfChunk ck = chunks.get(indexChunk);
-            bf = ck.font().getFont();
-            String s = ck.toString();
-            int len = s.length();
-            for (; indexChunkChar < len; ++indexChunkChar) {
-                c = s.charAt(indexChunkChar);
-                uniC = (char)bf.getUnicodeEquivalent(c);
-                if (uniC == '\r' || uniC == '\n') {
-                    // next condition is never true for CID
-                    if (uniC == '\r' && indexChunkChar + 1 < len && s.charAt(indexChunkChar + 1) == '\n')
-                        ++indexChunkChar;
-                    ++indexChunkChar;
-                    if (indexChunkChar >= len) {
-                        indexChunkChar = 0;
-                        ++indexChunk;
-                    }
-                    hasText = true;
-                    if (totalTextLength == 0)
-                        detailChunks[0] = ck;
-                    break;
-                }
-                addPiece(c, ck);
-            }
-            if (hasText)
-                break;
-            indexChunkChar = 0;
-        }
-        if (totalTextLength == 0)
-            return hasText;
-
-        // remove trailing WS
-        totalTextLength = trimRight(0, totalTextLength - 1) + 1;
-        if (totalTextLength == 0) {
-            return true;
-        }
-        
-        if (runDirection == PdfWriter.RUN_DIRECTION_LTR || runDirection == PdfWriter.RUN_DIRECTION_RTL) {
-            if (orderLevels.length < totalTextLength) {
-                orderLevels = new byte[pieceSize];
-                indexChars = new int[pieceSize];
-            }
-            ArabicLigaturizer.processNumbers(text, 0, totalTextLength, arabicOptions);
-            Bidi bidi = new Bidi(new String(text),
-                                 (byte) (runDirection == PdfWriter.RUN_DIRECTION_RTL ? Bidi.DIRECTION_RIGHT_TO_LEFT : Bidi.DIRECTION_LEFT_TO_RIGHT));
-            for (int k = 0; k < totalTextLength; ++k) {
-                orderLevels[k] = (byte) bidi.getLevelAt(k);
-                indexChars[k] = k;
-            }
-            doArabicShapping();
-            mirrorGlyphs();
-        }
-        
-        totalTextLength = trimRightEx(0, totalTextLength - 1) + 1;
-        return true;
-    }
-    
-    public void addChunk(PdfChunk chunk) {
-        chunks.add(chunk);
-    }
-
-    public void addChunks(List<PdfChunk> chunks) {
-        this.chunks.addAll(chunks);
-    }
-
-    public void addPiece(char c, PdfChunk chunk) {
-        if (totalTextLength >= pieceSize) {
-            char[] tempText = text;
-            PdfChunk[] tempDetailChunks = detailChunks;
-            pieceSize *= 2;
-            text = new char[pieceSize];
-            detailChunks = new PdfChunk[pieceSize];
-            System.arraycopy(tempText, 0, text, 0, totalTextLength);
-            System.arraycopy(tempDetailChunks, 0, detailChunks, 0, totalTextLength);
-        }
-        text[totalTextLength] = c;
-        detailChunks[totalTextLength++] = chunk;
-    }
-    
-    public void save() {
-        if (indexChunk > 0) {
-            if (indexChunk >= chunks.size())
-                chunks.clear();
-            else {
-                for (--indexChunk; indexChunk >= 0; --indexChunk)
-                    chunks.remove(indexChunk);
-            }
-            indexChunk = 0;
-        }
-        storedRunDirection = runDirection;
-        storedTotalTextLength = totalTextLength;
-        storedIndexChunk = indexChunk;
-        storedIndexChunkChar = indexChunkChar;
-        storedCurrentChar = currentChar;
-        shortStore = (currentChar < totalTextLength);
-        if (!shortStore) {
-            // long save
-            if (storedText.length < totalTextLength) {
-                storedText = new char[totalTextLength];
-                storedDetailChunks = new PdfChunk[totalTextLength];
-            }
-            System.arraycopy(text, 0, storedText, 0, totalTextLength);
-            System.arraycopy(detailChunks, 0, storedDetailChunks, 0, totalTextLength);
-        }
-        if (runDirection == PdfWriter.RUN_DIRECTION_LTR || runDirection == PdfWriter.RUN_DIRECTION_RTL) {
-            if (storedOrderLevels.length < totalTextLength) {
-                storedOrderLevels = new byte[totalTextLength];
-                storedIndexChars = new int[totalTextLength];
-            }
-            System.arraycopy(orderLevels, currentChar, storedOrderLevels, currentChar, totalTextLength - currentChar);
-            System.arraycopy(indexChars, currentChar, storedIndexChars, currentChar, totalTextLength - currentChar);
-        }
-    }
-    
-    public void restore() {
-        runDirection = storedRunDirection;
-        totalTextLength = storedTotalTextLength;
-        indexChunk = storedIndexChunk;
-        indexChunkChar = storedIndexChunkChar;
-        currentChar = storedCurrentChar;
-        if (!shortStore) {
-            // long restore
-            System.arraycopy(storedText, 0, text, 0, totalTextLength);
-            System.arraycopy(storedDetailChunks, 0, detailChunks, 0, totalTextLength);
-        }
-        if (runDirection == PdfWriter.RUN_DIRECTION_LTR || runDirection == PdfWriter.RUN_DIRECTION_RTL) {
-            System.arraycopy(storedOrderLevels, currentChar, orderLevels, currentChar, totalTextLength - currentChar);
-            System.arraycopy(storedIndexChars, currentChar, indexChars, currentChar, totalTextLength - currentChar);
-        }
-    }
-    
-    public void mirrorGlyphs() {
-        for (int k = 0; k < totalTextLength; ++k) {
-            if ((orderLevels[k] & 1) == 1) {
-                int mirror = mirrorChars.get(text[k]);
-                if (mirror != 0)
-                    text[k] = (char)mirror;
-            }
-        }
-    }
-    
-    public void doArabicShapping() {
-        int src = 0;
-        int dest = 0;
-        for (;;) {
-            while (src < totalTextLength) {
-                char c = text[src];
-                if (c >= 0x0600 && c <= 0x06ff)
-                    break;
-                if (src != dest) {
-                    text[dest] = text[src];
-                    detailChunks[dest] = detailChunks[src];
-                    orderLevels[dest] = orderLevels[src];
-                }
-                ++src;
-                ++dest;
-            }
-            if (src >= totalTextLength) {
-                totalTextLength = dest;
-                return;
-            }
-            int startArabicIdx = src;
-            ++src;
-            while (src < totalTextLength) {
-                char c = text[src];
-                if (c < 0x0600 || c > 0x06ff)
-                    break;
-                ++src;
-            }
-            int arabicWordSize = src - startArabicIdx;
-            int size = ArabicLigaturizer.arabic_shape(text, startArabicIdx, arabicWordSize, text, dest, arabicWordSize, arabicOptions);
-            if (startArabicIdx != dest) {
-                for (int k = 0; k < size; ++k) {
-                    detailChunks[dest] = detailChunks[startArabicIdx];
-                    orderLevels[dest++] = orderLevels[startArabicIdx++];
-                }
-            }
-            else
-                dest += size;
-        }
-    }
-       
-    public PdfLine processLine(float leftX, float width, int alignment, int runDirection, int arabicOptions) {
-        this.arabicOptions = arabicOptions;
-        save();
-        boolean isRTL = (runDirection == PdfWriter.RUN_DIRECTION_RTL);
-        if (currentChar >= totalTextLength) {
-            boolean hasText = getParagraph(runDirection);
-            if (!hasText)
-                return null;
-            if (totalTextLength == 0) {
-                ArrayList<PdfChunk> ar = new ArrayList<>();
-                PdfChunk ck = new PdfChunk("", detailChunks[0]);
-                ar.add(ck);
-                return new PdfLine(0, 0, 0, alignment, true, ar, isRTL);
-            }
-        }
-        float originalWidth = width;
-        int lastSplit = -1;
-        if (currentChar != 0)
-            currentChar = trimLeftEx(currentChar, totalTextLength - 1);
-        int oldCurrentChar = currentChar;
-        int uniC = 0;
-        PdfChunk ck = null;
-        float charWidth = 0;
-        PdfChunk lastValidChunk = null;
-        boolean splitChar = false;
-        boolean surrogate = false;
-        for (; currentChar < totalTextLength; ++currentChar) {
-            ck = detailChunks[currentChar];
-            surrogate = Utilities.isSurrogatePair(text, currentChar);
-            if (surrogate)
-                uniC = ck.getUnicodeEquivalent(Utilities.convertToUtf32(text, currentChar));
-            else
-                uniC = ck.getUnicodeEquivalent(text[currentChar]);
-            if (PdfChunk.noPrint(uniC))
-                continue;
-            if (surrogate)
-                charWidth = ck.getCharWidth(uniC);
-            else
-                charWidth = ck.getCharWidth(text[currentChar]);
-            splitChar = ck.isExtSplitCharacter(oldCurrentChar, currentChar, totalTextLength, text, detailChunks);
-            if (splitChar && Character.isWhitespace((char)uniC))
-                lastSplit = currentChar;
-            if (width - charWidth < 0)
-                break;
-            if (splitChar)
-                lastSplit = currentChar;
-            width -= charWidth;
-            lastValidChunk = ck;
-            if (ck.isTab()) {
-                Object[] tab = (Object[])ck.getAttribute(Chunk.TAB);
-                float tabPosition = (Float) tab[1];
-                boolean newLine = (Boolean) tab[2];
-                if (newLine && tabPosition < originalWidth - width) {
-                    return new PdfLine(0, originalWidth, width, alignment, true, createArrayOfPdfChunks(oldCurrentChar, currentChar - 1), isRTL);
-                }
-                detailChunks[currentChar].adjustLeft(leftX);
-                width = originalWidth - tabPosition;
-            }
-            if (surrogate)
-                ++currentChar;
-        }
-        if (lastValidChunk == null) {
-            // not even a single char fit; must output the first char
-            ++currentChar;
-            if (surrogate)
-                ++currentChar;
-            return new PdfLine(0, originalWidth, 0, alignment, false, createArrayOfPdfChunks(currentChar - 1, currentChar - 1), isRTL);
-        }
-        if (currentChar >= totalTextLength) {
-            // there was more line than text
-            return new PdfLine(0, originalWidth, width, alignment, true, createArrayOfPdfChunks(oldCurrentChar, totalTextLength - 1), isRTL);
-        }
-        int newCurrentChar = trimRightEx(oldCurrentChar, currentChar - 1);
-        if (newCurrentChar < oldCurrentChar) {
-            // only WS
-            return new PdfLine(0, originalWidth, width, alignment, false, createArrayOfPdfChunks(oldCurrentChar, currentChar - 1), isRTL);
-        }
-        if (newCurrentChar == currentChar - 1) { // middle of word
-            HyphenationEvent he = (HyphenationEvent)lastValidChunk.getAttribute(Chunk.HYPHENATION);
-            if (he != null) {
-                int[] word = getWord(oldCurrentChar, newCurrentChar);
-                if (word != null) {
-                    float testWidth = width + getWidth(word[0], currentChar - 1);
-                    String pre = he.getHyphenatedWordPre(new String(text, word[0], word[1] - word[0]), lastValidChunk.font().getFont(), lastValidChunk.font().size(), testWidth);
-                    String post = he.getHyphenatedWordPost();
-                    if (pre.length() > 0) {
-                        PdfChunk extra = new PdfChunk(pre, lastValidChunk);
-                        currentChar = word[1] - post.length();
-                        return new PdfLine(0, originalWidth, testWidth - lastValidChunk.font().width(pre), alignment, false, createArrayOfPdfChunks(oldCurrentChar, word[0] - 1, extra), isRTL);
-                    }
-                }
-            }
-        }
-        if (lastSplit == -1 || lastSplit >= newCurrentChar) {
-            // no split point or split point ahead of end
-            return new PdfLine(0, originalWidth, width + getWidth(newCurrentChar + 1, currentChar - 1), alignment, false, createArrayOfPdfChunks(oldCurrentChar, newCurrentChar), isRTL);
-        }
-        // standard split
-        currentChar = lastSplit + 1;
-        newCurrentChar = trimRightEx(oldCurrentChar, lastSplit);
-        if (newCurrentChar < oldCurrentChar) {
-            // only WS again
-            newCurrentChar = currentChar - 1;
-        }
-        return new PdfLine(0, originalWidth, originalWidth - getWidth(oldCurrentChar, newCurrentChar), alignment, false, createArrayOfPdfChunks(oldCurrentChar, newCurrentChar), isRTL);
-    }
-    
-    /** Gets the width of a range of characters.
-     * @param startIdx the first index to calculate
-     * @param lastIdx the last inclusive index to calculate
-     * @return the sum of all widths
-     */    
-    public float getWidth(int startIdx, int lastIdx) {
-        char c = 0;
-        char uniC;
-        PdfChunk ck = null;
-        float width = 0;
-        for (; startIdx <= lastIdx; ++startIdx) {
-            boolean surrogate = Utilities.isSurrogatePair(text, startIdx);
-            if (surrogate) {
-                width += detailChunks[startIdx].getCharWidth(Utilities.convertToUtf32(text, startIdx));
-                ++startIdx;
-            }
-            else {
-                c = text[startIdx];
-                ck = detailChunks[startIdx];
-                if (PdfChunk.noPrint(ck.getUnicodeEquivalent(c)))
-                    continue;
-                width += detailChunks[startIdx].getCharWidth(c);
-            }
-        }
-        return width;
-    }
-    
-    public ArrayList<PdfChunk> createArrayOfPdfChunks(int startIdx, int endIdx) {
-        return createArrayOfPdfChunks(startIdx, endIdx, null);
-    }
-    
-    public ArrayList<PdfChunk> createArrayOfPdfChunks(int startIdx, int endIdx, PdfChunk extraPdfChunk) {
-        boolean bidi = (runDirection == PdfWriter.RUN_DIRECTION_LTR || runDirection == PdfWriter.RUN_DIRECTION_RTL);
-        if (bidi)
-            reorder(startIdx, endIdx);
-        ArrayList<PdfChunk> ar = new ArrayList<>();
-        PdfChunk refCk = detailChunks[startIdx];
-        PdfChunk ck = null;
-        StringBuffer buf = new StringBuffer();
-        char c;
-        int idx = 0;
-        for (; startIdx <= endIdx; ++startIdx) {
-            idx = bidi ? indexChars[startIdx] : startIdx;
-            c = text[idx];
-            ck = detailChunks[idx];
-            if (PdfChunk.noPrint(ck.getUnicodeEquivalent(c)))
-                continue;
-            if (ck.isImage() || ck.isSeparator() || ck.isTab()) {
-                if (buf.length() > 0) {
-                    ar.add(new PdfChunk(buf.toString(), refCk));
-                    buf = new StringBuffer();
-                }
-                ar.add(ck);
-            }
-            else if (ck == refCk) {
-                buf.append(c);
-            }
-            else {
-                if (buf.length() > 0) {
-                    ar.add(new PdfChunk(buf.toString(), refCk));
-                    buf = new StringBuffer();
-                }
-                if (!ck.isImage() && !ck.isSeparator() && !ck.isTab())
-                    buf.append(c);
-                refCk = ck;
-            }
-        }
-        if (buf.length() > 0) {
-            ar.add(new PdfChunk(buf.toString(), refCk));
-        }
-        if (extraPdfChunk != null)
-            ar.add(extraPdfChunk);
-        return ar;
-    }
-    
-    public int[] getWord(int startIdx, int idx) {
-        int last = idx;
-        int first = idx;
-        // forward
-        for (; last < totalTextLength; ++last) {
-            if (!Character.isLetter(text[last]))
-                break;            
-        }
-        if (last == idx)
-            return null;
-        // backward
-        for (; first >= startIdx; --first) {
-            if (!Character.isLetter(text[first]))
-                break;            
-        }
-        ++first;
-        return new int[]{first, last};
-    }
-    
-    public int trimRight(int startIdx, int endIdx) {
-        int idx = endIdx;
-        char c;
-        for (; idx >= startIdx; --idx) {
-            c = (char)detailChunks[idx].getUnicodeEquivalent(text[idx]);
-            if (!isWS(c))
-                break;
-        }
-        return idx;
-    }
-    
-    public int trimLeft(int startIdx, int endIdx) {
-        int idx = startIdx;
-        char c;
-        for (; idx <= endIdx; ++idx) {
-            c = (char)detailChunks[idx].getUnicodeEquivalent(text[idx]);
-            if (!isWS(c))
-                break;
-        }
-        return idx;
-    }
-    
-    public int trimRightEx(int startIdx, int endIdx) {
-        int idx = endIdx;
-        char c = 0;
-        for (; idx >= startIdx; --idx) {
-            c = (char)detailChunks[idx].getUnicodeEquivalent(text[idx]);
-            if (!isWS(c) && !PdfChunk.noPrint(c))
-                break;
-        }
-        return idx;
-    }
-    
-    public int trimLeftEx(int startIdx, int endIdx) {
-        int idx = startIdx;
-        char c = 0;
-        for (; idx <= endIdx; ++idx) {
-            c = (char)detailChunks[idx].getUnicodeEquivalent(text[idx]);
-            if (!isWS(c) && !PdfChunk.noPrint(c))
-                break;
-        }
-        return idx;
-    }
-    
-    public void reorder(int start, int end) {
-        byte maxLevel = orderLevels[start];
-        byte minLevel = maxLevel;
-        byte onlyOddLevels = maxLevel;
-        byte onlyEvenLevels = maxLevel;
-        for (int k = start + 1; k <= end; ++k) {
-            byte b = orderLevels[k];
-            if (b > maxLevel)
-                maxLevel = b;
-            else if (b < minLevel)
-                minLevel = b;
-            onlyOddLevels &= b;
-            onlyEvenLevels |= b;
-        }
-        if ((onlyEvenLevels & 1) == 0) // nothing to do
-            return;
-        if ((onlyOddLevels & 1) == 1) { // single inversion
-            flip(start, end + 1);
-            return;
-        }
-        minLevel |= 1;
-        for (; maxLevel >= minLevel; --maxLevel) {
-            int pstart = start;
-            for (;;) {
-                for (;pstart <= end; ++pstart) {
-                    if (orderLevels[pstart] >= maxLevel)
-                        break;
-                }
-                if (pstart > end)
-                    break;
-                int pend = pstart + 1;
-                for (; pend <= end; ++pend) {
-                    if (orderLevels[pend] < maxLevel)
-                        break;
-                }
-                flip(pstart, pend);
-                pstart = pend + 1;
-            }
-        }
-    }
-    
-    public void flip(int start, int end) {
-        int mid = (start + end) / 2;
-        --end;
-        for (; start < mid; ++start, --end) {
-            int temp = indexChars[start];
-            indexChars[start] = indexChars[end];
-            indexChars[end] = temp;
-        }
-    }
-    
-    public static boolean isWS(char c) {
-        return (c <= ' ');
-    }
+    private static final IntHashtable mirrorChars = new IntHashtable();
 
     static {
         mirrorChars.put(0x0028, 0x0029); // LEFT PARENTHESIS
@@ -751,12 +187,14 @@ public class BidiLine {
         mirrorChars.put(0x22F1, 0x22F0); // DOWN RIGHT DIAGONAL ELLIPSIS
         mirrorChars.put(0x22F2, 0x22FA); // ELEMENT OF WITH LONG HORIZONTAL STROKE
         mirrorChars.put(0x22F3, 0x22FB); // ELEMENT OF WITH VERTICAL BAR AT END OF HORIZONTAL STROKE
-        mirrorChars.put(0x22F4, 0x22FC); // SMALL ELEMENT OF WITH VERTICAL BAR AT END OF HORIZONTAL STROKE
+        mirrorChars.put(0x22F4,
+                0x22FC); // SMALL ELEMENT OF WITH VERTICAL BAR AT END OF HORIZONTAL STROKE
         mirrorChars.put(0x22F6, 0x22FD); // ELEMENT OF WITH OVERBAR
         mirrorChars.put(0x22F7, 0x22FE); // SMALL ELEMENT OF WITH OVERBAR
         mirrorChars.put(0x22FA, 0x22F2); // CONTAINS WITH LONG HORIZONTAL STROKE
         mirrorChars.put(0x22FB, 0x22F3); // CONTAINS WITH VERTICAL BAR AT END OF HORIZONTAL STROKE
-        mirrorChars.put(0x22FC, 0x22F4); // SMALL CONTAINS WITH VERTICAL BAR AT END OF HORIZONTAL STROKE
+        mirrorChars.put(0x22FC,
+                0x22F4); // SMALL CONTAINS WITH VERTICAL BAR AT END OF HORIZONTAL STROKE
         mirrorChars.put(0x22FD, 0x22F6); // CONTAINS WITH OVERBAR
         mirrorChars.put(0x22FE, 0x22F7); // SMALL CONTAINS WITH OVERBAR
         mirrorChars.put(0x2308, 0x2309); // LEFT CEILING
@@ -859,8 +297,10 @@ public class BidiLine {
         mirrorChars.put(0x2A8C, 0x2A8B); // GREATER-THAN ABOVE DOUBLE-LINE EQUAL ABOVE LESS-THAN
         mirrorChars.put(0x2A91, 0x2A92); // LESS-THAN ABOVE GREATER-THAN ABOVE DOUBLE-LINE EQUAL
         mirrorChars.put(0x2A92, 0x2A91); // GREATER-THAN ABOVE LESS-THAN ABOVE DOUBLE-LINE EQUAL
-        mirrorChars.put(0x2A93, 0x2A94); // LESS-THAN ABOVE SLANTED EQUAL ABOVE GREATER-THAN ABOVE SLANTED EQUAL
-        mirrorChars.put(0x2A94, 0x2A93); // GREATER-THAN ABOVE SLANTED EQUAL ABOVE LESS-THAN ABOVE SLANTED EQUAL
+        mirrorChars.put(0x2A93,
+                0x2A94); // LESS-THAN ABOVE SLANTED EQUAL ABOVE GREATER-THAN ABOVE SLANTED EQUAL
+        mirrorChars.put(0x2A94,
+                0x2A93); // GREATER-THAN ABOVE SLANTED EQUAL ABOVE LESS-THAN ABOVE SLANTED EQUAL
         mirrorChars.put(0x2A95, 0x2A96); // SLANTED EQUAL TO OR LESS-THAN
         mirrorChars.put(0x2A96, 0x2A95); // SLANTED EQUAL TO OR GREATER-THAN
         mirrorChars.put(0x2A97, 0x2A98); // SLANTED EQUAL TO OR LESS-THAN WITH DOT INSIDE
@@ -946,4 +386,439 @@ public class BidiLine {
         mirrorChars.put(0xFF62, 0xFF63); // [BEST FIT] HALFWIDTH LEFT CORNER BRACKET
         mirrorChars.put(0xFF63, 0xFF62); // [BEST FIT] HALFWIDTH RIGHT CORNER BRACKET
     }
+
+    private int pieceSize = 256;
+    private char[] text = new char[pieceSize];
+    private PdfChunk[] detailChunks = new PdfChunk[pieceSize];
+    private int totalTextLength = 0;
+    private byte[] orderLevels = new byte[pieceSize];
+    private int[] indexChars = new int[pieceSize];
+    private ArrayList<PdfChunk> chunks = new ArrayList<>();
+    private int indexChunk = 0;
+    private int indexChunkChar = 0;
+    private int currentChar = 0;
+    private char[] storedText = new char[0];
+    private PdfChunk[] storedDetailChunks = new PdfChunk[0];
+    private int storedTotalTextLength = 0;
+    private byte[] storedOrderLevels = new byte[0];
+    private int[] storedIndexChars = new int[0];
+    private int storedIndexChunk = 0;
+    private int storedIndexChunkChar = 0;
+    private int storedCurrentChar = 0;
+    private boolean shortStore;
+
+    /**
+     * Creates new BidiLine
+     */
+    BidiLine() {
+    }
+
+    BidiLine(BidiLine org) {
+        pieceSize = org.pieceSize;
+        text = org.text.clone();
+        detailChunks = org.detailChunks.clone();
+        totalTextLength = org.totalTextLength;
+
+        orderLevels = org.orderLevels.clone();
+        indexChars = org.indexChars.clone();
+
+        chunks = new ArrayList<>(org.chunks);
+        indexChunk = org.indexChunk;
+        indexChunkChar = org.indexChunkChar;
+        currentChar = org.currentChar;
+
+        storedText = org.storedText.clone();
+        storedDetailChunks = org.storedDetailChunks.clone();
+        storedTotalTextLength = org.storedTotalTextLength;
+
+        storedOrderLevels = org.storedOrderLevels.clone();
+        storedIndexChars = org.storedIndexChars.clone();
+
+        storedIndexChunk = org.storedIndexChunk;
+        storedIndexChunkChar = org.storedIndexChunkChar;
+        storedCurrentChar = org.storedCurrentChar;
+
+        shortStore = org.shortStore;
+    }
+
+    void addChunk(PdfChunk chunk) {
+        chunks.add(chunk);
+    }
+
+    boolean isEmpty() {
+        return (currentChar >= totalTextLength && indexChunk >= chunks.size());
+    }
+
+    void restore() {
+        totalTextLength = storedTotalTextLength;
+        indexChunk = storedIndexChunk;
+        indexChunkChar = storedIndexChunkChar;
+        currentChar = storedCurrentChar;
+        if (!shortStore) {
+            // long restore
+            System.arraycopy(storedText, 0, text, 0, totalTextLength);
+            System.arraycopy(storedDetailChunks, 0, detailChunks, 0, totalTextLength);
+        }
+    }
+
+    PdfLine processLine(float leftX, float width, int alignment) {
+        save();
+        if (currentChar >= totalTextLength) {
+            boolean hasText = getParagraph();
+            if (!hasText) {
+                return null;
+            }
+            if (totalTextLength == 0) {
+                ArrayList<PdfChunk> ar = new ArrayList<>();
+                PdfChunk ck = new PdfChunk("", detailChunks[0]);
+                ar.add(ck);
+                return new PdfLine(0, 0, 0, alignment, true, ar);
+            }
+        }
+        float originalWidth = width;
+        int lastSplit = -1;
+        if (currentChar != 0) {
+            currentChar = trimLeftEx(currentChar, totalTextLength - 1);
+        }
+        int oldCurrentChar = currentChar;
+        int uniC = 0;
+        PdfChunk ck = null;
+        float charWidth = 0;
+        PdfChunk lastValidChunk = null;
+        boolean splitChar = false;
+        boolean surrogate = false;
+        for (; currentChar < totalTextLength; ++currentChar) {
+            ck = detailChunks[currentChar];
+            surrogate = Utilities.isSurrogatePair(text, currentChar);
+            if (surrogate) {
+                uniC = ck.getUnicodeEquivalent(Utilities.convertToUtf32(text, currentChar));
+            } else {
+                uniC = ck.getUnicodeEquivalent(text[currentChar]);
+            }
+            if (PdfChunk.noPrint(uniC)) {
+                continue;
+            }
+            if (surrogate) {
+                charWidth = ck.getCharWidth(uniC);
+            } else {
+                charWidth = ck.getCharWidth(text[currentChar]);
+            }
+            splitChar = ck.isExtSplitCharacter(currentChar, text, detailChunks);
+            if (splitChar && Character.isWhitespace((char) uniC)) {
+                lastSplit = currentChar;
+            }
+            if (width - charWidth < 0) {
+                break;
+            }
+            if (splitChar) {
+                lastSplit = currentChar;
+            }
+            width -= charWidth;
+            lastValidChunk = ck;
+            if (ck.isTab()) {
+                Object[] tab = (Object[]) ck.getAttribute(Chunk.TAB);
+                float tabPosition = (Float) tab[1];
+                boolean newLine = (Boolean) tab[2];
+                if (newLine && tabPosition < originalWidth - width) {
+                    return new PdfLine(0, originalWidth, width, alignment, true,
+                            createArrayOfPdfChunks(oldCurrentChar, currentChar - 1));
+                }
+                detailChunks[currentChar].adjustLeft(leftX);
+                width = originalWidth - tabPosition;
+            }
+            if (surrogate) {
+                ++currentChar;
+            }
+        }
+        if (lastValidChunk == null) {
+            // not even a single char fit; must output the first char
+            ++currentChar;
+            if (surrogate) {
+                ++currentChar;
+            }
+            return new PdfLine(0, originalWidth, 0, alignment, false,
+                    createArrayOfPdfChunks(currentChar - 1, currentChar - 1));
+        }
+        if (currentChar >= totalTextLength) {
+            // there was more line than text
+            return new PdfLine(0, originalWidth, width, alignment, true,
+                    createArrayOfPdfChunks(oldCurrentChar, totalTextLength - 1));
+        }
+        int newCurrentChar = trimRightEx(oldCurrentChar, currentChar - 1);
+        if (newCurrentChar < oldCurrentChar) {
+            // only WS
+            return new PdfLine(0, originalWidth, width, alignment, false,
+                    createArrayOfPdfChunks(oldCurrentChar, currentChar - 1));
+        }
+        if (newCurrentChar == currentChar - 1) { // middle of word
+            HyphenationEvent he = (HyphenationEvent) lastValidChunk.getAttribute(Chunk.HYPHENATION);
+            if (he != null) {
+                int[] word = getWord(oldCurrentChar, newCurrentChar);
+                if (word != null) {
+                    float testWidth = width + getWidth(word[0], currentChar - 1);
+                    String pre = he
+                            .getHyphenatedWordPre(new String(text, word[0], word[1] - word[0]),
+                                    lastValidChunk.font().getFont(), lastValidChunk.font().size(),
+                                    testWidth);
+                    String post = he.getHyphenatedWordPost();
+                    if (pre.length() > 0) {
+                        PdfChunk extra = new PdfChunk(pre, lastValidChunk);
+                        currentChar = word[1] - post.length();
+                        return new PdfLine(0, originalWidth,
+                                testWidth - lastValidChunk.font().width(pre), alignment, false,
+                                createArrayOfPdfChunks(oldCurrentChar, word[0] - 1, extra));
+                    }
+                }
+            }
+        }
+        if (lastSplit == -1 || lastSplit >= newCurrentChar) {
+            // no split point or split point ahead of end
+            return new PdfLine(0, originalWidth,
+                    width + getWidth(newCurrentChar + 1, currentChar - 1), alignment, false,
+                    createArrayOfPdfChunks(oldCurrentChar, newCurrentChar));
+        }
+        // standard split
+        currentChar = lastSplit + 1;
+        newCurrentChar = trimRightEx(oldCurrentChar, lastSplit);
+        if (newCurrentChar < oldCurrentChar) {
+            // only WS again
+            newCurrentChar = currentChar - 1;
+        }
+        return new PdfLine(0, originalWidth,
+                originalWidth - getWidth(oldCurrentChar, newCurrentChar), alignment, false,
+                createArrayOfPdfChunks(oldCurrentChar, newCurrentChar));
+    }
+
+    private boolean isWS(char c) {
+        return (c <= ' ');
+    }
+
+    private boolean getParagraph() {
+        currentChar = 0;
+        totalTextLength = 0;
+        boolean hasText = false;
+        char c;
+        char uniC;
+        BaseFont bf;
+        for (; indexChunk < chunks.size(); ++indexChunk) {
+            PdfChunk ck = chunks.get(indexChunk);
+            bf = ck.font().getFont();
+            String s = ck.toString();
+            int len = s.length();
+            for (; indexChunkChar < len; ++indexChunkChar) {
+                c = s.charAt(indexChunkChar);
+                uniC = (char) bf.getUnicodeEquivalent(c);
+                if (uniC == '\r' || uniC == '\n') {
+                    // next condition is never true for CID
+                    if (uniC == '\r' && indexChunkChar + 1 < len
+                            && s.charAt(indexChunkChar + 1) == '\n') {
+                        ++indexChunkChar;
+                    }
+                    ++indexChunkChar;
+                    if (indexChunkChar >= len) {
+                        indexChunkChar = 0;
+                        ++indexChunk;
+                    }
+                    hasText = true;
+                    if (totalTextLength == 0) {
+                        detailChunks[0] = ck;
+                    }
+                    break;
+                }
+                addPiece(c, ck);
+            }
+            if (hasText) {
+                break;
+            }
+            indexChunkChar = 0;
+        }
+        if (totalTextLength == 0) {
+            return hasText;
+        }
+
+        // remove trailing WS
+        totalTextLength = trimRight(0, totalTextLength - 1) + 1;
+        if (totalTextLength == 0) {
+            return true;
+        }
+
+        totalTextLength = trimRightEx(0, totalTextLength - 1) + 1;
+        return true;
+    }
+
+    private void addPiece(char c, PdfChunk chunk) {
+        if (totalTextLength >= pieceSize) {
+            char[] tempText = text;
+            PdfChunk[] tempDetailChunks = detailChunks;
+            pieceSize *= 2;
+            text = new char[pieceSize];
+            detailChunks = new PdfChunk[pieceSize];
+            System.arraycopy(tempText, 0, text, 0, totalTextLength);
+            System.arraycopy(tempDetailChunks, 0, detailChunks, 0, totalTextLength);
+        }
+        text[totalTextLength] = c;
+        detailChunks[totalTextLength++] = chunk;
+    }
+
+    private void save() {
+        if (indexChunk > 0) {
+            if (indexChunk >= chunks.size()) {
+                chunks.clear();
+            } else {
+                for (--indexChunk; indexChunk >= 0; --indexChunk) {
+                    chunks.remove(indexChunk);
+                }
+            }
+            indexChunk = 0;
+        }
+        storedTotalTextLength = totalTextLength;
+        storedIndexChunk = indexChunk;
+        storedIndexChunkChar = indexChunkChar;
+        storedCurrentChar = currentChar;
+        shortStore = (currentChar < totalTextLength);
+        if (!shortStore) {
+            // long save
+            if (storedText.length < totalTextLength) {
+                storedText = new char[totalTextLength];
+                storedDetailChunks = new PdfChunk[totalTextLength];
+            }
+            System.arraycopy(text, 0, storedText, 0, totalTextLength);
+            System.arraycopy(detailChunks, 0, storedDetailChunks, 0, totalTextLength);
+        }
+    }
+
+    /**
+     * Gets the width of a range of characters.
+     *
+     * @param startIdx the first index to calculate
+     * @param lastIdx  the last inclusive index to calculate
+     * @return the sum of all widths
+     */
+    private float getWidth(int startIdx, int lastIdx) {
+        char c = 0;
+        PdfChunk ck = null;
+        float width = 0;
+        for (; startIdx <= lastIdx; ++startIdx) {
+            boolean surrogate = Utilities.isSurrogatePair(text, startIdx);
+            if (surrogate) {
+                width += detailChunks[startIdx]
+                        .getCharWidth(Utilities.convertToUtf32(text, startIdx));
+                ++startIdx;
+            } else {
+                c = text[startIdx];
+                ck = detailChunks[startIdx];
+                if (PdfChunk.noPrint(ck.getUnicodeEquivalent(c))) {
+                    continue;
+                }
+                width += detailChunks[startIdx].getCharWidth(c);
+            }
+        }
+        return width;
+    }
+
+    private ArrayList<PdfChunk> createArrayOfPdfChunks(int startIdx, int endIdx) {
+        return createArrayOfPdfChunks(startIdx, endIdx, null);
+    }
+
+    private ArrayList<PdfChunk> createArrayOfPdfChunks(int startIdx, int endIdx,
+                                                       PdfChunk extraPdfChunk) {
+        ArrayList<PdfChunk> ar = new ArrayList<>();
+        PdfChunk refCk = detailChunks[startIdx];
+        PdfChunk ck = null;
+        StringBuffer buf = new StringBuffer();
+        char c;
+        int idx = 0;
+        for (; startIdx <= endIdx; ++startIdx) {
+            idx = startIdx;
+            c = text[idx];
+            ck = detailChunks[idx];
+            if (PdfChunk.noPrint(ck.getUnicodeEquivalent(c))) {
+                continue;
+            }
+            if (ck.isSeparator() || ck.isTab()) {
+                if (buf.length() > 0) {
+                    ar.add(new PdfChunk(buf.toString(), refCk));
+                    buf = new StringBuffer();
+                }
+                ar.add(ck);
+            } else if (ck == refCk) {
+                buf.append(c);
+            } else {
+                if (buf.length() > 0) {
+                    ar.add(new PdfChunk(buf.toString(), refCk));
+                    buf = new StringBuffer();
+                }
+                if (!ck.isSeparator() && !ck.isTab()) {
+                    buf.append(c);
+                }
+                refCk = ck;
+            }
+        }
+        if (buf.length() > 0) {
+            ar.add(new PdfChunk(buf.toString(), refCk));
+        }
+        if (extraPdfChunk != null) {
+            ar.add(extraPdfChunk);
+        }
+        return ar;
+    }
+
+    private int[] getWord(int startIdx, int idx) {
+        int last = idx;
+        int first = idx;
+        // forward
+        for (; last < totalTextLength; ++last) {
+            if (!Character.isLetter(text[last])) {
+                break;
+            }
+        }
+        if (last == idx) {
+            return null;
+        }
+        // backward
+        for (; first >= startIdx; --first) {
+            if (!Character.isLetter(text[first])) {
+                break;
+            }
+        }
+        ++first;
+        return new int[]{first, last};
+    }
+
+    private int trimRight(int startIdx, int endIdx) {
+        int idx = endIdx;
+        char c;
+        for (; idx >= startIdx; --idx) {
+            c = (char) detailChunks[idx].getUnicodeEquivalent(text[idx]);
+            if (!isWS(c)) {
+                break;
+            }
+        }
+        return idx;
+    }
+
+    private int trimRightEx(int startIdx, int endIdx) {
+        int idx = endIdx;
+        char c = 0;
+        for (; idx >= startIdx; --idx) {
+            c = (char) detailChunks[idx].getUnicodeEquivalent(text[idx]);
+            if (!isWS(c) && !PdfChunk.noPrint(c)) {
+                break;
+            }
+        }
+        return idx;
+    }
+
+    private int trimLeftEx(int startIdx, int endIdx) {
+        int idx = startIdx;
+        char c = 0;
+        for (; idx <= endIdx; ++idx) {
+            c = (char) detailChunks[idx].getUnicodeEquivalent(text[idx]);
+            if (!isWS(c) && !PdfChunk.noPrint(c)) {
+                break;
+            }
+        }
+        return idx;
+    }
+
 }

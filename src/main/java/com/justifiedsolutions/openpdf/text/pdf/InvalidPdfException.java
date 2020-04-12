@@ -1,7 +1,7 @@
 /*
- * $Id: PdfDashPattern.java 3373 2008-05-12 16:21:24Z xlv $
+ * $Id: InvalidPdfException.java 3665 2009-01-26 22:32:15Z xlv $
  *
- * Copyright 1999, 2000, 2001, 2002 Bruno Lowagie
+ * Copyright 2009 Bruno Lowagie
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * The Original Code is 'iText, a free JAVA-PDF library'.
  *
  * The Initial Developer of the Original Code is Bruno Lowagie. Portions created by
- * the Initial Developer are Copyright (C) 1999, 2000, 2001, 2002 by Bruno Lowagie.
+ * the Initial Developer are Copyright (C) 1999-2009 by Bruno Lowagie.
  * All Rights Reserved.
  * Co-Developer of the code is Paulo Soares. Portions created by the Co-Developer
- * are Copyright (C) 2000, 2001, 2002 by Paulo Soares. All Rights Reserved.
+ * are Copyright (C) 2000-2009 by Paulo Soares. All Rights Reserved.
  *
  * Contributor(s): all the names of the contributors are added in the source code
  * where applicable.
@@ -50,92 +50,22 @@
 package com.justifiedsolutions.openpdf.text.pdf;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
- * A <CODE>PdfDashPattern</CODE> defines a dash pattern as described in
- * the PDF Reference Manual version 1.3 p 325 (section 8.4.3).
- *
- * @see        PdfArray
+ * Typed exception used when opening an existing PDF document.
+ * Gets thrown when the document isn't a valid PDF document.
+ * @since 2.1.5
  */
+public class InvalidPdfException extends IOException {
 
-public class PdfDashPattern extends PdfArray {
-    
-    // membervariables
-    
-/** This is the length of a dash. */
-    private float dash = -1;
-    
-/** This is the length of a gap. */
-    private float gap = -1;
-    
-/** This is the phase. */
-    private float phase = -1;
-    
-    // constructors
-    
-/**
- * Constructs a new <CODE>PdfDashPattern</CODE>.
- */
-    
-    public PdfDashPattern() {
-        super();
-    }
-    
-/**
- * Constructs a new <CODE>PdfDashPattern</CODE>.
- */
-    
-    public PdfDashPattern(float dash) {
-        super(new PdfNumber(dash));
-        this.dash = dash;
-    }
-    
-/**
- * Constructs a new <CODE>PdfDashPattern</CODE>.
- */
-    
-    public PdfDashPattern(float dash, float gap) {
-        super(new PdfNumber(dash));
-        add(new PdfNumber(gap));
-        this.dash = dash;
-        this.gap = gap;
-    }
-    
-/**
- * Constructs a new <CODE>PdfDashPattern</CODE>.
- */
-    
-    public PdfDashPattern(float dash, float gap, float phase) {
-        super(new PdfNumber(dash));
-        add(new PdfNumber(gap));
-        this.dash = dash;
-        this.gap = gap;
-        this.phase = phase;
-    }
-    
-    public void add(float n) {
-        add(new PdfNumber(n));
-    }
-    
-/**
- * Returns the PDF representation of this <CODE>PdfArray</CODE>.
- */
-    
-    public void toPdf(PdfWriter writer, OutputStream os) throws IOException {
-        os.write('[');
+    /** a serial version UID */
+    private static final long serialVersionUID = -2319614911517026938L;
 
-        if (dash >= 0) {
-            new PdfNumber(dash).toPdf(writer, os);
-            if (gap >= 0) {
-                os.write(' ');
-                new PdfNumber(gap).toPdf(writer, os);
-            }
-        }
-        os.write(']');
-        if (phase >=0) {
-            os.write(' ');
-            new PdfNumber(phase).toPdf(writer, os);
-        }
+    /**
+     * Creates an instance of a NoPdfException.
+     * @param    message    the reason why the document isn't a PDF document according to iText.
+     */
+    public InvalidPdfException(String message) {
+        super(message);
     }
 }

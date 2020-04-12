@@ -163,8 +163,5 @@ public class OutputStreamCounter extends OutputStream {
     public long getCounter() {
         return counter;
     }
-    
-    public void resetCounter() {
-        counter = 0;
-    }
+
 }

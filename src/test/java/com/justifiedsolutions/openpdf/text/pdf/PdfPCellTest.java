@@ -6,20 +6,16 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import com.justifiedsolutions.openpdf.pdf.HorizontalAlignment;
 import com.justifiedsolutions.openpdf.pdf.VerticalAlignment;
 import com.justifiedsolutions.openpdf.pdf.content.Cell;
 import com.justifiedsolutions.openpdf.pdf.content.Cell.Border;
-import com.justifiedsolutions.openpdf.pdf.content.Phrase;
 import com.justifiedsolutions.openpdf.pdf.content.Table;
 import com.justifiedsolutions.openpdf.text.Element;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PdfPCellTest {
 
@@ -86,21 +82,6 @@ public class PdfPCellTest {
         PdfPCell actual = PdfPCell.getInstance(input);
 
         assertEquals(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT, actual.getBorder());
-    }
-
-    @Test
-    public void getInstanceContent() {
-        String expectedText = "text";
-        Phrase phrase = new Phrase(expectedText);
-        Table table = new Table(2);
-        Cell input = table.createCell(phrase);
-
-        PdfPCell actual = PdfPCell.getInstance(input);
-        assertNotNull(actual.getColumn().compositeElements.getFirst());
-        assertNotNull(actual.getColumn().compositeElements.getFirst().getChunks());
-        assertEquals(1, actual.getColumn().compositeElements.getFirst().getChunks().size());
-        assertNotNull(actual.getColumn().compositeElements.getFirst().getChunks().get(0));
-        assertEquals(expectedText, actual.getColumn().compositeElements.getFirst().getChunks().get(0).getContent());
     }
 
 }

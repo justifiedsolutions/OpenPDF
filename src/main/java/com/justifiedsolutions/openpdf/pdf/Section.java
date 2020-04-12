@@ -8,6 +8,7 @@ package com.justifiedsolutions.openpdf.pdf;
 
 import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,13 @@ public class Section {
     private boolean startsNewPage = false;
     private boolean displaySectionNumber = true;
 
-    protected Section(int sectionNumber, Paragraph title) {
+    /**
+     * Creates a new Section. Should not be called directly, instead call {@link #addSection(Paragraph)}.
+     *
+     * @param sectionNumber the section number
+     * @param title         the title
+     */
+    Section(int sectionNumber, Paragraph title) {
         this.sectionNumber = sectionNumber;
         this.title = title;
     }
@@ -103,7 +110,7 @@ public class Section {
     }
 
     /**
-     * Gets the {@link java.util.Collections#unmodifiableList(List)} of {@link Content} in the
+     * Gets the {@linkplain java.util.Collections#unmodifiableList(List) unmodifiable list} of {@link Content} in the
      * Section.
      *
      * @return the content in the section
@@ -128,13 +135,19 @@ public class Section {
     }
 
     /**
-     * Gets a {@link java.util.Collections#unmodifiableList(List)} of all of the subsections of this
-     * Section.
+     * Gets a {@linkplain java.util.Collections#unmodifiableList(List) unmodifiable list} of all of the subsections of
+     * this Section.
      *
      * @return the list of subsections
      */
     public List<Section> getSections() {
         return Collections.unmodifiableList(sections);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sectionNumber, title, content, sections, startsNewPage,
+                displaySectionNumber);
     }
 
     @Override
@@ -152,11 +165,5 @@ public class Section {
                 title.equals(section.title) &&
                 content.equals(section.content) &&
                 sections.equals(section.sections);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(sectionNumber, title, content, sections, startsNewPage,
-                displaySectionNumber);
     }
 }

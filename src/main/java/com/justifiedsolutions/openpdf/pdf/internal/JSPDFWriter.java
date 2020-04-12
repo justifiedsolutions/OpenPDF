@@ -7,32 +7,24 @@
 package com.justifiedsolutions.openpdf.pdf.internal;
 
 import com.justifiedsolutions.openpdf.pdf.Chapter;
-import com.justifiedsolutions.openpdf.pdf.Document;
-import com.justifiedsolutions.openpdf.pdf.Footer;
-import com.justifiedsolutions.openpdf.pdf.Header;
 import com.justifiedsolutions.openpdf.pdf.Margin;
 import com.justifiedsolutions.openpdf.pdf.Metadata;
 import com.justifiedsolutions.openpdf.pdf.PageSize;
 import com.justifiedsolutions.openpdf.pdf.content.Chunk;
-import com.justifiedsolutions.openpdf.pdf.content.Content;
 import com.justifiedsolutions.openpdf.pdf.content.Paragraph;
 import com.justifiedsolutions.openpdf.pdf.content.Phrase;
-import com.justifiedsolutions.openpdf.pdf.content.Table;
-import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.Meta;
-import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.RectangleReadOnly;
-import com.justifiedsolutions.openpdf.text.pdf.ColumnText;
-import com.justifiedsolutions.openpdf.text.pdf.PdfContentByte;
+import com.justifiedsolutions.openpdf.pdf.content.*;
+import com.justifiedsolutions.openpdf.text.*;
 import com.justifiedsolutions.openpdf.text.pdf.PdfPTable;
-import com.justifiedsolutions.openpdf.text.pdf.PdfPageEventHelper;
 import com.justifiedsolutions.openpdf.text.pdf.PdfWriter;
+
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Objects;
 
 public class JSPDFWriter {
 
-    private final Document model;
+    private final com.justifiedsolutions.openpdf.pdf.Document model;
     private final OutputStream outputStream;
 
     /**
@@ -40,17 +32,18 @@ public class JSPDFWriter {
      *
      * @param model        the document model
      * @param outputStream the output stream to write to
+     * @throws NullPointerException if either argument is <code>null</code>
      */
-    public JSPDFWriter(Document model, OutputStream outputStream) {
-        this.model = model;
-        this.outputStream = outputStream;
+    public JSPDFWriter(com.justifiedsolutions.openpdf.pdf.Document model, OutputStream outputStream) {
+        this.model = Objects.requireNonNull(model);
+        this.outputStream = Objects.requireNonNull(outputStream);
     }
 
     /**
-     * Writes the {@link Document} to the {@link OutputStream}.
+     * Writes the {@link com.justifiedsolutions.openpdf.pdf.Document} to the {@link OutputStream}.
      */
     public void write() {
-        com.justifiedsolutions.openpdf.text.Document document = createDocument();
+        Document document = createDocument();
         PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
         pdfWriter.setPageEvent(new HeaderFooterHelper(model.getHeader(), model.getFooter()));
         addMetadata(document);
@@ -67,19 +60,17 @@ public class JSPDFWriter {
         document.close();
     }
 
-    private com.justifiedsolutions.openpdf.text.Document createDocument() {
+    private Document createDocument() {
         Rectangle pageSize = convertPageSize(model.getPageSize());
         Margin margin = model.getMargin();
-        return new com.justifiedsolutions.openpdf.text.Document(pageSize, margin.getLeft(),
-                margin.getRight(), margin.getTop(), margin.getBottom());
+        return new Document(pageSize, margin.getLeft(), margin.getRight(), margin.getTop(), margin.getBottom());
     }
 
     private Rectangle convertPageSize(PageSize pageSize) {
-        com.justifiedsolutions.openpdf.pdf.Rectangle size = pageSize.size();
-        return new RectangleReadOnly(size.getWidth(), size.getHeight());
+        return new RectangleReadOnly(pageSize.width(), pageSize.height());
     }
 
-    private void addMetadata(com.justifiedsolutions.openpdf.text.Document document) {
+    private void addMetadata(Document document) {
         Map<Metadata, String> metadata = model.getMetadata();
         for (Metadata key : metadata.keySet()) {
             Meta meta = new Meta(key, metadata.get(key));
@@ -99,52 +90,5 @@ public class JSPDFWriter {
             result = PdfPTable.getInstance((Table) content);
         }
         return result;
-    }
-
-    private static class HeaderFooterHelper extends PdfPageEventHelper {
-
-        private final Header header;
-        private final Footer footer;
-
-        public HeaderFooterHelper(Header header, Footer footer) {
-            this.header = header;
-            this.footer = footer;
-        }
-
-        @Override
-        public void onStartPage(PdfWriter writer,
-                com.justifiedsolutions.openpdf.text.Document document) {
-            if (header != null && header.isValidForPageNumber(document.getPageNumber())) {
-                writeHeaderFooter(writer, document, header.getParagraph(document.getPageNumber()),
-                        document.top() + 27);
-            }
-        }
-
-        @Override
-        public void onEndPage(PdfWriter writer,
-                com.justifiedsolutions.openpdf.text.Document document) {
-            if (footer != null && footer.isValidForPageNumber(document.getPageNumber())) {
-                writeHeaderFooter(writer, document, footer.getParagraph(document.getPageNumber()),
-                        document.bottom() - 27);
-            }
-        }
-
-        private void writeHeaderFooter(PdfWriter writer, com.justifiedsolutions.openpdf.text.Document document,
-                Paragraph modelParagraph, float y) {
-            com.justifiedsolutions.openpdf.text.Paragraph paragraph = com.justifiedsolutions.openpdf.text.Paragraph
-                    .getInstance(modelParagraph);
-            float x;
-            int alignment = paragraph.getAlignment();
-            if (alignment == Element.ALIGN_LEFT) {
-                x = document.left();
-            } else if (alignment == Element.ALIGN_RIGHT) {
-                x = document.right();
-            } else {
-                x = document.getPageSize().getRight() / 2.0f;
-                alignment = Element.ALIGN_CENTER;
-            }
-            final PdfContentByte cb = writer.getDirectContent();
-            ColumnText.showTextAligned(cb, alignment, paragraph, x, y, 0);
-        }
     }
 }

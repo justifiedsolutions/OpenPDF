@@ -56,14 +56,6 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
  */
 
 public class PdfPattern extends PdfStream {
-    
-    /**
-     * Creates a PdfPattern object.
-     * @param    painter    a pattern painter instance
-     */
-    PdfPattern(PdfPatternPainter painter) {
-        this(painter, DEFAULT_COMPRESSION);
-    }
 
     /**
      * Creates a PdfPattern object.
@@ -89,7 +81,7 @@ public class PdfPattern extends PdfStream {
             put(PdfName.PAINTTYPE, one);
         put(PdfName.XSTEP, new PdfNumber(painter.getXStep()));
         put(PdfName.YSTEP, new PdfNumber(painter.getYStep()));
-        bytes = painter.toPdf(null);
+        bytes = painter.toPdf();
         put(PdfName.LENGTH, new PdfNumber(bytes.length));
         try {
             flateCompress(compressionLevel);

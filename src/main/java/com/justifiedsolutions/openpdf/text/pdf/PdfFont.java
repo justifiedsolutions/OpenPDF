@@ -49,10 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-
-import com.justifiedsolutions.openpdf.text.Image;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-
 /**
  * <CODE>PdfFont</CODE> is the Pdf Font object.
  * <P>
@@ -68,18 +64,15 @@ import com.justifiedsolutions.openpdf.text.ExceptionConverter;
  * @see        BadPdfFormatException
  */
 
-class PdfFont implements Comparable {
+class PdfFont implements Comparable<PdfFont> {
     
     
     /** the font metrics. */
-    private BaseFont font;
+    private final BaseFont font;
     
     /** the size. */
-    private float size;
-    
-    /** an image. */
-    protected Image image;
-    
+    private final float size;
+
     protected float hScale = 1;
     
     // constructors
@@ -94,30 +87,21 @@ class PdfFont implements Comparable {
     /**
      * Compares this <CODE>PdfFont</CODE> with another
      *
-     * @param    object    the other <CODE>PdfFont</CODE>
+     * @param    pdfFont    the other <CODE>PdfFont</CODE>
      * @return    a value
      */
     
-    public int compareTo(Object object) {
-        if (image != null)
-            return 0;
-        if (object == null) {
+    public int compareTo(PdfFont pdfFont) {
+        if (pdfFont == null) {
             return -1;
         }
-        PdfFont pdfFont;
-        try {
-            pdfFont = (PdfFont) object;
-            if (font != pdfFont.font) {
-                return 1;
-            }
-            if (this.size() != pdfFont.size()) {
-                return 2;
-            }
-            return 0;
+        if (font != pdfFont.font) {
+            return 1;
         }
-        catch(ClassCastException cce) {
-            return -2;
+        if (this.size() != pdfFont.size()) {
+            return 2;
         }
+        return 0;
     }
     
     /**
@@ -125,15 +109,11 @@ class PdfFont implements Comparable {
      *
      * @return        a size
      */
-    
+
     float size() {
-        if (image == null)
-            return size;
-        else {
-            return image.getScaledHeight();
-        }
+        return size;
     }
-    
+
     /**
      * Returns the approximative width of 1 character of this font.
      *
@@ -150,38 +130,19 @@ class PdfFont implements Comparable {
      * @param        character    a certain character
      * @return        a width in Text Space
      */
-    
+
     float width(int character) {
-        if (image == null)
-            return font.getWidthPoint(character, size) * hScale;
-        else
-            return image.getScaledWidth();
+        return font.getWidthPoint(character, size) * hScale;
     }
-    
+
     float width(String s) {
-        if (image == null)
-            return font.getWidthPoint(s, size) * hScale;
-        else
-            return image.getScaledWidth();
+        return font.getWidthPoint(s, size) * hScale;
     }
-    
+
     BaseFont getFont() {
         return font;
     }
-    
-    void setImage(Image image) {
-        this.image = image;
-    }
-    
-    static PdfFont getDefaultFont() {
-        try {
-            BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, false);
-            return new PdfFont(bf, 12);
-        }
-        catch (Exception ee) {
-            throw new ExceptionConverter(ee);
-        }
-    }
+
     void setHorizontalScaling(float hScale) {
         this.hScale = hScale;
     }

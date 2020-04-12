@@ -62,40 +62,6 @@ public class CMYKColor extends ExtendedColor {
     float black;
 
     /**
-     * Constructs a CMYK Color based on 4 color values (values are integers from 0 to 255).
-     * @param intCyan
-     * @param intMagenta
-     * @param intYellow
-     * @param intBlack
-     */
-    public CMYKColor(int intCyan, int intMagenta, int intYellow, int intBlack) {
-        this(normalize(intCyan) / MAX_INT_COLOR_VALUE, normalize(intMagenta) / MAX_INT_COLOR_VALUE, normalize(intYellow) / MAX_INT_COLOR_VALUE, normalize(intBlack) / MAX_INT_COLOR_VALUE);
-    }
-
-    /**
-     * Constructs a CMYK Color based on 4 color values (values are integers from 0 to 255).
-     * @param intCyan
-     * @param intMagenta
-     * @param intYellow
-     * @param intBlack
-     * @param intAlpha
-     */
-    public CMYKColor(int intCyan, int intMagenta, int intYellow, int intBlack, int intAlpha) {
-        this(normalize(intCyan) / MAX_INT_COLOR_VALUE, normalize(intMagenta) / MAX_INT_COLOR_VALUE, normalize(intYellow) / MAX_INT_COLOR_VALUE, normalize(intBlack) / MAX_INT_COLOR_VALUE, normalize(intAlpha) / MAX_INT_COLOR_VALUE);
-    }
-
-    /**
-     * Construct a CMYK Color.
-     * @param floatCyan
-     * @param floatMagenta
-     * @param floatYellow
-     * @param floatBlack
-     */
-    public CMYKColor(float floatCyan, float floatMagenta, float floatYellow, float floatBlack) {
-        this(floatCyan, floatMagenta, floatYellow, floatBlack, MAX_FLOAT_COLOR_VALUE);
-    }
-
-    /**
      * Construct a CMYK Color.
      * @param floatCyan
      * @param floatMagenta

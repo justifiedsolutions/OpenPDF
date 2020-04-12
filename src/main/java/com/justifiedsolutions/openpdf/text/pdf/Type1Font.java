@@ -49,17 +49,16 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
+import com.justifiedsolutions.openpdf.text.DocumentException;
+import com.justifiedsolutions.openpdf.text.MessageLocalization;
+import com.justifiedsolutions.openpdf.text.pdf.fonts.FontsResourceAnchor;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
-
-import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.pdf.fonts.FontsResourceAnchor;
 
 /** Reads a Type1 font
  *
@@ -235,7 +234,7 @@ class Type1Font extends BaseFont
         else if (afmFile.toLowerCase().endsWith(".afm")) {
             try {
                 if (ttfAfm == null)
-                    rf = new RandomAccessFileOrArray(afmFile, forceRead, Document.plainRandomAccess);
+                    rf = new RandomAccessFileOrArray(afmFile, forceRead, false);
                 else
                     rf = new RandomAccessFileOrArray(ttfAfm);
                 process(rf);
@@ -255,7 +254,7 @@ class Type1Font extends BaseFont
             try {
                 ByteArrayOutputStream ba = new ByteArrayOutputStream();
                 if (ttfAfm == null)
-                    rf = new RandomAccessFileOrArray(afmFile, forceRead, Document.plainRandomAccess);
+                    rf = new RandomAccessFileOrArray(afmFile, forceRead, false);
                 else
                     rf = new RandomAccessFileOrArray(ttfAfm);
                 Pfm2afm.convert(rf, ba);
@@ -307,33 +306,8 @@ class Type1Font extends BaseFont
             return (Integer) (metrics[1]);
         return 0;
     }
-    
-/** Gets the kerning between two Unicode characters. The characters
- * are converted to names and this names are used to find the kerning
- * pairs in the <CODE>HashMap</CODE> <CODE>KernPairs</CODE>.
- * @param char1 the first char
- * @param char2 the second char
- * @return the kerning to be applied
- */
-    public int getKerning(int char1, int char2)
-    {
-        String first = GlyphList.unicodeToName(char1);
-        if (first == null)
-            return 0;
-        String second = GlyphList.unicodeToName(char2);
-        if (second == null)
-            return 0;
-        Object[] obj = KernPairs.get(first);
-        if (obj == null)
-            return 0;
-        for (int k = 0; k < obj.length; k += 2) {
-            if (second.equals(obj[k]) && obj.length > k + 1)
-                return (Integer) obj[k + 1];
-        }
-        return 0;
-    }
-    
-    
+
+
     /** Reads the font metrics
      * @param rf the AFM file
      * @throws DocumentException the AFM file is invalid
@@ -530,7 +504,7 @@ class Type1Font extends BaseFont
         try {
             String filePfb = fileName.substring(0, fileName.length() - 3) + "pfb";
             if (pfb == null)
-                rf = new RandomAccessFileOrArray(filePfb, true, Document.plainRandomAccess);
+                rf = new RandomAccessFileOrArray(filePfb, true, false);
             else
                 rf = new RandomAccessFileOrArray(pfb);
             int fileLength = rf.length();
@@ -745,31 +719,7 @@ class Type1Font extends BaseFont
     public String getPostscriptFontName() {
         return FontName;
     }
-    
-    /** Gets the full name of the font. If it is a True Type font
-     * each array element will have {Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be
-     * found in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"", "", "",
-     * font name}.
-     * @return the full name of the font
-     */
-    public String[][] getFullFontName() {
-        return new String[][]{{"", "", "", FullName}};
-    }
-    
-    /** Gets all the entries of the names-table. If it is a True Type font
-     * each array element will have {Name ID, Platform ID, Platform Encoding ID,
-     * Language ID, font name}. The interpretation of this values can be
-     * found in the Open Type specification, chapter 2, in the 'name' table.<br>
-     * For the other fonts the array has a single element with {"4", "", "", "",
-     * font name}.
-     * @return the full name of the font
-     */
-    public String[][] getAllNameEntries() {
-        return new String[][]{{"4", "", "", "", FullName}};
-    }
-    
+
     /** Gets the family name of the font. If it is a True Type font
      * each array element will have {Platform ID, Platform Encoding ID,
      * Language ID, font name}. The interpretation of this values can be
@@ -780,13 +730,6 @@ class Type1Font extends BaseFont
      */
     public String[][] getFamilyFontName() {
         return new String[][]{{"", "", "", FamilyName}};
-    }
-    
-    /** Checks if the font has any kerning pairs.
-     * @return <CODE>true</CODE> if the font has any kerning pairs
-     */    
-    public boolean hasKernPairs() {
-        return !KernPairs.isEmpty();
     }
 
     protected int[] getRawCharBBox(int c, String name) {
