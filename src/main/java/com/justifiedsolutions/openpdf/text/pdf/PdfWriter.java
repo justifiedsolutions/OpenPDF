@@ -49,8 +49,6 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import static com.justifiedsolutions.openpdf.text.Utilities.getISOBytes;
-
 import com.justifiedsolutions.openpdf.text.Document;
 import com.justifiedsolutions.openpdf.text.DocumentException;
 import com.justifiedsolutions.openpdf.text.ExceptionConverter;
@@ -59,21 +57,16 @@ import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfVersion;
 import com.justifiedsolutions.openpdf.text.pdf.interfaces.PdfXConformance;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfVersionImp;
 import com.justifiedsolutions.openpdf.text.pdf.internal.PdfXConformanceImp;
-import java.awt.Color;
+
+import java.awt.*;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.justifiedsolutions.openpdf.text.Utilities.getISOBytes;
 
 /**
  * A <CODE>DocWriter</CODE> class for PDF.
@@ -167,22 +160,6 @@ public class PdfWriter implements PdfVersion, PdfXConformance {
      * Disable the inter-character spacing.
      */
     public static final float NO_SPACE_CHAR_RATIO = 10000000f;
-    /**
-     * Use the default run direction.
-     */
-    public static final int RUN_DIRECTION_DEFAULT = 0;
-    /**
-     * Do not use bidirectional reordering.
-     */
-    public static final int RUN_DIRECTION_NO_BIDI = 1;
-    /**
-     * Use bidirectional reordering with getDocumentLeft-to-getDocumentRight preferential run direction.
-     */
-    public static final int RUN_DIRECTION_LTR = 2;
-    /**
-     * Use bidirectional reordering with getDocumentRight-to-getDocumentLeft preferential run direction.
-     */
-    public static final int RUN_DIRECTION_RTL = 3;
     /**
      * Stores the PDF/X level.
      */

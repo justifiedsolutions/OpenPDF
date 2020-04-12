@@ -6,15 +6,11 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.justifiedsolutions.openpdf.pdf.content.Phrase;
 import com.justifiedsolutions.openpdf.pdf.content.Table;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PdfPTableTest {
 
@@ -72,11 +68,6 @@ public class PdfPTableTest {
         PdfPRow row = actual.getRow(0);
         assertNotNull(row.getCells());
         assertEquals(2, row.getCells().length);
-        PdfPCell c0 = row.getCells()[0];
-
-        assertEquals("p1", c0.getColumn().compositeElements.getFirst().getChunks().get(0).getContent());
-        PdfPCell c1 = row.getCells()[1];
-        assertEquals("p2", c1.getColumn().compositeElements.getFirst().getChunks().get(0).getContent());
     }
 
 

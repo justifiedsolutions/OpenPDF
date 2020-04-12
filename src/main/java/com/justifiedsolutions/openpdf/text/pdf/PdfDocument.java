@@ -49,22 +49,13 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import com.justifiedsolutions.openpdf.text.Chunk;
-import com.justifiedsolutions.openpdf.text.DocListener;
-import com.justifiedsolutions.openpdf.text.Document;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
 import com.justifiedsolutions.openpdf.text.Font;
-import com.justifiedsolutions.openpdf.text.LargeElement;
-import com.justifiedsolutions.openpdf.text.Meta;
-import com.justifiedsolutions.openpdf.text.Paragraph;
-import com.justifiedsolutions.openpdf.text.Phrase;
 import com.justifiedsolutions.openpdf.text.Rectangle;
-import com.justifiedsolutions.openpdf.text.Section;
+import com.justifiedsolutions.openpdf.text.*;
 import com.justifiedsolutions.openpdf.text.error_messages.MessageLocalization;
 import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
-import java.awt.Color;
+
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -822,9 +813,6 @@ class PdfDocument extends Document implements DocListener {
         } else if (isJustified) {
             final float calc = lastBaseFactor * (ratio * numberOfSpaces + lineLen - 1);
             if (line.isNewlineSplit() && line.widthLeft() >= calc) {
-                if (line.isRTL()) {
-                    text.moveText(line.widthLeft() - calc, 0);
-                }
                 baseWordSpacing = ratio * lastBaseFactor;
                 baseCharacterSpacing = lastBaseFactor;
             } else {

@@ -49,18 +49,14 @@
 
 package com.justifiedsolutions.openpdf.text.pdf;
 
-import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
-import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
-
 import com.justifiedsolutions.openpdf.pdf.content.Cell.Border;
-import com.justifiedsolutions.openpdf.text.DocumentException;
-import com.justifiedsolutions.openpdf.text.Element;
-import com.justifiedsolutions.openpdf.text.ExceptionConverter;
-import com.justifiedsolutions.openpdf.text.Paragraph;
-import com.justifiedsolutions.openpdf.text.Phrase;
-import com.justifiedsolutions.openpdf.text.Rectangle;
+import com.justifiedsolutions.openpdf.text.*;
+
 import java.util.List;
 import java.util.Objects;
+
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertHorizontalAlignment;
+import static com.justifiedsolutions.openpdf.text.AlignmentConverter.convertVerticalAlignment;
 
 /**
  * A cell in a PdfPTable.
@@ -159,19 +155,6 @@ public class PdfPCell extends Rectangle {
         super(0, 0, 0, 0);
         borderWidth = 0.5f;
         border = BOX;
-        column.setLeading(0, 1);
-    }
-
-    /**
-     * Constructs a <CODE>PdfPCell</CODE> with a <CODE>Phrase</CODE>. The default padding is 2.
-     *
-     * @param phrase the text
-     */
-    public PdfPCell(Phrase phrase) {
-        super(0, 0, 0, 0);
-        borderWidth = 0.5f;
-        border = BOX;
-        column.addText(this.phrase = phrase);
         column.setLeading(0, 1);
     }
 
@@ -517,27 +500,6 @@ public class PdfPCell extends Rectangle {
      */
     public void setRowspan(int rowspan) {
         this.rowspan = rowspan;
-    }
-
-    /**
-     * Sets the run direction of the text content in the cell. May be either of:
-     * PdfWriter.RUN_DIRECTION_DEFAULT, PdfWriter.RUN_DIRECTION_NO_BIDI, PdfWriter.RUN_DIRECTION_LTR
-     * or PdfWriter.RUN_DIRECTION_RTL.
-     *
-     * @param runDirection
-     */
-    public void setRunDirection(int runDirection) {
-        column.setRunDirection(runDirection);
-    }
-
-    /**
-     * Gets the run direction of the text content in the cell
-     *
-     * @return One of the following values: PdfWriter.RUN_DIRECTION_DEFAULT,
-     * PdfWriter.RUN_DIRECTION_NO_BIDI, PdfWriter.RUN_DIRECTION_LTR or PdfWriter.RUN_DIRECTION_RTL.
-     */
-    public int getRunDirection() {
-        return column.getRunDirection();
     }
 
 
