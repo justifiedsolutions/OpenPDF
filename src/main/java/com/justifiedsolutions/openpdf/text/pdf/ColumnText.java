@@ -478,7 +478,7 @@ public class ColumnText {
                     status = NO_MORE_TEXT;
                     break;
                 }
-                line = bidiLine.processLine(leftX, rectangularWidth - firstIndent - rightIndent, alignment
+                line = bidiLine.processLine(rectangularWidth - firstIndent - rightIndent, alignment
                 );
                 if (line == null) {
                     status = NO_MORE_TEXT;
@@ -531,7 +531,7 @@ public class ColumnText {
                     text.beginText();
                     dirty = true;
                 }
-                line = bidiLine.processLine(x1, x2 - x1 - firstIndent - rightIndent, alignment);
+                line = bidiLine.processLine(x2 - x1 - firstIndent - rightIndent, alignment);
                 if (line == null) {
                     status = NO_MORE_TEXT;
                     yLine = yTemp;
