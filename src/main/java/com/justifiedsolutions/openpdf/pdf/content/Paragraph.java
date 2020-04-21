@@ -279,11 +279,12 @@ public class Paragraph implements TextContent {
      * Adds the specified content to the Paragraph.
      *
      * @param content the content
-     * @throws NullPointerException     if content is null
      * @throws IllegalArgumentException if content is not a Chunk or Phrase
      */
     public void add(Content content) {
-        Objects.requireNonNull(content);
+        if (content == null) {
+            return;
+        }
         if ((content instanceof Chunk) || (content instanceof Phrase)) {
             this.content.add(content);
         } else {
@@ -295,11 +296,11 @@ public class Paragraph implements TextContent {
      * Adds the specified text to the Paragraph as a Chunk.
      *
      * @param text the text
-     * @throws NullPointerException if text is null
      */
     public void add(String text) {
-        Objects.requireNonNull(text);
-        add(new Chunk(text));
+        if (text != null) {
+            add(new Chunk(text));
+        }
     }
 
     @Override

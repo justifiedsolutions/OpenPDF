@@ -8,6 +8,7 @@ package com.justifiedsolutions.openpdf.pdf.content;
 
 
 import com.justifiedsolutions.openpdf.pdf.font.Font;
+
 import java.util.Objects;
 
 /**
@@ -45,8 +46,8 @@ public class Chunk implements TextContent {
      * @param font the font
      */
     public Chunk(String text, Font font) {
-        this.text = (text != null) ? text : "";
-        this.font = font;
+        setText(text);
+        setFont(font);
     }
 
     private Chunk(boolean pageBreak) {
@@ -59,7 +60,9 @@ public class Chunk implements TextContent {
      * @param text the text to append
      */
     public void append(String text) {
-        this.text += text;
+        if (text != null) {
+            this.text += text;
+        }
     }
 
     /**
@@ -77,7 +80,7 @@ public class Chunk implements TextContent {
      * @param text the new text for the Chunk
      */
     public void setText(String text) {
-        this.text = text;
+        this.text = (text != null) ? text : "";
     }
 
     /**

@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A Phrase is a series of {@link Chunk}s. The Phrase has an associated {@link
- * com.justifiedsolutions.openpdf.pdf.font.Font} and any Chunks added to the Phrase inherit the Font
- * of the Phrase unless they specify a Font themselves. A Phrase also specifies a leading value.
+ * A Phrase is a series of {@link Chunk}s. The Phrase has an associated {@link com.justifiedsolutions.openpdf.pdf.font.Font}
+ * and any Chunks added to the Phrase inherit the Font of the Phrase unless they specify a Font themselves. A Phrase
+ * also specifies a leading value.
  *
  * @see <a href="https://techterms.com/definition/leading">Leading</a>
  */
@@ -63,8 +63,8 @@ public class Phrase implements TextContent {
     }
 
     /**
-     * Creates a Phrase with the specified text and font. The text is turned into a Chunk and the
-     * font is associated with the Phrase.
+     * Creates a Phrase with the specified text and font. The text is turned into a Chunk and the font is associated
+     * with the Phrase.
      *
      * @param text the text
      * @param font the font
@@ -75,8 +75,7 @@ public class Phrase implements TextContent {
     }
 
     /**
-     * Get the leading for the Phrase. The default value is {@link Float#NaN} which dynamically
-     * calculates the leading.
+     * Get the leading for the Phrase. The default value is {@link Float#NaN} which dynamically calculates the leading.
      *
      * @return the leading
      */
@@ -118,12 +117,14 @@ public class Phrase implements TextContent {
      * @param chunk the chunk to add
      */
     public void add(Chunk chunk) {
-        chunks.add(chunk);
+        if (chunk != null) {
+            chunks.add(chunk);
+        }
     }
 
     /**
-     * Adds the text to the Phrase. This is a shortcut for creating a {@link Chunk} then adding it
-     * to the Phrase. Passing <code>null</code> to this method is silently ignored.
+     * Adds the text to the Phrase. This is a shortcut for creating a {@link Chunk} then adding it to the Phrase.
+     * Passing <code>null</code> to this method is silently ignored.
      *
      * @param text the text to add
      */
@@ -131,6 +132,11 @@ public class Phrase implements TextContent {
         if (text != null) {
             add(new Chunk(text));
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(chunks, leading, font);
     }
 
     @Override
@@ -145,10 +151,5 @@ public class Phrase implements TextContent {
         return Float.compare(phrase.leading, leading) == 0 &&
                 chunks.equals(phrase.chunks) &&
                 Objects.equals(font, phrase.font);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(chunks, leading, font);
     }
 }
