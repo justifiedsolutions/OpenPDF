@@ -429,6 +429,10 @@ class PdfDocument extends Document implements DocListener {
     }
 
     private void add(PdfChunk chunk) {
+        if (chunk.isAttribute(Chunk.NEWPAGE) && pageEmpty) {
+            return;
+        }
+
         // if there isn't a current line available, we make one
         if (line == null) {
             carriageReturn();
@@ -827,7 +831,6 @@ class PdfDocument extends Document implements DocListener {
         float baseXMarker = xMarker;
         float yMarker = text.getYTLM();
         boolean adjustMatrix = false;
-        float tabPosition = 0;
 
         // looping over all the chunks in 1 line
         for (Iterator j = line.iterator(); j.hasNext(); ) {
