@@ -8,6 +8,11 @@ OpenPDF is a Java library for creating PDF files with a LGPL and MPL open source
 [![License (LGPL version 3.0)](https://img.shields.io/badge/license-GNU%20LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) 
 [![License (MPL)](https://img.shields.io/badge/license-Mozilla%20Public%20License%20v2-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
 
+## OpenPDF version 1.1.2 released 2020-04-22 ##
+ - Small fixes to API (accept `null` as argments to some method calls)
+ - Fixed issue with page breaks creating empty page in some cases
+ - Removed more unused code
+
 ## OpenPDF version 1.1.1 released 2020-04-12 ##
  - Small fixes to API (mostly to documentation)
  - Removed many features and classes as well as hundreds of lines of unused code
@@ -25,7 +30,7 @@ Add this to your pom.xml file to use the latest version of OpenPDF:
         <dependency>
             <groupId>com.justifiedsolutions</groupId>
             <artifactId>openpdf</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.2</version>
         </dependency>
         
 ## Project Goals ##
@@ -52,9 +57,7 @@ All contributions to OpenPDF must be dual licensed as [LGPL v3](https://www.gnu.
 Justified Solutions OpenPDF is open source software with a LGPL and MPL license. It is a fork of LibrePDF which is a fork of iText version 4, more specifically iText svn tag 4.2.0, which was hosted publicly on sourceforge with LGPL and MPL license headers in the source code, and LGPL and MPL license documents in the SVN repository. Beginning with version 5.0 of iText, the developers have moved to the AGPL to improve their ability to sell commercial licenses. Justified Solutions OpenPDF was forked off of the LibrePDF version in March 2020. The goal of this version to provide a slimmed down version that focuses on the minimum requirements for creating a PDF document.
 
 ## Coding Style ##
-- Code indentation style is 4 spaces.
 - A coding style configuraton for [IntelliJ](https://www.jetbrains.com/idea/) is included in the repository.
-- Generally try to preserve the coding style in the file you are modifying.
 
 ## Dependencies ##
 ### Required Dependencies: ###
@@ -62,42 +65,3 @@ Justified Solutions OpenPDF is open source software with a LGPL and MPL license.
 
 ### Testing Dependencies: ###
  - JUnit 5
- - AssertJ
- - Hamcrest
- - Mockito
- - Apache Commons IO
-
-## Credits ##
-Significant [Contributors to OpenPDF](https://github.com/LibrePDF/OpenPDF/graphs/contributors) on GitHub:
-
-  [@andreasrosdal](https://github.com/andreasrosdal) - Andreas Røsdal - Maintainer of OpenPDF from 1.0 to 1.3.11, now retired from OpenPDF development.  
-  [@daviddurand](https://github.com/daviddurand) -  David G. Durand  
-  [@tlxtellef](https://github.com/tlxtellef) - Tellef  
-  [@asturio](https://github.com/asturio) - Claudio Clemens     
-  [@ymasory](https://github.com/ymasory)  
-  [@albfernandez](https://github.com/albfernandez) - Alberto Fernández  
-  [@noavarice](https://github.com/noavarice)  
-  [@bengolder](https://github.com/bengolder)  - Benjamin Golder  
-  [@glarfs](https://github.com/glarfs)  
-  [@Kindrat](https://github.com/Kindrat)  
-  [@syakovyn](https://github.com/syakovyn)  
-  [@ubermichael](https://github.com/ubermichael) - Michael Joyce  
-  [@weiyeh](https://github.com/weiyeh)  
-  [@SuperPat45](https://github.com/SuperPat45)  
-  [@lapo-luchini](https://github.com/lapo-luchini)  
-  [@MartinKocour](https://github.com/MartinKocour)  - Martin Kocour  
-  [@jokimaki](https://github.com/jokimaki)  
-  [@sullis](https://github.com/sullis)  
-  [@lapo-luchini](https://github.com/lapo-luchini)  
-  [@jeffrey-easyesi](https://github.com/jeffrey-easyesi)  
-  [@V-F](https://github.com/V-F)     
-  [@sixdouglas](https://github.com/sixdouglas) - Douglas Six  
-  [@razilein](https://github.com/razilein) - Sita Geßner  
-  [@PalAditya](https://github.com/PalAditya) - Aditya Pal       
-  [@rammetzger](https://github.com/rammetzger)   
-  [@codecracker2014](https://github.com/codecracker2014)   
-  [@mluppi](https://github.com/mluppi)   
-  [@vic0075](https://github.com/vic0075)   
- 
-
-Also, a very special thanks to the iText developers ;)

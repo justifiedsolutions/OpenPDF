@@ -50,11 +50,8 @@
 package com.justifiedsolutions.openpdf.text;
 
 import com.justifiedsolutions.openpdf.text.pdf.HyphenationEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 
 /**
  * This is the smallest significant part of text that can be added to a document.
@@ -97,12 +94,6 @@ public class Chunk implements Element {
     public static final String SEPARATOR = "SEPARATOR";
 
     // member variables
-    /**
-     * Key for drawInterface of the tab.
-     *
-     * @since 2.1.2
-     */
-    public static final String TAB = "TAB";
     /**
      * Key for text horizontal scaling.
      */

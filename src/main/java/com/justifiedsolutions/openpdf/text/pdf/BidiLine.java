@@ -461,7 +461,7 @@ class BidiLine {
         }
     }
 
-    PdfLine processLine(float leftX, float width, int alignment) {
+    PdfLine processLine(float width, int alignment) {
         save();
         if (currentChar >= totalTextLength) {
             boolean hasText = getParagraph();
@@ -515,17 +515,6 @@ class BidiLine {
             }
             width -= charWidth;
             lastValidChunk = ck;
-            if (ck.isTab()) {
-                Object[] tab = (Object[]) ck.getAttribute(Chunk.TAB);
-                float tabPosition = (Float) tab[1];
-                boolean newLine = (Boolean) tab[2];
-                if (newLine && tabPosition < originalWidth - width) {
-                    return new PdfLine(0, originalWidth, width, alignment, true,
-                            createArrayOfPdfChunks(oldCurrentChar, currentChar - 1));
-                }
-                detailChunks[currentChar].adjustLeft(leftX);
-                width = originalWidth - tabPosition;
-            }
             if (surrogate) {
                 ++currentChar;
             }
@@ -735,22 +724,14 @@ class BidiLine {
             if (PdfChunk.noPrint(ck.getUnicodeEquivalent(c))) {
                 continue;
             }
-            if (ck.isSeparator() || ck.isTab()) {
-                if (buf.length() > 0) {
-                    ar.add(new PdfChunk(buf.toString(), refCk));
-                    buf = new StringBuffer();
-                }
-                ar.add(ck);
-            } else if (ck == refCk) {
+            if (ck == refCk) {
                 buf.append(c);
             } else {
                 if (buf.length() > 0) {
                     ar.add(new PdfChunk(buf.toString(), refCk));
                     buf = new StringBuffer();
                 }
-                if (!ck.isSeparator() && !ck.isTab()) {
-                    buf.append(c);
-                }
+                buf.append(c);
                 refCk = ck;
             }
         }

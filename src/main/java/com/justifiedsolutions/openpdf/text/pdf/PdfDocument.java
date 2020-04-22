@@ -52,7 +52,6 @@ package com.justifiedsolutions.openpdf.text.pdf;
 import com.justifiedsolutions.openpdf.text.Font;
 import com.justifiedsolutions.openpdf.text.Rectangle;
 import com.justifiedsolutions.openpdf.text.*;
-import com.justifiedsolutions.openpdf.text.pdf.draw.DrawInterface;
 
 import java.awt.*;
 import java.io.IOException;
@@ -430,6 +429,10 @@ class PdfDocument extends Document implements DocListener {
     }
 
     private void add(PdfChunk chunk) {
+        if (chunk.isAttribute(Chunk.NEWPAGE) && pageEmpty) {
+            return;
+        }
+
         // if there isn't a current line available, we make one
         if (line == null) {
             carriageReturn();
@@ -828,7 +831,6 @@ class PdfDocument extends Document implements DocListener {
         float baseXMarker = xMarker;
         float yMarker = text.getYTLM();
         boolean adjustMatrix = false;
-        float tabPosition = 0;
 
         // looping over all the chunks in 1 line
         for (Iterator j = line.iterator(); j.hasNext(); ) {
@@ -845,42 +847,6 @@ class PdfDocument extends Document implements DocListener {
                 }
                 if (chunk.isStroked()) {
                     PdfChunk nextChunk = line.getChunk(chunkStrokeIdx + 1);
-                    if (chunk.isSeparator()) {
-                        width = glueWidth;
-                        Object[] sep = (Object[]) chunk.getAttribute(Chunk.SEPARATOR);
-                        DrawInterface di = (DrawInterface) sep[0];
-                        Boolean vertical = (Boolean) sep[1];
-                        float fontSize = chunk.font().size();
-                        float ascender = chunk.font().getFont()
-                                .getFontDescriptor(BaseFont.ASCENT, fontSize);
-                        float descender = chunk.font().getFont()
-                                .getFontDescriptor(BaseFont.DESCENT, fontSize);
-                        if (vertical) {
-                            di.draw(graphics, baseXMarker, yMarker + descender,
-                                    baseXMarker + line.getOriginalWidth(), ascender - descender,
-                                    yMarker);
-                        } else {
-                            di.draw(graphics, xMarker, yMarker + descender, xMarker + width,
-                                    ascender - descender, yMarker);
-                        }
-                    }
-                    if (chunk.isTab()) {
-                        Object[] tab = (Object[]) chunk.getAttribute(Chunk.TAB);
-                        DrawInterface di = (DrawInterface) tab[0];
-                        tabPosition = (Float) tab[1] + (Float) tab[3];
-                        float fontSize = chunk.font().size();
-                        float ascender = chunk.font().getFont()
-                                .getFontDescriptor(BaseFont.ASCENT, fontSize);
-                        float descender = chunk.font().getFont()
-                                .getFontDescriptor(BaseFont.DESCENT, fontSize);
-                        if (tabPosition > xMarker) {
-                            di.draw(graphics, xMarker, yMarker + descender, tabPosition,
-                                    ascender - descender, yMarker);
-                        }
-                        float tmp = xMarker;
-                        xMarker = tabPosition;
-                        tabPosition = tmp;
-                    }
                     if (chunk.isAttribute(Chunk.BACKGROUND)) {
                         graphics.saveState();
 
@@ -1027,10 +993,6 @@ class PdfDocument extends Document implements DocListener {
             } else if (chunk.isHorizontalSeparator()) {
                 PdfTextArray array = new PdfTextArray();
                 array.add(-glueWidth * 1000f / chunk.font.size() / hScale);
-                text.showText(array);
-            } else if (chunk.isTab()) {
-                PdfTextArray array = new PdfTextArray();
-                array.add((tabPosition - xMarker) * 1000f / chunk.font.size() / hScale);
                 text.showText(array);
             }
             // If it is a CJK chunk or Unicode TTF we will have to simulate the

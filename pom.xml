@@ -5,7 +5,7 @@
 
   <groupId>com.justifiedsolutions</groupId>
   <artifactId>openpdf</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <packaging>jar</packaging>
 
   <name>Justified Solutions OpenPDF</name>

@@ -178,19 +178,8 @@ class PdfLine {
         newlineSplit = (chunk.isNewlineSplit() || overflow == null);
         //        if (chunk.isNewlineSplit() && alignment == Element.ALIGN_JUSTIFIED)
         //            alignment = Element.ALIGN_LEFT;
-        if (chunk.isTab()) {
-            Object[] tab = (Object[]) chunk.getAttribute(Chunk.TAB);
-            float tabPosition = (Float) tab[1];
-            boolean newline = (Boolean) tab[2];
-            if (newline && tabPosition < originalWidth - width) {
-                return chunk;
-            }
-            width = originalWidth - tabPosition;
-            chunk.adjustLeft(left);
-            addToLine(chunk);
-        }
         // if the length of the chunk > 0 we add it to the line
-        else if (chunk.length() > 0) {
+        if (chunk.length() > 0) {
             if (overflow != null)
                 chunk.trimLastSpace();
             width -= chunk.width();
@@ -407,9 +396,6 @@ class PdfLine {
         PdfChunk ck;
         for (Object o : line) {
             ck = (PdfChunk) o;
-            if (ck.isTab()) {
-                return 0;
-            }
             if (ck.isHorizontalSeparator()) {
                 s++;
             }
